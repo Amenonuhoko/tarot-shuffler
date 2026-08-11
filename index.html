@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14101f">
+<title>Tarot Pull</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="table">
+
+  <header class="header">
+    <p class="eyebrow">78 cards &middot; drawn with replacement</p>
+    <h1>Tarot Pull</h1>
+  </header>
+
+  <main class="stage">
+    <div class="card-slot" id="cardSlot">
+      <div class="card" id="card">
+        <div class="card-face card-back" id="cardBack">
+          <svg class="back-motif" viewBox="0 0 100 160" aria-hidden="true">
+            <rect x="6" y="6" width="88" height="148" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+            <circle cx="50" cy="80" r="26" fill="none" stroke="currentColor" stroke-width="1"/>
+            <circle cx="50" cy="80" r="2" fill="currentColor"/>
+            <path d="M50 34 L50 54 M50 106 L50 126 M20 80 L36 80 M64 80 L80 80" stroke="currentColor" stroke-width="1"/>
+            <path d="M28 58 L38 68 M62 68 L72 58 M28 102 L38 92 M62 92 L72 102" stroke="currentColor" stroke-width="1"/>
+          </svg>
+        </div>
+        <div class="card-face card-front" id="cardFront">
+          <p class="arcana-label" id="arcanaLabel">Major Arcana</p>
+          <div class="art-placeholder" id="artPlaceholder">
+            <svg viewBox="0 0 100 140" aria-hidden="true">
+              <rect x="4" y="4" width="92" height="132" rx="3" fill="none" stroke="currentColor" stroke-width="1"/>
+              <circle cx="50" cy="55" r="20" fill="none" stroke="currentColor" stroke-width="1"/>
+              <path d="M30 100 Q50 82 70 100" fill="none" stroke="currentColor" stroke-width="1"/>
+            </svg>
+          </div>
+          <p class="card-name" id="cardName">&mdash;</p>
+          <p class="card-orientation" id="cardOrientation">&nbsp;</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="hint" id="hint">Tap Pull to draw a card</p>
+
+    <div class="controls">
+      <button class="btn btn-secondary" id="shuffleBtn" type="button">Shuffle</button>
+      <button class="btn btn-primary" id="pullBtn" type="button">Pull a Card</button>
+    </div>
+  </main>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
