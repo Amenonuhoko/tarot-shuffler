@@ -16,11 +16,6 @@
 
 <div class="table">
 
-  <header class="header">
-    <p class="eyebrow">78 cards &middot; drawn with replacement</p>
-    <h1>Tarot Pull</h1>
-  </header>
-
   <main class="stage">
     <div class="card-slot" id="cardSlot">
       <div class="card" id="card">
@@ -35,24 +30,25 @@
         </div>
         <div class="card-face card-front" id="cardFront">
           <p class="arcana-label" id="arcanaLabel">Major Arcana</p>
-          <div class="art-placeholder" id="artPlaceholder">
-            <svg viewBox="0 0 100 140" aria-hidden="true">
+          <div class="card-art" id="cardArt">
+            <img class="card-art-img" id="cardArtImg" alt="">
+            <svg class="card-art-fallback" id="cardArtFallback" viewBox="0 0 100 140" aria-hidden="true">
               <rect x="4" y="4" width="92" height="132" rx="3" fill="none" stroke="currentColor" stroke-width="1"/>
               <circle cx="50" cy="55" r="20" fill="none" stroke="currentColor" stroke-width="1"/>
               <path d="M30 100 Q50 82 70 100" fill="none" stroke="currentColor" stroke-width="1"/>
             </svg>
           </div>
           <p class="card-name" id="cardName">&mdash;</p>
-          <p class="card-orientation" id="cardOrientation">&nbsp;</p>
         </div>
       </div>
     </div>
 
-    <p class="hint" id="hint">Tap Pull to draw a card</p>
+    <div class="bottom-group">
+      <p class="hint" id="hint">Tap anywhere to pull a card</p>
 
-    <div class="controls">
-      <button class="btn btn-secondary" id="shuffleBtn" type="button">Shuffle</button>
-      <button class="btn btn-primary" id="pullBtn" type="button">Pull a Card</button>
+      <div class="controls">
+        <button class="btn btn-secondary" id="shuffleBtn" type="button">Shuffle</button>
+      </div>
     </div>
   </main>
 
