@@ -48,6 +48,35 @@
 
       <div class="controls">
         <button class="btn btn-secondary" id="shuffleBtn" type="button">Shuffle</button>
+
+        <div class="menu-wrap">
+          <button class="menu-toggle" id="menuToggle" type="button" aria-label="Toggle history" aria-expanded="false">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="history-panel" id="historyPanel" hidden>
+        <div class="history-header">
+          <span>Recent pulls</span>
+          <span class="history-count" id="historyCount">0 / 10</span>
+        </div>
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th aria-label="Card type">Type</th>
+              <th>Card</th>
+              <th>State</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody">
+            <tr>
+              <td colspan="3" class="history-empty">No pulls yet</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </main>

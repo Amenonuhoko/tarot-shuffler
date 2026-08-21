@@ -15,7 +15,6 @@ const MINOR_RANKS = [
   "Eight", "Nine", "Ten", "Page", "Knight", "Queen", "King"
 ];
 
-// Colors based on each Major Arcana card's traditional element/planet.
 const MAJOR_COLORS = {
   "The Fool": "#e8c34a",
   "The Magician": "#f2c14e",
@@ -41,16 +40,13 @@ const MAJOR_COLORS = {
   "The World": "#3f8a6a"
 };
 
-// Colors based on each Minor Arcana suit's element.
 const SUIT_COLORS = {
-  "Wands": "#c9622f",     // fire
-  "Cups": "#3f6fa3",      // water
-  "Swords": "#8fa3b0",    // air
-  "Pentacles": "#5a8a52"  // earth
+  "Wands": "#c9622f",
+  "Cups": "#3f6fa3",
+  "Swords": "#8fa3b0",
+  "Pentacles": "#5a8a52"
 };
 
-// Turns a card name into the filename it looks for in /images
-// e.g. "The Hanged Man" -> "the-hanged-man", "Ace of Wands" -> "ace-of-wands"
 function slugify(name) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
@@ -62,6 +58,7 @@ function buildDeck() {
     color: MAJOR_COLORS[name],
     slug: slugify(name)
   }));
+
   for (const suit of MINOR_SUITS) {
     for (const rank of MINOR_RANKS) {
       const name = `${rank} of ${suit}`;
@@ -73,14 +70,12 @@ function buildDeck() {
       });
     }
   }
+
   return deck;
 }
 
-const DECK = buildDeck(); // 78 cards total
+const DECK = buildDeck();
 
-// ---- Seedable RNG ----
-// Math.random() can't be reseeded, so we use a small seedable generator
-// (mulberry32) instead. Shuffle re-seeds it for a genuine "reset".
 function mulberry32(seed) {
   return function () {
     seed |= 0;
@@ -97,28 +92,25 @@ function reseedRandom() {
   random = mulberry32(Date.now() ^ performance.now() * 1000);
 }
 
-// ---- Pull / shuffle logic ----
-
-// Pull with replacement: every draw is independent, no state to track.
 function pullCard() {
   const card = DECK[Math.floor(random() * DECK.length)];
   const reversed = random() < 0.5;
   return { ...card, reversed };
 }
 
-// ---- DOM wiring ----
-
 const cardEl = document.getElementById("card");
 const arcanaLabelEl = document.getElementById("arcanaLabel");
 const cardNameEl = document.getElementById("cardName");
 const hintEl = document.getElementById("hint");
 const shuffleBtn = document.getElementById("shuffleBtn");
+const menuToggle = document.getElementById("menuToggle");
+const historyPanel = document.getElementById("historyPanel");
+const historyBody = document.getElementById("historyBody");
+const historyCount = document.getElementById("historyCount");
 const cardArtEl = document.getElementById("cardArt");
 const cardArtImgEl = document.getElementById("cardArtImg");
 const cardArtFallbackEl = document.getElementById("cardArtFallback");
 
-// Tries each extension in turn for a given card slug; falls back to the
-// color placeholder if no matching image file exists in /images.
 const IMAGE_EXTENSIONS = ["png", "jpg", "jpeg", "webp"];
 
 function loadCardArt(card) {
@@ -131,6 +123,7 @@ function loadCardArt(card) {
       cardArtFallbackEl.classList.remove("hidden");
       return;
     }
+
     const ext = IMAGE_EXTENSIONS[i++];
     cardArtImgEl.src = `images/${card.slug}.${ext}`;
   }
@@ -139,12 +132,61 @@ function loadCardArt(card) {
     cardArtImgEl.classList.add("loaded");
     cardArtFallbackEl.classList.add("hidden");
   };
-  cardArtImgEl.onerror = tryNext;
 
+  cardArtImgEl.onerror = tryNext;
   tryNext();
 }
 
 let isFlipped = false;
+let isMenuOpen = false;
+let pullHistory = [];
+
+function renderHistory() {
+  if (pullHistory.length === 0) {
+    historyBody.innerHTML = '<tr><td colspan="3" class="history-empty">No pulls yet</td></tr>';
+    historyCount.textContent = "0 / 10";
+    return;
+  }
+
+  const rows = pullHistory
+    .slice(0, 10)
+    .map((entry) => {
+      const type = getCardTypeSymbol(entry.card);
+      return `
+      <tr>
+        <td class="history-type" title="${type.label}" aria-label="${type.label}">${type.symbol}</td>
+        <td>${entry.card.name}</td>
+        <td class="history-state" title="${entry.card.reversed ? "Reversed" : "Upright"}" aria-label="${entry.card.reversed ? "Reversed" : "Upright"}">${entry.card.reversed ? "↓" : "↑"}</td>
+      </tr>
+    `;
+    })
+    .join("");
+
+  historyBody.innerHTML = rows;
+  historyCount.textContent = `${pullHistory.length} / 10`;
+}
+
+function getCardTypeSymbol(card) {
+  if (card.arcana === "Major Arcana") {
+    return { symbol: "✦", label: "Major Arcana" };
+  }
+
+  const suitSymbols = {
+    Wands: ["♢", "Wands"],
+    Cups: ["♡", "Cups"],
+    Swords: ["⚔", "Swords"],
+    Pentacles: ["⬟", "Pentacles"]
+  };
+  const [symbol, label] = suitSymbols[card.name.split(" of ").pop()];
+  return { symbol, label };
+}
+
+function addToHistory(card) {
+  pullHistory.unshift({ index: pullHistory.length + 1, card });
+  pullHistory = pullHistory.slice(0, 10);
+  pullHistory = pullHistory.map((entry, idx) => ({ ...entry, index: idx + 1 }));
+  renderHistory();
+}
 
 function showCard(card) {
   arcanaLabelEl.textContent = card.arcana;
@@ -152,6 +194,7 @@ function showCard(card) {
   cardArtEl.style.setProperty("--card-color", card.color);
   cardArtEl.classList.toggle("is-reversed", card.reversed);
   loadCardArt(card);
+  addToHistory(card);
 
   if (!isFlipped) {
     cardEl.classList.add("flipped");
@@ -161,18 +204,38 @@ function showCard(card) {
   hintEl.textContent = "Tap anywhere to draw again";
 }
 
+function setMenuOpen(open) {
+  isMenuOpen = open;
+  historyPanel.hidden = !open;
+  menuToggle.setAttribute("aria-expanded", String(open));
+}
+
+function toggleMenu() {
+  setMenuOpen(!isMenuOpen);
+}
+
 document.addEventListener("click", (event) => {
-  if (event.target.closest("#shuffleBtn")) return;
+  if (event.target.closest("#shuffleBtn")) {
+    return;
+  }
+
+  if (event.target.closest("#menuToggle")) {
+    toggleMenu();
+    return;
+  }
+
+  if (event.target.closest("#historyPanel")) {
+    return;
+  }
+
   const card = pullCard();
   showCard(card);
 });
 
 shuffleBtn.addEventListener("click", () => {
-  // close the card
   cardEl.classList.remove("flipped");
   isFlipped = false;
 
-  // reset displayed text back to the empty state
   arcanaLabelEl.textContent = "Major Arcana";
   cardNameEl.textContent = "\u2014";
   cardArtEl.classList.remove("is-reversed");
@@ -183,12 +246,10 @@ shuffleBtn.addEventListener("click", () => {
   cardArtFallbackEl.classList.remove("hidden");
   hintEl.textContent = "Tap anywhere to pull a card";
 
-  // reseed the RNG
   reseedRandom();
 
-  // replay the shake animation
   cardEl.classList.remove("shuffling");
-  void cardEl.offsetWidth; // force reflow so it can replay on repeated clicks
+  void cardEl.offsetWidth;
   cardEl.classList.add("shuffling");
 });
 
@@ -196,7 +257,8 @@ cardEl.addEventListener("animationend", () => {
   cardEl.classList.remove("shuffling");
 });
 
-// ---- PWA service worker registration ----
+renderHistory();
+setMenuOpen(false);
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
