@@ -10,6 +10,7 @@
   --lavender: #7d6fa3;
 
   --font-display: 'Cormorant Garamond', serif;
+  --font-description: 'Grenze Gotisch', serif;
   --font-body: 'Inter', system-ui, sans-serif;
 }
 
@@ -72,6 +73,16 @@ body {
   perspective: 1200px;
   width: min(300px, calc(100vw - 40px));
   aspect-ratio: 3 / 5;
+}
+
+.card-slot.pulling {
+  animation: pull-card 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes pull-card {
+  0% { opacity: 0.78; transform: translateY(10px) scale(0.985); }
+  55% { opacity: 1; transform: translateY(-3px) scale(1.01); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @media (max-height: 700px) {
@@ -185,12 +196,26 @@ body {
   display: none;
 }
 
-.card-name {
+.card-title {
   margin: 0;
   font-family: var(--font-display);
   font-size: clamp(1.5rem, 6vw, 2rem);
   font-weight: 600;
   line-height: 1.15;
+  min-height: 1.15em;
+  text-align: center;
+}
+
+.card-description {
+  width: 90%;
+  min-height: 2.8em;
+  margin: 0;
+  font-family: var(--font-description);
+  font-size: 0.9rem;
+  line-height: 1.25;
+  border: 1px solid var(--surface-line);
+  border-radius: 8px;
+  background: rgba(20, 16, 31, 0.28);
 }
 
 .hint {
@@ -378,7 +403,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card, .card.shuffling {
+  .card, .card.shuffling, .card-slot.pulling {
     animation: none !important;
     transition: none !important;
   }

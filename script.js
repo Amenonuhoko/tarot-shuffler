@@ -47,6 +47,321 @@ const SUIT_COLORS = {
   "Pentacles": "#5a8a52"
 };
 
+const CARD_MEANINGS = {
+  "The Fool": [
+    "Beginnings, innocence, possibilities, impulsiveness",
+    "Recklessness, hesitation, a faulty choice, doldrums"
+  ],
+  "The Magician": [
+    "Originality, self-confidence, skill, a breakthrough, resourcefulness",
+    "Insecurity, delay, lack of trust, closed mind, secrets"
+  ],
+  "The High Priestess": [
+    "Wisdom, intuition, dreams, an enigma",
+    "Ignorance, shallowness, lack of concentration, smothering, selfishness"
+  ],
+  "The Empress": [
+    "Fertility, nurturing, abundance, accomplishment",
+    "Insecurity, feeling undesirable, anxiety, lack of imagination"
+  ],
+  "The Emperor": [
+    "Stability, leadership, bravery, bold action, structure",
+    "Immaturity, pettiness, rigidity, domination, anger"
+  ],
+  "The Hierophant": [
+    "Conformity, compassion, social approval, tradition, legacy",
+    "Bucking trends, vulnerability, feeling adrift, blind faith"
+  ],
+  "The Lovers": [
+    "Love, harmony, trust, a leap of faith, choice",
+    "Unreliability, separation, second-guessing, values, conflict"
+  ],
+  "The Chariot": [
+    "A journey, perseverance, rushed decisions, vengeance, victory",
+    "A lack of direction, floundering, stagnation, willfulness"
+  ],
+  "Strength": [
+    "Courage, conviction, control, determination, patience",
+    "Weakness, self-doubt, abuse of power, pride, negligence"
+  ],
+  "The Hermit": [
+    "Introspection, withdrawal, prudence, insight, meditation",
+    "Recklessness, hastiness, avoidance, loneliness, rejection"
+  ],
+  "Wheel of Fortune": [
+    "Fortune, an unexpected windfall, karma, destiny, cycles",
+    "Bad luck, a lack of control, the past, misery, disappointment"
+  ],
+  "Justice": [
+    "Harmony, balance, equality, virtue, honor",
+    "Bias, false accusations, intolerance, abuse, dishonesty"
+  ],
+  "The Hanged Man": [
+    "Suspension, restriction, sacrifice, readjustment, improvement",
+    "Willfulness, useless sacrifice, rushing, thoughtlessness, martyrdom"
+  ],
+  "Death": [
+    "Metamorphosis, evolution, loss, transition, change",
+    "Stagnation, immobility, stubbornness, festering, decay"
+  ],
+  "Temperance": [
+    "Moderation, harmony, purpose, good influence, reconciliation",
+    "Conflict, hostility, frustration, impatience, reluctance"
+  ],
+  "The Devil": [
+    "Greed, controversy, violence, strange experiences, addiction",
+    "Release, enlightenment, power reclaimed, divorce, moving on"
+  ],
+  "The Tower": [
+    "Massive change, upheaval, catastrophe, rebuilding, revelation",
+    "Feeling trapped, delaying disaster, fear of pain, avoidance"
+  ],
+  "The Star": [
+    "Hope, serenity, inspiration, insight, spirituality",
+    "Crushed dreams, insecurity, despair, dejection, exhaustion"
+  ],
+  "The Moon": [
+    "Trickery, melancholy, anguish, illusion, insecurity",
+    "Joy, enlightenment, resolution, deception revealed, relief"
+  ],
+  "The Sun": [
+    "Satisfaction, accomplishment, joy, luck, vitality",
+    "Missed opportunities, delays, doubt, fear of missing out, depression"
+  ],
+  "Judgement": [
+    "Improvement, forgiveness, a change of perspective, absolution, rebirth",
+    "Oppression, lack of self-awareness, failure, repeated mistakes, self-loathing"
+  ],
+  "The World": [
+    "Completion, recognition, fulfillment, triumph, celebration",
+    "Imperfection, disappointment, shortcuts, shortsightedness, anxiety"
+  ],
+  "Ace of Wands": [
+    "Excitement, creativity, a spark, growth, new beginnings",
+    "Delays, bad news, a creative block, wasted talent"
+  ],
+  "Two of Wands": [
+    "Decisions, travel, business opportunities, future planning, cooperation",
+    "Indecision, doubt, fear of the unknown, playing it safe"
+  ],
+  "Three of Wands": [
+    "Self-motivation, freedom, reward, romance",
+    "Returning home, wallowing, frustration, delays"
+  ],
+  "Four of Wands": [
+    "Reunion, success, pride, happiness, family",
+    "Self-doubt, diaspora, canceled plans, gloom"
+  ],
+  "Five of Wands": [
+    "Rivalry, opponents, disagreement, competition, clashing egos",
+    "Compromise, peace, harmony, resolution, conflict avoidance"
+  ],
+  "Six of Wands": [
+    "Victory, praise, achievement, reward, fame",
+    "Ego, pride, disrepute, a fall from grace"
+  ],
+  "Seven of Wands": [
+    "Endurance, attack, fighting for beliefs, perseverance, mounting a defense",
+    "Giving up, defeat, timidity, cowardice, overwhelmed"
+  ],
+  "Eight of Wands": [
+    "Speed, momentum, travel, excitement, results",
+    "Lethargy, delays, bad timing, slowness, frustration"
+  ],
+  "Nine of Wands": [
+    "Fatigue, persistence, gathering strength, wounds, resilience",
+    "A stalemate, stubbornness, hesitance, giving in, paranoia"
+  ],
+  "Ten of Wands": [
+    "Overwhelm, stress, obligation, refusing aide, duty",
+    "Avoidance, burnout, overcommitting, stretched thin, giving up"
+  ],
+  "Page of Wands": [
+    "Playfulness, charisma, discovery, a rogue, enthusiasm",
+    "Naivety, petulance, a lack of imagination, pessimism"
+  ],
+  "Knight of Wands": [
+    "Adventure, passion, a rebel, a flirt, a hot temper",
+    "Arrogance, jealousy, abuse, recklessness, a braggart"
+  ],
+  "Queen of Wands": [
+    "Optimism, independence, confidence, passion, verve",
+    "Jealousy, spite, avarice, destruction, demands"
+  ],
+  "King of Wands": [
+    "Honesty, passion, leadership, charm, flexibility",
+    "Tyranny, a lack of harmony, weakness, volatility"
+  ],
+  "Ace of Swords": [
+    "New projects, truth, assertiveness, creative thinking, clarity",
+    "Lack of communication, misinformation, rigidity, confusion"
+  ],
+  "Two of Swords": [
+    "Facing fears, a stalemate, denial, opposition, a precarious position",
+    "Indecision, lies exposed, delays, overwhelming fear"
+  ],
+  "Three of Swords": [
+    "Heartbreak, self-harm, sadness, grief, separation",
+    "Overcoming grief, optimism, reconciliation, forgiveness, seeking help"
+  ],
+  "Four of Swords": [
+    "Sanctuary, recouping, meditation, passivity, counseling",
+    "Awakening, healing, returning, burnout, strength"
+  ],
+  "Five of Swords": [
+    "Surrender, betrayal, bullying, violence, crime",
+    "Resolution, compromise, sacrifice, peace, justice"
+  ],
+  "Six of Swords": [
+    "Healing, moving forward, stability, escape, journeys",
+    "Feeling trapped, instability, canceled travel, abuse, unresolved issues"
+  ],
+  "Seven of Swords": [
+    "Strategy, cunning, thievery, cheating, manipulation",
+    "Conscience, confession, getting caught, outsmarted, deception"
+  ],
+  "Eight of Swords": [
+    "Anxiety, victimhood, feeling trapped, paralysis, crisis",
+    "Freedom, new perspectives, taking a stand, strength, healing"
+  ],
+  "Nine of Swords": [
+    "Anxiety, terror, nightmares, obsession, insomnia",
+    "Recovery, acceptance, letting go, accepting help, hope"
+  ],
+  "Ten of Swords": [
+    "Bitterness, betrayal, rock bottom, martyrdom, severing ties",
+    "Surviving disaster, recovery, regeneration, the inevitable"
+  ],
+  "Page of Swords": [
+    "Talkativeness, energy, thoughtfulness, curiosity, truthfulness",
+    "Bluntness, cynicism, defensiveness, sullenness, all talk"
+  ],
+  "Knight of Swords": [
+    "Intellect, bravery, confidence, being action-oriented",
+    "Rudeness, bullying, an inferiority complex, passivity"
+  ],
+  "Queen of Swords": [
+    "Protection, meaningful criticism, tough love, skepticism, intelligence",
+    "Bitterness, vindication, judgment, malice, pessimism"
+  ],
+  "King of Swords": [
+    "Authority, structure, logic, self-discipline, loyalty",
+    "A dictator, cruelty, violence, oppression, cynicism"
+  ],
+  "Ace of Cups": [
+    "Happiness, love, intimacy, new emotions, compassion",
+    "Relationship problems, depression, sadness, creative block, repression"
+  ],
+  "Two of Cups": [
+    "A happy relationship, equality, partnership, attraction, connection",
+    "Imbalance, discord, separation, incompatibility, power imbalance"
+  ],
+  "Three of Cups": [
+    "Celebrations, friends, indulgence, parties, community",
+    "Overindulgence, infidelity, disintegrating bonds, gossip, isolation"
+  ],
+  "Four of Cups": [
+    "A lack of awareness, pessimism, daydreaming, lethargy, reevaluation",
+    "Motivation, opportunity, optimism, restlessness, boredom"
+  ],
+  "Five of Cups": [
+    "Self-pity, guilt, regret, stagnation, depression",
+    "Moving on, forgiveness, acceptance, finding peace, encouragement"
+  ],
+  "Six of Cups": [
+    "Nostalgia, old friends, simple joys, sharing, childhood",
+    "The future, letting go, leaving home, rose-tinted glasses"
+  ],
+  "Seven of Cups": [
+    "Daydreaming, fantasy, decisions, wishful thinking, procrastination",
+    "Reality, clarity, temptation, confusion, diversion"
+  ],
+  "Eight of Cups": [
+    "Walking away, introspection, escapism, withdrawal, seeking truth",
+    "Aimlessness, fear of abandonment, depression, settling, hopelessness"
+  ],
+  "Nine of Cups": [
+    "Dreams realized, fulfillment, pleasure, recognition, triumph",
+    "Greed, devastation, pessimism, addiction, self-loathing"
+  ],
+  "Ten of Cups": [
+    "Harmony, reunions, security, domestic bliss, found family",
+    "Dysfunctional family, broken home, instability, conflict, neglect"
+  ],
+  "Page of Cups": [
+    "Youthfulness, idealism, sensitivity, romance, spirituality",
+    "Bad news, jealousy, obsession, childhood problems, immaturity"
+  ],
+  "Knight of Cups": [
+    "Chivalry, affection, invitations, taking action, meaningful gifts",
+    "Heartbreak, infidelity, lack of diplomacy, moodiness, pettiness"
+  ],
+  "Queen of Cups": [
+    "Femininity, warmth, empathy, a counselor, intuition",
+    "Immaturity, selfishness, smothering, sulking, spite"
+  ],
+  "King of Cups": [
+    "Devotion, loyalty, faithfulness, wisdom, generosity",
+    "Anxiety, lack of caring, control, violence, imbalance"
+  ],
+  "Ace of Pentacles": [
+    "New business, money, investments, abundance, security",
+    "Bad finances, excessive spending, greed, stinginess, poor planning"
+  ],
+  "Two of Pentacles": [
+    "Multitasking, balance, choice, flexibility, prioritization",
+    "Disorganization, a facade, overwhelm, overextending, financial mess"
+  ],
+  "Three of Pentacles": [
+    "Studying, growth, collaboration, success, recognition",
+    "Poor work ethic, apathy, lack of goals, willfulness"
+  ],
+  "Four of Pentacles": [
+    "Hoarding, possession, financial stability, materialism, stinginess",
+    "Gambling, recklessness, letting go, generosity, large purchases"
+  ],
+  "Five of Pentacles": [
+    "Recession, adversity, isolation, unemployment, ruin",
+    "Paid debts, improved finances, positive change, acceptance, recovery"
+  ],
+  "Six of Pentacles": [
+    "Generosity, charity, kindness, value, reward",
+    "Abuse of power, scams, extortion, gullibility, greed"
+  ],
+  "Seven of Pentacles": [
+    "Reward, perseverance, decisions, investment, fruition",
+    "Shortsightedness, laziness, procrastination, setbacks, delay"
+  ],
+  "Eight of Pentacles": [
+    "Craftsmanship, commitment, determination, ambition, concentration",
+    "Repetition, poor quality, rushing, bad reputation"
+  ],
+  "Nine of Pentacles": [
+    "Independence, prosperity, freedom, maturity, self-discipline",
+    "Scams, superficiality, overinvestment, work-obsessed, ungrateful"
+  ],
+  "Ten of Pentacles": [
+    "Inheritance, ancestry, pensions, settling down, financial stability",
+    "Financial disaster, disputes, instability, broken traditions"
+  ],
+  "Page of Pentacles": [
+    "Setting goals, loyalty, positivity, opportunities, manifestation",
+    "A lack of common sense, immaturity, laziness, apathy"
+  ],
+  "Knight of Pentacles": [
+    "Ambition, hard work, persistence, being efficient",
+    "Impatience, apathy, irresponsibility, anxiety"
+  ],
+  "Queen of Pentacles": [
+    "A healer, luxury, being grounded, practicality, movement",
+    "Jealousy, possession, a lack of organization, manipulation"
+  ],
+  "King of Pentacles": [
+    "Success, dependability, conservatism, strong will, willing to work",
+    "Corruption, materialism, ruthlessness, authority, indulgence"
+  ]
+};
+
 function slugify(name) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
@@ -56,7 +371,8 @@ function buildDeck() {
     name,
     arcana: "Major Arcana",
     color: MAJOR_COLORS[name],
-    slug: slugify(name)
+    slug: slugify(name),
+    meanings: CARD_MEANINGS[name]
   }));
 
   for (const suit of MINOR_SUITS) {
@@ -66,7 +382,8 @@ function buildDeck() {
         name,
         arcana: "Minor Arcana",
         color: SUIT_COLORS[suit],
-        slug: slugify(name)
+        slug: slugify(name),
+        meanings: CARD_MEANINGS[name]
       });
     }
   }
@@ -98,9 +415,11 @@ function pullCard() {
   return { ...card, reversed };
 }
 
+const cardSlotEl = document.getElementById("cardSlot");
 const cardEl = document.getElementById("card");
 const arcanaLabelEl = document.getElementById("arcanaLabel");
-const cardNameEl = document.getElementById("cardName");
+const cardTitleEl = document.getElementById("cardTitle");
+const cardDescriptionEl = document.getElementById("cardDescription");
 const hintEl = document.getElementById("hint");
 const shuffleBtn = document.getElementById("shuffleBtn");
 const menuToggle = document.getElementById("menuToggle");
@@ -188,13 +507,21 @@ function addToHistory(card) {
   renderHistory();
 }
 
+function animateCardPull() {
+  cardSlotEl.classList.remove("pulling");
+  void cardSlotEl.offsetWidth;
+  cardSlotEl.classList.add("pulling");
+}
+
 function showCard(card) {
   arcanaLabelEl.textContent = card.arcana;
-  cardNameEl.textContent = card.name;
+  cardTitleEl.textContent = card.name;
+  cardDescriptionEl.textContent = card.meanings[card.reversed ? 1 : 0];
   cardArtEl.style.setProperty("--card-color", card.color);
   cardArtEl.classList.toggle("is-reversed", card.reversed);
   loadCardArt(card);
   addToHistory(card);
+  animateCardPull();
 
   if (!isFlipped) {
     cardEl.classList.add("flipped");
@@ -241,7 +568,8 @@ shuffleBtn.addEventListener("click", () => {
   isFlipped = false;
 
   arcanaLabelEl.textContent = "Major Arcana";
-  cardNameEl.textContent = "\u2014";
+  cardTitleEl.textContent = "\u2014";
+  cardDescriptionEl.textContent = "";
   cardArtEl.classList.remove("is-reversed");
   cardArtImgEl.onload = null;
   cardArtImgEl.onerror = null;
@@ -259,6 +587,10 @@ shuffleBtn.addEventListener("click", () => {
 
 cardEl.addEventListener("animationend", () => {
   cardEl.classList.remove("shuffling");
+});
+
+cardSlotEl.addEventListener("animationend", () => {
+  cardSlotEl.classList.remove("pulling");
 });
 
 renderHistory();
