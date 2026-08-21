@@ -214,13 +214,17 @@ function toggleMenu() {
   setMenuOpen(!isMenuOpen);
 }
 
+menuToggle.addEventListener("click", (event) => {
+  event.stopPropagation();
+  toggleMenu();
+});
+
 document.addEventListener("click", (event) => {
   if (event.target.closest("#shuffleBtn")) {
     return;
   }
 
   if (event.target.closest("#menuToggle")) {
-    toggleMenu();
     return;
   }
 
