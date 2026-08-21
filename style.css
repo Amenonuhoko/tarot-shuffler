@@ -74,6 +74,16 @@ body {
   aspect-ratio: 3 / 5;
 }
 
+.card-slot.pulling {
+  animation: pull-card 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes pull-card {
+  0% { opacity: 0.78; transform: translateY(10px) scale(0.985); }
+  55% { opacity: 1; transform: translateY(-3px) scale(1.01); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 @media (max-height: 700px) {
   .table,
   .card-slot {
@@ -378,7 +388,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card, .card.shuffling {
+  .card, .card.shuffling, .card-slot.pulling {
     animation: none !important;
     transition: none !important;
   }

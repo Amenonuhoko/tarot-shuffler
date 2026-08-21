@@ -98,6 +98,7 @@ function pullCard() {
   return { ...card, reversed };
 }
 
+const cardSlotEl = document.getElementById("cardSlot");
 const cardEl = document.getElementById("card");
 const arcanaLabelEl = document.getElementById("arcanaLabel");
 const cardNameEl = document.getElementById("cardName");
@@ -188,6 +189,12 @@ function addToHistory(card) {
   renderHistory();
 }
 
+function animateCardPull() {
+  cardSlotEl.classList.remove("pulling");
+  void cardSlotEl.offsetWidth;
+  cardSlotEl.classList.add("pulling");
+}
+
 function showCard(card) {
   arcanaLabelEl.textContent = card.arcana;
   cardNameEl.textContent = card.name;
@@ -195,6 +202,7 @@ function showCard(card) {
   cardArtEl.classList.toggle("is-reversed", card.reversed);
   loadCardArt(card);
   addToHistory(card);
+  animateCardPull();
 
   if (!isFlipped) {
     cardEl.classList.add("flipped");
@@ -259,6 +267,10 @@ shuffleBtn.addEventListener("click", () => {
 
 cardEl.addEventListener("animationend", () => {
   cardEl.classList.remove("shuffling");
+});
+
+cardSlotEl.addEventListener("animationend", () => {
+  cardSlotEl.classList.remove("pulling");
 });
 
 renderHistory();
