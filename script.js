@@ -47,6 +47,33 @@ const SUIT_COLORS = {
   "Pentacles": "#5a8a52"
 };
 
+const CUSTOM_NON_ARCANA = [
+  "Recovery", "Celebration", "Wrath", "Order", "Ambition", "Loyalty",
+  "Reckoning", "Power", "Fluidity", "Insight", "Envy", "Crossroads",
+  "Vitality", "Temptation", "Obstacles", "Stability", "Integrity", "Endurance",
+  "Cynicism", "Idealism", "Industrious", "Gossip", "Vanity", "Trickster",
+  "Receptive", "Potential", "Greed", "Fecundity", "Pride", "Contemplation",
+  "Impulsive", "Duty", "Selfish", "Recovery", "Sacrifice", "Abandonment",
+  "Hyperfocus", "Deception", "Spite", "Delusions", "Innovator", "Generosity",
+  "Gluttony", "Abundance", "Betwixt", "Discretion", "Betrayal", "Fulfillment"
+];
+
+const CUSTOM_ARCANA = [
+  "The Divine Fruit", "The Mirror", "The Forbidden", "The Reaped God",
+  "The Instrument", "The Magic Skin", "The Flood", "The World Tree",
+  "The Sacred Sword", "The Monster Marriage", "The Primordial Chaos", "The Apocalypse"
+];
+
+const CUSTOM_COLORS = ["#b06b4f", "#4f8a82", "#a18a4d", "#765b8f", "#7b6a55"];
+const CUSTOM_TYPES = ["Hero", "Advisor", "Challenge", "Desire"];
+const CUSTOM_TYPE_SYMBOLS = {
+  Hero: { symbol: "❦", label: "Hero: Wreath" },
+  Advisor: { symbol: "◉", label: "Advisor: Eye" },
+  Challenge: { symbol: "☠", label: "Challenge: Skull" },
+  Desire: { symbol: "♡", label: "Desire: Heart" },
+  Symbol: { symbol: "✦", label: "Symbol" }
+};
+
 function slugify(name) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
@@ -74,7 +101,28 @@ function buildDeck() {
   return deck;
 }
 
-const DECK = buildDeck();
+const CLASSICAL_DECK = buildDeck();
+
+function buildCustomDeck() {
+  const cards = [...CUSTOM_NON_ARCANA, ...CUSTOM_ARCANA];
+
+  return cards.map((name, index) => ({
+    name,
+    arcana: index < CUSTOM_NON_ARCANA.length ? "Custom" : "Custom Arcana",
+    type: index < CUSTOM_NON_ARCANA.length
+      ? CUSTOM_TYPES[index % CUSTOM_TYPES.length]
+      : "Symbol",
+    color: CUSTOM_COLORS[index % CUSTOM_COLORS.length],
+    slug: `inner-compass-${slugify(name)}-${index}`
+  }));
+}
+
+const DECKS = {
+  classical: { name: "Tarot of the Divine", cards: CLASSICAL_DECK },
+  custom: { name: "Oracle of the Divine", cards: buildCustomDeck() }
+};
+
+let activeDeck = DECKS.classical;
 
 function mulberry32(seed) {
   return function () {
@@ -93,7 +141,7 @@ function reseedRandom() {
 }
 
 function pullCard() {
-  const card = DECK[Math.floor(random() * DECK.length)];
+  const card = activeDeck.cards[Math.floor(random() * activeDeck.cards.length)];
   const reversed = random() < 0.5;
   return { ...card, reversed };
 }
@@ -104,6 +152,7 @@ const arcanaLabelEl = document.getElementById("arcanaLabel");
 const cardNameEl = document.getElementById("cardName");
 const hintEl = document.getElementById("hint");
 const shuffleBtn = document.getElementById("shuffleBtn");
+const deckSelect = document.getElementById("deckSelect");
 const menuToggle = document.getElementById("menuToggle");
 const historyPanel = document.getElementById("historyPanel");
 const historyBody = document.getElementById("historyBody");
@@ -168,8 +217,20 @@ function renderHistory() {
 }
 
 function getCardTypeSymbol(card) {
+  if (card.type && CUSTOM_TYPE_SYMBOLS[card.type]) {
+    return CUSTOM_TYPE_SYMBOLS[card.type];
+  }
+
   if (card.arcana === "Major Arcana") {
     return { symbol: "✦", label: "Major Arcana" };
+  }
+
+  if (card.arcana === "Custom Arcana") {
+    return { symbol: "✦", label: "Custom Arcana" };
+  }
+
+  if (card.arcana === "Custom") {
+    return { symbol: "◇", label: "Custom" };
   }
 
   const suitSymbols = {
@@ -196,7 +257,7 @@ function animateCardPull() {
 }
 
 function showCard(card) {
-  arcanaLabelEl.textContent = card.arcana;
+  arcanaLabelEl.textContent = card.type || card.arcana;
   cardNameEl.textContent = card.name;
   cardArtEl.style.setProperty("--card-color", card.color);
   cardArtEl.classList.toggle("is-reversed", card.reversed);
@@ -222,9 +283,33 @@ function toggleMenu() {
   setMenuOpen(!isMenuOpen);
 }
 
+function resetReading() {
+  cardEl.classList.remove("flipped");
+  isFlipped = false;
+
+  arcanaLabelEl.textContent = "Major Arcana";
+  cardNameEl.textContent = "\u2014";
+  cardArtEl.classList.remove("is-reversed");
+  cardArtImgEl.onload = null;
+  cardArtImgEl.onerror = null;
+  cardArtImgEl.removeAttribute("src");
+  cardArtImgEl.classList.remove("loaded");
+  cardArtFallbackEl.classList.remove("hidden");
+  hintEl.textContent = "Tap anywhere to pull a card";
+  pullHistory = [];
+  renderHistory();
+  reseedRandom();
+}
+
 menuToggle.addEventListener("click", (event) => {
   event.stopPropagation();
   toggleMenu();
+});
+
+deckSelect.addEventListener("change", () => {
+  activeDeck = DECKS[deckSelect.value];
+  resetReading();
+  setMenuOpen(false);
 });
 
 document.addEventListener("click", (event) => {
@@ -240,25 +325,16 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  if (event.target.closest("#deckSelect")) {
+    return;
+  }
+
   const card = pullCard();
   showCard(card);
 });
 
 shuffleBtn.addEventListener("click", () => {
-  cardEl.classList.remove("flipped");
-  isFlipped = false;
-
-  arcanaLabelEl.textContent = "Major Arcana";
-  cardNameEl.textContent = "\u2014";
-  cardArtEl.classList.remove("is-reversed");
-  cardArtImgEl.onload = null;
-  cardArtImgEl.onerror = null;
-  cardArtImgEl.removeAttribute("src");
-  cardArtImgEl.classList.remove("loaded");
-  cardArtFallbackEl.classList.remove("hidden");
-  hintEl.textContent = "Tap anywhere to pull a card";
-
-  reseedRandom();
+  resetReading();
 
   cardEl.classList.remove("shuffling");
   void cardEl.offsetWidth;
