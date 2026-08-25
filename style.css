@@ -61,6 +61,40 @@ body {
   gap: clamp(24px, 6vh, 48px);
 }
 
+.deck-selector {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--ink-dim);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.deck-selector select {
+  min-height: 42px;
+  max-width: 210px;
+  padding: 0 30px 0 12px;
+  border: 1px solid var(--surface-line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font: 500 0.82rem var(--font-body);
+  cursor: pointer;
+}
+
+.deck-selector select:hover,
+.deck-selector select:focus-visible {
+  border-color: var(--gold);
+}
+
+.deck-selector select:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
 .bottom-group {
   width: 100%;
   display: flex;

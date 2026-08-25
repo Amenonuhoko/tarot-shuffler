@@ -1,7 +1,7 @@
 {
   "name": "Tarot Pull",
   "short_name": "Tarot Pull",
-  "description": "Pull a random tarot card from a classical 78-card deck.",
+  "description": "Pull a random card from multiple tarot and custom decks.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

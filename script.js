@@ -391,7 +391,28 @@ function buildDeck() {
   return deck;
 }
 
-const DECK = buildDeck();
+const CLASSICAL_DECK = buildDeck();
+
+function buildCustomDeck() {
+  const cards = [...CUSTOM_NON_ARCANA, ...CUSTOM_ARCANA];
+
+  return cards.map((name, index) => ({
+    name,
+    arcana: index < CUSTOM_NON_ARCANA.length ? "Custom" : "Custom Arcana",
+    type: index < CUSTOM_NON_ARCANA.length
+      ? CUSTOM_TYPES[index % CUSTOM_TYPES.length]
+      : "Symbol",
+    color: CUSTOM_COLORS[index % CUSTOM_COLORS.length],
+    slug: `inner-compass-${slugify(name)}-${index}`
+  }));
+}
+
+const DECKS = {
+  classical: { name: "Tarot of the Divine", cards: CLASSICAL_DECK },
+  custom: { name: "Oracle of the Divine", cards: buildCustomDeck() }
+};
+
+let activeDeck = DECKS.classical;
 
 function mulberry32(seed) {
   return function () {
@@ -410,11 +431,12 @@ function reseedRandom() {
 }
 
 function pullCard() {
-  const card = DECK[Math.floor(random() * DECK.length)];
+  const card = activeDeck.cards[Math.floor(random() * activeDeck.cards.length)];
   const reversed = random() < 0.5;
   return { ...card, reversed };
 }
 
+const cardSlotEl = document.getElementById("cardSlot");
 const cardSlotEl = document.getElementById("cardSlot");
 const cardEl = document.getElementById("card");
 const arcanaLabelEl = document.getElementById("arcanaLabel");
@@ -422,6 +444,7 @@ const cardTitleEl = document.getElementById("cardTitle");
 const cardDescriptionEl = document.getElementById("cardDescription");
 const hintEl = document.getElementById("hint");
 const shuffleBtn = document.getElementById("shuffleBtn");
+const deckSelect = document.getElementById("deckSelect");
 const menuToggle = document.getElementById("menuToggle");
 const historyPanel = document.getElementById("historyPanel");
 const historyBody = document.getElementById("historyBody");
@@ -486,8 +509,20 @@ function renderHistory() {
 }
 
 function getCardTypeSymbol(card) {
+  if (card.type && CUSTOM_TYPE_SYMBOLS[card.type]) {
+    return CUSTOM_TYPE_SYMBOLS[card.type];
+  }
+
   if (card.arcana === "Major Arcana") {
     return { symbol: "✦", label: "Major Arcana" };
+  }
+
+  if (card.arcana === "Custom Arcana") {
+    return { symbol: "✦", label: "Custom Arcana" };
+  }
+
+  if (card.arcana === "Custom") {
+    return { symbol: "◇", label: "Custom" };
   }
 
   const suitSymbols = {
@@ -513,6 +548,12 @@ function animateCardPull() {
   cardSlotEl.classList.add("pulling");
 }
 
+function animateCardPull() {
+  cardSlotEl.classList.remove("pulling");
+  void cardSlotEl.offsetWidth;
+  cardSlotEl.classList.add("pulling");
+}
+
 function showCard(card) {
   arcanaLabelEl.textContent = card.arcana;
   cardTitleEl.textContent = card.name;
@@ -521,6 +562,7 @@ function showCard(card) {
   cardArtEl.classList.toggle("is-reversed", card.reversed);
   loadCardArt(card);
   addToHistory(card);
+  animateCardPull();
   animateCardPull();
 
   if (!isFlipped) {
@@ -541,9 +583,33 @@ function toggleMenu() {
   setMenuOpen(!isMenuOpen);
 }
 
+function resetReading() {
+  cardEl.classList.remove("flipped");
+  isFlipped = false;
+
+  arcanaLabelEl.textContent = "Major Arcana";
+  cardNameEl.textContent = "\u2014";
+  cardArtEl.classList.remove("is-reversed");
+  cardArtImgEl.onload = null;
+  cardArtImgEl.onerror = null;
+  cardArtImgEl.removeAttribute("src");
+  cardArtImgEl.classList.remove("loaded");
+  cardArtFallbackEl.classList.remove("hidden");
+  hintEl.textContent = "Tap anywhere to pull a card";
+  pullHistory = [];
+  renderHistory();
+  reseedRandom();
+}
+
 menuToggle.addEventListener("click", (event) => {
   event.stopPropagation();
   toggleMenu();
+});
+
+deckSelect.addEventListener("change", () => {
+  activeDeck = DECKS[deckSelect.value];
+  resetReading();
+  setMenuOpen(false);
 });
 
 document.addEventListener("click", (event) => {
@@ -556,6 +622,10 @@ document.addEventListener("click", (event) => {
   }
 
   if (event.target.closest("#historyPanel")) {
+    return;
+  }
+
+  if (event.target.closest("#deckSelect")) {
     return;
   }
 
@@ -587,6 +657,10 @@ shuffleBtn.addEventListener("click", () => {
 
 cardEl.addEventListener("animationend", () => {
   cardEl.classList.remove("shuffling");
+});
+
+cardSlotEl.addEventListener("animationend", () => {
+  cardSlotEl.classList.remove("pulling");
 });
 
 cardSlotEl.addEventListener("animationend", () => {
