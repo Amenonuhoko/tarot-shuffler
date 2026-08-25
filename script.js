@@ -47,6 +47,33 @@ const SUIT_COLORS = {
   "Pentacles": "#5a8a52"
 };
 
+const CUSTOM_NON_ARCANA = [
+  "Recovery", "Celebration", "Wrath", "Order", "Ambition", "Loyalty",
+  "Reckoning", "Power", "Fluidity", "Insight", "Envy", "Crossroads",
+  "Vitality", "Temptation", "Obstacles", "Stability", "Integrity", "Endurance",
+  "Cynicism", "Idealism", "Industrious", "Gossip", "Vanity", "Trickster",
+  "Receptive", "Potential", "Greed", "Fecundity", "Pride", "Contemplation",
+  "Impulsive", "Duty", "Selfish", "Recovery", "Sacrifice", "Abandonment",
+  "Hyperfocus", "Deception", "Spite", "Delusions", "Innovator", "Generosity",
+  "Gluttony", "Abundance", "Betwixt", "Discretion", "Betrayal", "Fulfillment"
+];
+
+const CUSTOM_ARCANA = [
+  "The Divine Fruit", "The Mirror", "The Forbidden", "The Reaped God",
+  "The Instrument", "The Magic Skin", "The Flood", "The World Tree",
+  "The Sacred Sword", "The Monster Marriage", "The Primordial Chaos", "The Apocalypse"
+];
+
+const CUSTOM_COLORS = ["#b06b4f", "#4f8a82", "#a18a4d", "#765b8f", "#7b6a55"];
+const CUSTOM_TYPES = ["Hero", "Advisor", "Challenge", "Desire"];
+const CUSTOM_TYPE_SYMBOLS = {
+  Hero: { symbol: "❦", label: "Hero: Wreath" },
+  Advisor: { symbol: "◉", label: "Advisor: Eye" },
+  Challenge: { symbol: "☠", label: "Challenge: Skull" },
+  Desire: { symbol: "♡", label: "Desire: Heart" },
+  Symbol: { symbol: "✦", label: "Symbol" }
+};
+
 const CARD_MEANINGS = {
   "The Fool": [
     "Beginnings, innocence, possibilities, impulsiveness",
@@ -437,7 +464,6 @@ function pullCard() {
 }
 
 const cardSlotEl = document.getElementById("cardSlot");
-const cardSlotEl = document.getElementById("cardSlot");
 const cardEl = document.getElementById("card");
 const arcanaLabelEl = document.getElementById("arcanaLabel");
 const cardTitleEl = document.getElementById("cardTitle");
@@ -548,21 +574,16 @@ function animateCardPull() {
   cardSlotEl.classList.add("pulling");
 }
 
-function animateCardPull() {
-  cardSlotEl.classList.remove("pulling");
-  void cardSlotEl.offsetWidth;
-  cardSlotEl.classList.add("pulling");
-}
-
 function showCard(card) {
   arcanaLabelEl.textContent = card.arcana;
   cardTitleEl.textContent = card.name;
-  cardDescriptionEl.textContent = card.meanings[card.reversed ? 1 : 0];
+  cardDescriptionEl.textContent = card.meanings
+    ? card.meanings[card.reversed ? 1 : 0]
+    : "";
   cardArtEl.style.setProperty("--card-color", card.color);
   cardArtEl.classList.toggle("is-reversed", card.reversed);
   loadCardArt(card);
   addToHistory(card);
-  animateCardPull();
   animateCardPull();
 
   if (!isFlipped) {
@@ -588,7 +609,8 @@ function resetReading() {
   isFlipped = false;
 
   arcanaLabelEl.textContent = "Major Arcana";
-  cardNameEl.textContent = "\u2014";
+  cardTitleEl.textContent = "\u2014";
+  cardDescriptionEl.textContent = "";
   cardArtEl.classList.remove("is-reversed");
   cardArtImgEl.onload = null;
   cardArtImgEl.onerror = null;
