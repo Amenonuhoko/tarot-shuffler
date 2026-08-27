@@ -467,6 +467,7 @@ const cardSlotEl = document.getElementById("cardSlot");
 const cardEl = document.getElementById("card");
 const arcanaLabelEl = document.getElementById("arcanaLabel");
 const cardTitleEl = document.getElementById("cardTitle");
+const orientationLabelEl = document.getElementById("orientationLabel");
 const cardDescriptionEl = document.getElementById("cardDescription");
 const hintEl = document.getElementById("hint");
 const shuffleBtn = document.getElementById("shuffleBtn");
@@ -577,6 +578,8 @@ function animateCardPull() {
 function showCard(card) {
   arcanaLabelEl.textContent = card.arcana;
   cardTitleEl.textContent = card.name;
+  orientationLabelEl.textContent = card.reversed ? "Reversed" : "Upright";
+  orientationLabelEl.classList.toggle("is-reversed", card.reversed);
   cardDescriptionEl.textContent = card.meanings
     ? card.meanings[card.reversed ? 1 : 0]
     : "";
@@ -610,6 +613,8 @@ function resetReading() {
 
   arcanaLabelEl.textContent = "Major Arcana";
   cardTitleEl.textContent = "\u2014";
+  orientationLabelEl.textContent = "";
+  orientationLabelEl.classList.remove("is-reversed");
   cardDescriptionEl.textContent = "";
   cardArtEl.classList.remove("is-reversed");
   cardArtImgEl.onload = null;
@@ -661,6 +666,8 @@ shuffleBtn.addEventListener("click", () => {
 
   arcanaLabelEl.textContent = "Major Arcana";
   cardTitleEl.textContent = "\u2014";
+  orientationLabelEl.textContent = "";
+  orientationLabelEl.classList.remove("is-reversed");
   cardDescriptionEl.textContent = "";
   cardArtEl.classList.remove("is-reversed");
   cardArtImgEl.onload = null;
