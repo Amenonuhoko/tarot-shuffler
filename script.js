@@ -389,6 +389,68 @@ const CARD_MEANINGS = {
   ]
 };
 
+const CUSTOM_MEANINGS = {
+  "Recovery": "The process of returning to a normal state of health, mind, or strength after a period of illness, difficulty, or loss.",
+  "Celebration": "A social gathering or ritual act performed to mark a happy or significant occasion.",
+  "Wrath": "Intense, often righteous anger; a strong desire for vengeance or retribution against a wrong.",
+  "Order": "A state in which everything is in its correct or proper place; a condition of methodical arrangement.",
+  "Ambition": "A strong desire to achieve something, typically requiring determination and hard work.",
+  "Loyalty": "A strong feeling of support or allegiance to a person, cause, or belief.",
+  "Reckoning": "The action or process of calculating or estimating something; a settling of accounts, especially a difficult one.",
+  "Power": "The capacity or ability to direct or influence the behavior of others or the course of events.",
+  "Fluidity": "The quality of being able to flow easily and change shape smoothly; adaptability.",
+  "Insight": "The capacity to gain an accurate and deep understanding of a person or situation.",
+  "Envy": "A feeling of discontented or resentful longing aroused by someone else's possessions, qualities, or luck.",
+  "Crossroads": "A point at which a crucial decision must be made that will have far-reaching consequences.",
+  "Vitality": "The state of being strong and active; energy essential for survival and growth.",
+  "Temptation": "A desire to do something, especially something wrong or unwise.",
+  "Obstacles": "Things that block one's way or prevent progress.",
+  "Stability": "The state of being firmly fixed and not likely to change or fail.",
+  "Integrity": "The quality of being honest and having strong moral principles that remain consistent under pressure.",
+  "Endurance": "The capacity to withstand hardship or stress without giving way.",
+  "Cynicism": "A tendency to distrust the sincerity or value of people's motives and actions.",
+  "Idealism": "The practice of forming or pursuing ideals, especially unrealistically.",
+  "Industrious": "Diligent and hard-working, especially in a way that produces results.",
+  "Gossip": "Casual or unconstrained conversation about other people, typically involving details that are not confirmed as being true.",
+  "Vanity": "Excessive pride in one's appearance, achievements, or qualities.",
+  "Trickster": "A figure who deceives or plays tricks, often to subvert normal rules or expectations.",
+  "Receptive": "Willing to consider or accept new ideas, suggestions, or influences.",
+  "Potential": "Latent qualities or abilities that may be developed and lead to future success.",
+  "Greed": "An intense and selfish desire for more of something than one needs.",
+  "Fecundity": "The capacity for abundant fertility, productivity, or creative output.",
+  "Pride": "A feeling of deep satisfaction derived from one's own achievements, or an excessive belief in one's own importance.",
+  "Contemplation": "Deep reflective thought; the act of observing or studying something carefully.",
+  "Impulsive": "Acting or done without forethought, on sudden urges rather than careful thought.",
+  "Duty": "A moral or legal obligation; a responsibility owed to others or to oneself.",
+  "Selfish": "Lacking consideration for others; concerned chiefly with one's own personal profit or pleasure.",
+  "Sacrifice": "The act of giving up something valued for the sake of something else considered more important.",
+  "Abandonment": "The act of leaving someone or something permanently, especially in violation of a duty or obligation.",
+  "Hyperfocus": "An intense, absorbing concentration on a single task or subject to the exclusion of everything else.",
+  "Deception": "The act of deliberately causing someone to believe something that is not true.",
+  "Spite": "A desire to hurt, annoy, or offend someone, often in retaliation.",
+  "Delusions": "Persistent false beliefs held with strong conviction despite evidence to the contrary.",
+  "Innovator": "A person who introduces new ideas, methods, or inventions.",
+  "Generosity": "The quality of being kind and giving more of something, especially money or time, than is strictly necessary.",
+  "Gluttony": "Excessive and habitual indulgence, especially in food or drink.",
+  "Abundance": "A very large quantity of something; a state of plentiful supply.",
+  "Betwixt": "In an intermediate position; neither one thing nor the other.",
+  "Discretion": "The quality of being careful and reserved in what one says or does, especially to avoid causing offense.",
+  "Betrayal": "The act of being disloyal or breaking trust with someone who placed confidence in you.",
+  "Fulfillment": "The achievement of something desired, promised, or predicted; a sense of satisfaction from realizing one's potential.",
+  "The Divine Fruit": "A mythic emblem of forbidden knowledge and awakening; fruit said to grant wisdom or power at the cost of innocence once tasted.",
+  "The Mirror": "An object with a reflective surface, used historically for self-examination and, in myth and folklore, as a symbol of truth, vanity, and duality.",
+  "The Forbidden": "That which is prohibited by law, custom, or decree; a boundary whose crossing carries consequence.",
+  "The Reaped God": "A mythological figure representing a deity cut down or sacrificed, often tied to harvest cycles and themes of death enabling renewal.",
+  "The Instrument": "A tool or means by which an action is carried out; in myth, often a being or object used to enact fate.",
+  "The Magic Skin": "A folkloric relic that grants wishes while shrinking with each use, symbolizing the cost of desire.",
+  "The Flood": "A mythic deluge, recurring across cultures as an act of divine judgment or cleansing that precedes renewal.",
+  "The World Tree": "A cosmological symbol found in many mythologies, a great tree connecting the heavens, earth, and underworld.",
+  "The Sacred Sword": "A weapon imbued with divine or symbolic authority, often marking the bearer as chosen or destined for a task.",
+  "The Monster Marriage": "A folkloric motif in which a human is wed to a supernatural or monstrous being, testing loyalty, fear, and transformation.",
+  "The Primordial Chaos": "The formless void or disorder said to precede creation in many cosmogonies.",
+  "The Apocalypse": "A revelation or unveiling; in eschatology, a cataclysmic event marking the end of an age and the disclosure of hidden truth."
+};
+
 function slugify(name) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
@@ -430,13 +492,14 @@ function buildCustomDeck() {
       ? CUSTOM_TYPES[index % CUSTOM_TYPES.length]
       : "Symbol",
     color: CUSTOM_COLORS[index % CUSTOM_COLORS.length],
-    slug: `inner-compass-${slugify(name)}-${index}`
+    slug: `inner-compass-${slugify(name)}-${index}`,
+    meaning: CUSTOM_MEANINGS[name]
   }));
 }
 
 const DECKS = {
-  classical: { name: "Tarot of the Divine", cards: CLASSICAL_DECK },
-  custom: { name: "Oracle of the Divine", cards: buildCustomDeck() }
+  classical: { name: "Tarot of the Divine", cards: CLASSICAL_DECK, allowReversed: true },
+  custom: { name: "Oracle of the Divine", cards: buildCustomDeck(), allowReversed: false }
 };
 
 let activeDeck = DECKS.classical;
@@ -459,7 +522,7 @@ function reseedRandom() {
 
 function pullCard() {
   const card = activeDeck.cards[Math.floor(random() * activeDeck.cards.length)];
-  const reversed = random() < 0.5;
+  const reversed = activeDeck.allowReversed && random() < 0.5;
   return { ...card, reversed };
 }
 
@@ -587,7 +650,7 @@ function renderCardFace(card) {
   orientationLabelEl.classList.toggle("is-reversed", card.reversed);
   cardDescriptionEl.textContent = card.meanings
     ? card.meanings[card.reversed ? 1 : 0]
-    : "";
+    : card.meaning || "";
   cardArtEl.style.setProperty("--card-color", card.color);
   cardArtEl.classList.toggle("is-reversed", card.reversed);
   loadCardArt(card);
@@ -596,7 +659,7 @@ function renderCardFace(card) {
 function revealCard(card) {
   renderCardFace(card);
   animateCardPull();
-  flipBtn.hidden = false;
+  flipBtn.hidden = !activeDeck.allowReversed;
 
   if (!isFlipped) {
     cardEl.classList.add("flipped");
