@@ -479,6 +479,10 @@ const historyCount = document.getElementById("historyCount");
 const cardArtEl = document.getElementById("cardArt");
 const cardArtImgEl = document.getElementById("cardArtImg");
 const cardArtFallbackEl = document.getElementById("cardArtFallback");
+const flipBtn = document.getElementById("flipBtn");
+const cardSearchInputEl = document.getElementById("cardSearchInput");
+const cardSearchBtn = document.getElementById("cardSearchBtn");
+const cardNamesListEl = document.getElementById("cardNamesList");
 
 const IMAGE_EXTENSIONS = ["png", "jpg", "jpeg", "webp"];
 
@@ -509,6 +513,7 @@ function loadCardArt(card) {
 let isFlipped = false;
 let isMenuOpen = false;
 let pullHistory = [];
+let searchedCard = null;
 
 function renderHistory() {
   if (pullHistory.length === 0) {
@@ -575,7 +580,7 @@ function animateCardPull() {
   cardSlotEl.classList.add("pulling");
 }
 
-function showCard(card) {
+function renderCardFace(card) {
   arcanaLabelEl.textContent = card.arcana;
   cardTitleEl.textContent = card.name;
   orientationLabelEl.textContent = card.reversed ? "Reversed" : "Upright";
@@ -586,7 +591,10 @@ function showCard(card) {
   cardArtEl.style.setProperty("--card-color", card.color);
   cardArtEl.classList.toggle("is-reversed", card.reversed);
   loadCardArt(card);
-  addToHistory(card);
+}
+
+function revealCard(card) {
+  renderCardFace(card);
   animateCardPull();
 
   if (!isFlipped) {
@@ -595,6 +603,46 @@ function showCard(card) {
   }
 
   hintEl.textContent = "Tap anywhere to draw again";
+}
+
+function showCard(card) {
+  searchedCard = null;
+  flipBtn.hidden = true;
+  revealCard(card);
+  addToHistory(card);
+}
+
+function showSearchedCard(card) {
+  searchedCard = { ...card, reversed: false };
+  flipBtn.hidden = false;
+  revealCard(searchedCard);
+}
+
+function populateCardNames() {
+  cardNamesListEl.innerHTML = activeDeck.cards
+    .map((card) => `<option value="${card.name}"></option>`)
+    .join("");
+}
+
+function searchCard() {
+  const query = cardSearchInputEl.value.trim().toLowerCase();
+  if (!query) {
+    return;
+  }
+
+  const match = activeDeck.cards.find((card) => card.name.toLowerCase() === query);
+
+  if (!match) {
+    cardSearchInputEl.classList.remove("not-found");
+    void cardSearchInputEl.offsetWidth;
+    cardSearchInputEl.classList.add("not-found");
+    return;
+  }
+
+  showSearchedCard(match);
+  cardSearchInputEl.value = "";
+  cardSearchInputEl.blur();
+  setMenuOpen(false);
 }
 
 function setMenuOpen(open) {
@@ -624,7 +672,10 @@ function resetReading() {
   cardArtFallbackEl.classList.remove("hidden");
   hintEl.textContent = "Tap anywhere to pull a card";
   pullHistory = [];
+  searchedCard = null;
+  flipBtn.hidden = true;
   renderHistory();
+  populateCardNames();
   reseedRandom();
 }
 
@@ -656,6 +707,10 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  if (event.target.closest("#flipBtn")) {
+    return;
+  }
+
   const card = pullCard();
   showCard(card);
 });
@@ -676,12 +731,40 @@ shuffleBtn.addEventListener("click", () => {
   cardArtImgEl.classList.remove("loaded");
   cardArtFallbackEl.classList.remove("hidden");
   hintEl.textContent = "Tap anywhere to pull a card";
+  searchedCard = null;
+  flipBtn.hidden = true;
 
   reseedRandom();
 
   cardEl.classList.remove("shuffling");
   void cardEl.offsetWidth;
   cardEl.classList.add("shuffling");
+});
+
+cardSearchBtn.addEventListener("click", (event) => {
+  event.stopPropagation();
+  searchCard();
+});
+
+cardSearchInputEl.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    searchCard();
+  }
+});
+
+cardSearchInputEl.addEventListener("animationend", () => {
+  cardSearchInputEl.classList.remove("not-found");
+});
+
+flipBtn.addEventListener("click", (event) => {
+  event.stopPropagation();
+  if (!searchedCard) {
+    return;
+  }
+
+  searchedCard.reversed = !searchedCard.reversed;
+  renderCardFace(searchedCard);
 });
 
 cardEl.addEventListener("animationend", () => {
@@ -697,6 +780,7 @@ cardSlotEl.addEventListener("animationend", () => {
 });
 
 renderHistory();
+populateCardNames();
 setMenuOpen(false);
 
 if ("serviceWorker" in navigator) {

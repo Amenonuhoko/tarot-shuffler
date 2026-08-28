@@ -242,6 +242,13 @@ body {
   text-align: center;
 }
 
+.orientation-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
 .orientation-label {
   margin: 0;
   font-family: var(--font-body);
@@ -254,6 +261,39 @@ body {
 
 .orientation-label.is-reversed {
   color: var(--lavender);
+}
+
+.flip-btn {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--surface-line);
+  background: var(--surface);
+  color: var(--ink-dim);
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.flip-btn:hover {
+  border-color: var(--gold);
+  color: var(--ink);
+}
+
+.flip-btn:active {
+  transform: scale(0.92);
+}
+
+.flip-btn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
 }
 
 .card-description {
@@ -349,6 +389,72 @@ body {
 
 .menu-toggle[aria-expanded="true"] {
   border-color: var(--gold);
+}
+
+.card-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--surface-line);
+}
+
+.card-search-input {
+  flex: 1;
+  min-width: 0;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--surface-line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--ink);
+  font: 500 0.8rem var(--font-body);
+}
+
+.card-search-input::placeholder {
+  color: var(--ink-dim);
+}
+
+.card-search-input:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.card-search-input.not-found {
+  animation: shuffle-shake 0.5s ease;
+  border-color: var(--gold-dim);
+}
+
+.search-btn {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  flex: 0 0 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid var(--surface-line);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.search-btn:hover {
+  border-color: var(--gold);
+}
+
+.search-btn:active {
+  transform: scale(0.95);
+}
+
+.search-btn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
 }
 
 .history-panel {
@@ -497,7 +603,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card, .card.shuffling, .card-slot.pulling {
+  .card, .card.shuffling, .card-slot.pulling, .card-search-input.not-found {
     animation: none !important;
     transition: none !important;
   }

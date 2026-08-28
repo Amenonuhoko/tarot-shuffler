@@ -47,7 +47,10 @@
               <path d="M30 100 Q50 82 70 100" fill="none" stroke="currentColor" stroke-width="1"/>
             </svg>
           </div>
-          <p class="orientation-label" id="orientationLabel"></p>
+          <div class="orientation-row">
+            <p class="orientation-label" id="orientationLabel"></p>
+            <button class="flip-btn" id="flipBtn" type="button" hidden aria-label="Flip card orientation">&#8644;</button>
+          </div>
           <p class="card-description" id="cardDescription"></p>
         </div>
       </div>
@@ -69,6 +72,12 @@
       </div>
 
       <div class="history-panel" id="historyPanel" hidden>
+        <div class="card-search">
+          <input class="card-search-input" id="cardSearchInput" type="text" list="cardNamesList" placeholder="Search for a card&hellip;" autocomplete="off" aria-label="Search for a card">
+          <button class="search-btn" id="cardSearchBtn" type="button" aria-label="Search">&#8981;</button>
+        </div>
+        <datalist id="cardNamesList"></datalist>
+
         <div class="history-header">
           <span>Recent pulls</span>
           <span class="history-count" id="historyCount">0 / 10</span>
