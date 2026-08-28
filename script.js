@@ -513,7 +513,7 @@ function loadCardArt(card) {
 let isFlipped = false;
 let isMenuOpen = false;
 let pullHistory = [];
-let searchedCard = null;
+let currentCard = null;
 
 function renderHistory() {
   if (pullHistory.length === 0) {
@@ -596,6 +596,7 @@ function renderCardFace(card) {
 function revealCard(card) {
   renderCardFace(card);
   animateCardPull();
+  flipBtn.hidden = false;
 
   if (!isFlipped) {
     cardEl.classList.add("flipped");
@@ -606,16 +607,14 @@ function revealCard(card) {
 }
 
 function showCard(card) {
-  searchedCard = null;
-  flipBtn.hidden = true;
-  revealCard(card);
-  addToHistory(card);
+  currentCard = { ...card };
+  revealCard(currentCard);
+  addToHistory({ ...card });
 }
 
 function showSearchedCard(card) {
-  searchedCard = { ...card, reversed: false };
-  flipBtn.hidden = false;
-  revealCard(searchedCard);
+  currentCard = { ...card, reversed: false };
+  revealCard(currentCard);
 }
 
 function populateCardNames() {
@@ -672,7 +671,7 @@ function resetReading() {
   cardArtFallbackEl.classList.remove("hidden");
   hintEl.textContent = "Tap anywhere to pull a card";
   pullHistory = [];
-  searchedCard = null;
+  currentCard = null;
   flipBtn.hidden = true;
   renderHistory();
   populateCardNames();
@@ -731,7 +730,7 @@ shuffleBtn.addEventListener("click", () => {
   cardArtImgEl.classList.remove("loaded");
   cardArtFallbackEl.classList.remove("hidden");
   hintEl.textContent = "Tap anywhere to pull a card";
-  searchedCard = null;
+  currentCard = null;
   flipBtn.hidden = true;
 
   reseedRandom();
@@ -759,12 +758,12 @@ cardSearchInputEl.addEventListener("animationend", () => {
 
 flipBtn.addEventListener("click", (event) => {
   event.stopPropagation();
-  if (!searchedCard) {
+  if (!currentCard) {
     return;
   }
 
-  searchedCard.reversed = !searchedCard.reversed;
-  renderCardFace(searchedCard);
+  currentCard.reversed = !currentCard.reversed;
+  renderCardFace(currentCard);
 });
 
 cardEl.addEventListener("animationend", () => {
