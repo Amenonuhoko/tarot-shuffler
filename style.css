@@ -183,6 +183,11 @@ body {
   transform: rotateY(180deg);
   justify-content: space-between;
   color: var(--ink);
+  transition: filter 0.4s ease;
+}
+
+.card-front.is-reversed {
+  filter: invert(1);
 }
 
 .arcana-label {
@@ -205,12 +210,11 @@ body {
   margin: 2px 0;
   overflow: hidden;
   position: relative;
-  transition: background 0.4s ease, transform 0.4s ease, filter 0.4s ease;
+  transition: background 0.4s ease, transform 0.4s ease;
 }
 
 .card-art.is-reversed {
   transform: rotate(180deg);
-  filter: invert(1);
 }
 
 .card-art-img {
