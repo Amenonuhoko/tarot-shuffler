@@ -658,17 +658,30 @@ function renderCardFace(card) {
   loadCardArt(card);
 }
 
-function revealCard(card) {
+function openCard(card) {
   renderCardFace(card);
   animateCardPull();
   flipBtn.hidden = !activeDeck.allowReversed;
+  cardEl.classList.add("flipped");
+  isFlipped = true;
+  hintEl.textContent = "Tap anywhere to draw again";
+}
 
+function revealCard(card) {
   if (!isFlipped) {
-    cardEl.classList.add("flipped");
-    isFlipped = true;
+    openCard(card);
+    return;
   }
 
-  hintEl.textContent = "Tap anywhere to draw again";
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  cardEl.classList.remove("flipped");
+  isFlipped = false;
+
+  if (prefersReducedMotion) {
+    openCard(card);
+  } else {
+    cardEl.addEventListener("transitionend", () => openCard(card), { once: true });
+  }
 }
 
 function showCard(card) {
