@@ -198,6 +198,13 @@ body {
   filter: invert(1);
 }
 
+.card-front-content.is-reversed .arcana-label,
+.card-front-content.is-reversed .card-title,
+.card-front-content.is-reversed .card-description,
+.card-front-content.is-reversed .orientation-label {
+  filter: invert(1);
+}
+
 .arcana-label {
   margin: 0;
   font-size: 0.66rem;
