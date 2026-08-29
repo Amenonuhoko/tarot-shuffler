@@ -643,6 +643,12 @@ function animateCardPull() {
   cardSlotEl.classList.add("pulling");
 }
 
+function invertColor(hex) {
+  const num = parseInt(hex.slice(1), 16);
+  const inverted = 0xffffff ^ num;
+  return `#${inverted.toString(16).padStart(6, "0")}`;
+}
+
 function renderCardFace(card) {
   arcanaLabelEl.textContent = card.arcana;
   cardTitleEl.textContent = card.name;
@@ -651,7 +657,7 @@ function renderCardFace(card) {
   cardDescriptionEl.textContent = card.meanings
     ? card.meanings[card.reversed ? 1 : 0]
     : card.meaning || "";
-  cardArtEl.style.setProperty("--card-color", card.color);
+  cardArtEl.style.setProperty("--card-color", card.reversed ? invertColor(card.color) : card.color);
   cardArtEl.classList.toggle("is-reversed", card.reversed);
   loadCardArt(card);
 }
