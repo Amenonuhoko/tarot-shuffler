@@ -528,7 +528,7 @@ function pullCard() {
 
 const cardSlotEl = document.getElementById("cardSlot");
 const cardEl = document.getElementById("card");
-const cardFrontEl = document.getElementById("cardFront");
+const cardFrontContentEl = document.getElementById("cardFrontContent");
 const arcanaLabelEl = document.getElementById("arcanaLabel");
 const cardTitleEl = document.getElementById("cardTitle");
 const orientationLabelEl = document.getElementById("orientationLabel");
@@ -654,7 +654,7 @@ function renderCardFace(card) {
     : card.meaning || "";
   cardArtEl.style.setProperty("--card-color", card.color);
   cardArtEl.classList.toggle("is-reversed", card.reversed);
-  cardFrontEl.classList.toggle("is-reversed", card.reversed);
+  cardFrontContentEl.classList.toggle("is-reversed", card.reversed);
   loadCardArt(card);
 }
 
@@ -729,7 +729,7 @@ function resetReading() {
   orientationLabelEl.classList.remove("is-reversed");
   cardDescriptionEl.textContent = "";
   cardArtEl.classList.remove("is-reversed");
-  cardFrontEl.classList.remove("is-reversed");
+  cardFrontContentEl.classList.remove("is-reversed");
   cardArtImgEl.onload = null;
   cardArtImgEl.onerror = null;
   cardArtImgEl.removeAttribute("src");
@@ -790,7 +790,7 @@ shuffleBtn.addEventListener("click", () => {
   orientationLabelEl.classList.remove("is-reversed");
   cardDescriptionEl.textContent = "";
   cardArtEl.classList.remove("is-reversed");
-  cardFrontEl.classList.remove("is-reversed");
+  cardFrontContentEl.classList.remove("is-reversed");
   cardArtImgEl.onload = null;
   cardArtImgEl.onerror = null;
   cardArtImgEl.removeAttribute("src");
