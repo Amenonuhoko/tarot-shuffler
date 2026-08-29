@@ -780,7 +780,16 @@ document.addEventListener("click", (event) => {
   showCard(card);
 });
 
+function startShuffleShake() {
+  cardEl.classList.remove("shuffling");
+  void cardEl.offsetWidth;
+  cardEl.classList.add("shuffling");
+}
+
 shuffleBtn.addEventListener("click", () => {
+  const wasFlipped = isFlipped;
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   cardEl.classList.remove("flipped");
   isFlipped = false;
 
@@ -802,9 +811,11 @@ shuffleBtn.addEventListener("click", () => {
 
   reseedRandom();
 
-  cardEl.classList.remove("shuffling");
-  void cardEl.offsetWidth;
-  cardEl.classList.add("shuffling");
+  if (wasFlipped && !prefersReducedMotion) {
+    cardEl.addEventListener("transitionend", startShuffleShake, { once: true });
+  } else {
+    startShuffleShake();
+  }
 });
 
 cardSearchBtn.addEventListener("click", (event) => {
