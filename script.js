@@ -588,10 +588,10 @@ function renderHistory() {
 
   const rows = pullHistory
     .slice(0, 10)
-    .map((entry) => {
+    .map((entry, idx) => {
       const type = getCardTypeSymbol(entry.card);
       return `
-      <tr>
+      <tr class="history-row" data-history-index="${idx}" tabindex="0" role="button" aria-label="View ${entry.card.name}">
         <td class="history-type" title="${type.label}" aria-label="${type.label}">${type.symbol}</td>
         <td>${entry.card.name}</td>
         <td class="history-state" title="${entry.card.reversed ? "Reversed" : "Upright"}" aria-label="${entry.card.reversed ? "Reversed" : "Upright"}">${entry.card.reversed ? "↓" : "↑"}</td>
@@ -694,6 +694,38 @@ function showSearchedCard(card) {
   currentCard = { ...card, reversed: false };
   revealCard(currentCard);
 }
+
+function showHistoryCard(card) {
+  currentCard = { ...card };
+  revealCard(currentCard);
+  setMenuOpen(false);
+}
+
+function handleHistoryRowActivate(row) {
+  const entry = pullHistory[Number(row.dataset.historyIndex)];
+  if (entry) {
+    showHistoryCard(entry.card);
+  }
+}
+
+historyBody.addEventListener("click", (event) => {
+  const row = event.target.closest(".history-row");
+  if (row) {
+    handleHistoryRowActivate(row);
+  }
+});
+
+historyBody.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter" && event.key !== " ") {
+    return;
+  }
+
+  const row = event.target.closest(".history-row");
+  if (row) {
+    event.preventDefault();
+    handleHistoryRowActivate(row);
+  }
+});
 
 function populateCardNames() {
   cardNamesListEl.innerHTML = activeDeck.cards

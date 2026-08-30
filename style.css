@@ -539,6 +539,21 @@ body {
   border-bottom: none;
 }
 
+.history-row {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.history-row:hover,
+.history-row:focus-visible {
+  background: rgba(255,255,255,0.05);
+}
+
+.history-row:focus-visible {
+  outline: 1px solid var(--gold);
+  outline-offset: -1px;
+}
+
 .history-empty {
   color: var(--ink-dim);
   text-align: center;
