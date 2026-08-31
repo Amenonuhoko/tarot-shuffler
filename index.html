@@ -37,21 +37,23 @@
           </svg>
         </div>
         <div class="card-face card-front" id="cardFront">
-          <p class="arcana-label" id="arcanaLabel">Major Arcana</p>
-          <p class="card-title" id="cardTitle">&mdash;</p>
-          <div class="card-art" id="cardArt">
-            <img class="card-art-img" id="cardArtImg" alt="">
-            <svg class="card-art-fallback" id="cardArtFallback" viewBox="0 0 100 140" aria-hidden="true">
-              <rect x="4" y="4" width="92" height="132" rx="3" fill="none" stroke="currentColor" stroke-width="1"/>
-              <circle cx="50" cy="55" r="20" fill="none" stroke="currentColor" stroke-width="1"/>
-              <path d="M30 100 Q50 82 70 100" fill="none" stroke="currentColor" stroke-width="1"/>
-            </svg>
+          <div class="card-front-content" id="cardFrontContent">
+            <p class="arcana-label" id="arcanaLabel">Major Arcana</p>
+            <p class="card-title" id="cardTitle">&mdash;</p>
+            <div class="card-art" id="cardArt">
+              <img class="card-art-img" id="cardArtImg" alt="">
+              <svg class="card-art-fallback" id="cardArtFallback" viewBox="0 0 100 140" aria-hidden="true">
+                <rect x="4" y="4" width="92" height="132" rx="3" fill="none" stroke="currentColor" stroke-width="1"/>
+                <circle cx="50" cy="55" r="20" fill="none" stroke="currentColor" stroke-width="1"/>
+                <path d="M30 100 Q50 82 70 100" fill="none" stroke="currentColor" stroke-width="1"/>
+              </svg>
+            </div>
+            <div class="orientation-row">
+              <p class="orientation-label" id="orientationLabel"></p>
+              <button class="flip-btn" id="flipBtn" type="button" hidden aria-label="Flip card orientation">&#8644;</button>
+            </div>
+            <p class="card-description" id="cardDescription"></p>
           </div>
-          <div class="orientation-row">
-            <p class="orientation-label" id="orientationLabel"></p>
-            <button class="flip-btn" id="flipBtn" type="button" hidden aria-label="Flip card orientation">&#8644;</button>
-          </div>
-          <p class="card-description" id="cardDescription"></p>
         </div>
       </div>
     </div>
