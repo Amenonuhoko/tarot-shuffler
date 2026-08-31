@@ -638,7 +638,7 @@ body {
   flex: 0 0 18px;
 }
 
-@media (min-aspect-ratio: 4/3) and (min-width: 700px) {
+@media (orientation: landscape) and (min-width: 700px) and (min-height: 560px) {
   .table {
     width: min(720px, calc(100vw - 80px));
     max-width: 720px;
