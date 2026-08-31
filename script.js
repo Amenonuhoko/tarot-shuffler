@@ -547,6 +547,9 @@ const flipBtn = document.getElementById("flipBtn");
 const cardSearchInputEl = document.getElementById("cardSearchInput");
 const cardSearchBtn = document.getElementById("cardSearchBtn");
 const cardNamesListEl = document.getElementById("cardNamesList");
+const wideLayoutQuery = window.matchMedia(
+  "(orientation: landscape) and (min-width: 700px) and (min-height: 560px)"
+);
 
 const IMAGE_EXTENSIONS = ["png", "jpg", "jpeg", "webp"];
 
@@ -698,7 +701,7 @@ function showSearchedCard(card) {
 function showHistoryCard(card) {
   currentCard = { ...card };
   revealCard(currentCard);
-  setMenuOpen(false);
+  closeMenuIfCompact();
 }
 
 function handleHistoryRowActivate(row) {
@@ -751,7 +754,7 @@ function searchCard() {
   showSearchedCard(match);
   cardSearchInputEl.value = "";
   cardSearchInputEl.blur();
-  setMenuOpen(false);
+  closeMenuIfCompact();
 }
 
 function setMenuOpen(open) {
@@ -762,6 +765,12 @@ function setMenuOpen(open) {
 
 function toggleMenu() {
   setMenuOpen(!isMenuOpen);
+}
+
+function closeMenuIfCompact() {
+  if (!wideLayoutQuery.matches) {
+    setMenuOpen(false);
+  }
 }
 
 function resetReading() {
@@ -797,7 +806,7 @@ menuToggle.addEventListener("click", (event) => {
 deckSelect.addEventListener("change", () => {
   activeDeck = DECKS[deckSelect.value];
   resetReading();
-  setMenuOpen(false);
+  closeMenuIfCompact();
 });
 
 document.addEventListener("click", (event) => {
@@ -903,7 +912,11 @@ cardSlotEl.addEventListener("animationend", () => {
 
 renderHistory();
 populateCardNames();
-setMenuOpen(false);
+setMenuOpen(wideLayoutQuery.matches);
+
+wideLayoutQuery.addEventListener("change", (event) => {
+  setMenuOpen(event.matches);
+});
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
