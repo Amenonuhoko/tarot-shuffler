@@ -113,13 +113,13 @@ body {
 }
 
 .card-slot.pulling {
-  animation: pull-card 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: pull-card 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @keyframes pull-card {
-  0% { opacity: 0.78; transform: translateY(10px) scale(0.985); }
-  55% { opacity: 1; transform: translateY(-3px) scale(1.01); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
+  0% { transform: scale(0.97); }
+  60% { transform: scale(1.015); }
+  100% { transform: scale(1); }
 }
 
 @media (max-height: 700px) {
@@ -134,7 +134,8 @@ body {
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
-  transition: transform 0.7s cubic-bezier(0.4, 0.1, 0.2, 1);
+  will-change: transform;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .card.flipped {
@@ -263,6 +264,10 @@ body {
   text-align: center;
 }
 
+.orientation-row[hidden] {
+  display: none;
+}
+
 .orientation-row {
   display: flex;
   align-items: center;
@@ -282,6 +287,10 @@ body {
 
 .orientation-label.is-reversed {
   color: var(--lavender);
+}
+
+.flip-btn[hidden] {
+  display: none;
 }
 
 .flip-btn {

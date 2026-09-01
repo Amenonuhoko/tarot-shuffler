@@ -531,6 +531,7 @@ const cardEl = document.getElementById("card");
 const cardFrontContentEl = document.getElementById("cardFrontContent");
 const arcanaLabelEl = document.getElementById("arcanaLabel");
 const cardTitleEl = document.getElementById("cardTitle");
+const orientationRowEl = document.getElementById("orientationRow");
 const orientationLabelEl = document.getElementById("orientationLabel");
 const cardDescriptionEl = document.getElementById("cardDescription");
 const hintEl = document.getElementById("hint");
@@ -650,6 +651,7 @@ function animateCardPull() {
 function renderCardFace(card) {
   arcanaLabelEl.textContent = card.arcana;
   cardTitleEl.textContent = card.name;
+  orientationRowEl.hidden = !activeDeck.allowReversed;
   orientationLabelEl.textContent = card.reversed ? "Reversed" : "Upright";
   orientationLabelEl.classList.toggle("is-reversed", card.reversed);
   cardDescriptionEl.textContent = card.meanings
