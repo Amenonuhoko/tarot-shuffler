@@ -12,6 +12,149 @@
   --font-display: 'Cormorant Garamond', serif;
   --font-description: 'Grenze Gotisch', serif;
   --font-body: 'Inter', system-ui, sans-serif;
+
+  --radius-card: 14px;
+  --radius-art: 8px;
+  --radius-pill: 999px;
+  --card-shadow: 0 18px 40px -18px rgba(0,0,0,0.6);
+  --bg-texture: none;
+  --label-transform: uppercase;
+  --description-bg: rgba(20, 16, 31, 0.28);
+  --panel-bg: rgba(31, 26, 48, 0.82);
+}
+
+/* ---- Theme: Celestial Midnight ---- */
+[data-theme="celestial"] {
+  --bg: #05070f;
+  --bg-glow: #0d1730;
+  --surface: #101a33;
+  --surface-line: #23335c;
+  --gold: #bcdcff;
+  --gold-dim: #6f88b8;
+  --ink: #eaf1ff;
+  --ink-dim: #7f93c2;
+  --lavender: #9fb8ff;
+
+  --font-display: 'Cinzel', serif;
+  --font-description: 'Cormorant Garamond', serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  --radius-card: 10px;
+  --radius-art: 6px;
+  --radius-pill: 10px;
+  --card-shadow: 0 0 46px -8px rgba(140, 185, 255, 0.35);
+  --bg-texture:
+    radial-gradient(1px 1px at 12% 22%, rgba(255,255,255,0.75), transparent),
+    radial-gradient(1px 1px at 82% 15%, rgba(255,255,255,0.55), transparent),
+    radial-gradient(1px 1px at 65% 78%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 30% 88%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 92% 60%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 45% 45%, rgba(255,255,255,0.35), transparent),
+    radial-gradient(1.5px 1.5px at 20% 60%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1.5px 1.5px at 75% 92%, rgba(255,255,255,0.45), transparent);
+}
+
+/* ---- Theme: Vintage Grimoire ---- */
+[data-theme="grimoire"] {
+  --bg: #e9dcbc;
+  --bg-glow: #f6ecd2;
+  --surface: #f8efd8;
+  --surface-line: #c6b183;
+  --gold: #8a5a2b;
+  --gold-dim: #ab875a;
+  --ink: #3b2a18;
+  --ink-dim: #6b5636;
+  --lavender: #7a4a2e;
+
+  --font-display: 'Playfair Display', serif;
+  --font-description: 'EB Garamond', serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  --radius-card: 4px;
+  --radius-art: 3px;
+  --radius-pill: 6px;
+  --card-shadow: 0 12px 26px -14px rgba(60, 40, 10, 0.45);
+  --bg-texture:
+    radial-gradient(ellipse at 50% 35%, transparent 45%, rgba(60,40,10,0.10) 100%),
+    repeating-linear-gradient(45deg, rgba(60,40,10,0.03) 0px, rgba(60,40,10,0.03) 1px, transparent 1px, transparent 3px);
+  --label-transform: none;
+  --description-bg: rgba(60, 40, 10, 0.06);
+  --panel-bg: rgba(248, 239, 216, 0.9);
+}
+
+/* ---- Theme: Neon Arcade ---- */
+[data-theme="neon"] {
+  --bg: #050208;
+  --bg-glow: #1a0630;
+  --surface: #140a24;
+  --surface-line: #5a2a6e;
+  --gold: #39f2ff;
+  --gold-dim: #ff2fb0;
+  --ink: #f2eaff;
+  --ink-dim: #b48ce0;
+  --lavender: #ff2fb0;
+
+  --font-display: 'Orbitron', sans-serif;
+  --font-description: 'Space Mono', monospace;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  --radius-card: 4px;
+  --radius-art: 2px;
+  --radius-pill: 4px;
+  --card-shadow: 0 0 26px rgba(57, 242, 255, 0.35), 0 0 55px rgba(255, 47, 176, 0.2);
+  --bg-texture:
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 3px),
+    radial-gradient(ellipse at 20% 10%, rgba(255,47,176,0.12) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 85%, rgba(57,242,255,0.12) 0%, transparent 55%);
+}
+
+/* ---- Theme: Minimalist Mono ---- */
+[data-theme="minimal"] {
+  --bg: #f7f7f5;
+  --bg-glow: #ffffff;
+  --surface: #ffffff;
+  --surface-line: #e2e2df;
+  --gold: #ff5a36;
+  --gold-dim: #c2431f;
+  --ink: #141414;
+  --ink-dim: #6b6b68;
+  --lavender: #2563eb;
+
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-description: 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  --radius-card: 8px;
+  --radius-art: 6px;
+  --radius-pill: 8px;
+  --card-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 10px 26px -14px rgba(0,0,0,0.18);
+  --bg-texture: none;
+  --label-transform: none;
+  --description-bg: rgba(0, 0, 0, 0.03);
+  --panel-bg: rgba(255, 255, 255, 0.96);
+}
+
+/* ---- Theme: Blood Moon Gothic ---- */
+[data-theme="gothic"] {
+  --bg: #0a0505;
+  --bg-glow: #200606;
+  --surface: #170808;
+  --surface-line: #4a1010;
+  --gold: #c8302f;
+  --gold-dim: #7a1010;
+  --ink: #f1dede;
+  --ink-dim: #a06a6a;
+  --lavender: #8a1c1c;
+
+  --font-display: 'Cinzel Decorative', serif;
+  --font-description: 'Cormorant Garamond', serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  --radius-card: 2px;
+  --radius-art: 2px;
+  --radius-pill: 3px;
+  --card-shadow: 0 22px 55px -12px rgba(200, 48, 47, 0.45);
+  --bg-texture: radial-gradient(ellipse at 50% 28%, transparent 30%, rgba(0,0,0,0.6) 100%);
 }
 
 * { box-sizing: border-box; }
@@ -25,8 +168,12 @@ html {
 }
 
 body {
-  background:
+  background-color: var(--bg);
+  background-image:
+    var(--bg-texture),
     radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 55%);
+  background-repeat: no-repeat;
+  transition: background-color 0.3s ease;
   color: var(--ink);
   font-family: var(--font-body);
   min-height: 100vh;
@@ -73,7 +220,7 @@ body {
   color: var(--ink-dim);
   font-size: 0.72rem;
   letter-spacing: 0.12em;
-  text-transform: uppercase;
+  text-transform: var(--label-transform);
 }
 
 .deck-selector select {
@@ -81,7 +228,7 @@ body {
   max-width: 210px;
   padding: 0 30px 0 12px;
   border: 1px solid var(--surface-line);
-  border-radius: 8px;
+  border-radius: var(--radius-art);
   background: var(--surface);
   color: var(--ink);
   font: 500 0.82rem var(--font-body);
@@ -158,7 +305,7 @@ body {
 .card-face {
   position: absolute;
   inset: 0;
-  border-radius: 14px;
+  border-radius: var(--radius-card);
   backface-visibility: hidden;
   display: flex;
   flex-direction: column;
@@ -166,9 +313,10 @@ body {
   justify-content: center;
   background: var(--surface);
   border: 1px solid var(--surface-line);
-  box-shadow: 0 18px 40px -18px rgba(0,0,0,0.6);
+  box-shadow: var(--card-shadow);
   padding: 12px;
   text-align: center;
+  transition: border-radius 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card-back {
@@ -211,14 +359,14 @@ body {
   margin: 0;
   font-size: 0.66rem;
   letter-spacing: 0.14em;
-  text-transform: uppercase;
+  text-transform: var(--label-transform);
   color: var(--lavender);
 }
 
 .card-art {
   width: 80%;
   height: 60%;
-  border-radius: 8px;
+  border-radius: var(--radius-art);
   background: color-mix(in srgb, var(--card-color, #241d3a) 55%, var(--surface) 45%);
   display: flex;
   align-items: center;
@@ -281,7 +429,7 @@ body {
   font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.16em;
-  text-transform: uppercase;
+  text-transform: var(--label-transform);
   color: var(--gold);
 }
 
@@ -334,8 +482,8 @@ body {
   font-size: 0.9rem;
   line-height: 1.25;
   border: 1px solid var(--surface-line);
-  border-radius: 8px;
-  background: rgba(20, 16, 31, 0.28);
+  border-radius: var(--radius-art);
+  background: var(--description-bg);
 }
 
 .hint {
@@ -360,7 +508,7 @@ body {
   min-width: 140px;
   min-height: 48px;
   padding: 14px 28px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-family: var(--font-body);
   font-size: 0.92rem;
   font-weight: 600;
@@ -435,7 +583,7 @@ body {
   min-height: 36px;
   padding: 0 10px;
   border: 1px solid var(--surface-line);
-  border-radius: 8px;
+  border-radius: var(--radius-art);
   background: var(--bg);
   color: var(--ink);
   font: 500 0.8rem var(--font-body);
@@ -464,7 +612,7 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: var(--radius-art);
   border: 1px solid var(--surface-line);
   background: var(--surface);
   color: var(--ink);
@@ -489,9 +637,9 @@ body {
 
 .history-panel {
   width: min(300px, calc(100vw - 40px));
-  background: rgba(31, 26, 48, 0.82);
+  background: var(--panel-bg);
   border: 1px solid var(--surface-line);
-  border-radius: 14px;
+  border-radius: var(--radius-card);
   box-shadow: 0 12px 24px rgba(0,0,0,0.18);
   overflow: hidden;
 }
@@ -615,7 +763,7 @@ body {
   align-items: center;
   gap: 8px;
   padding: 10px 18px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid var(--surface-line);
   background: var(--surface);
   color: var(--ink-dim);
@@ -693,4 +841,132 @@ body {
     animation: none !important;
     transition: none !important;
   }
+}
+
+/* ---- Theme switcher (preview-build only, not part of the real design) ---- */
+
+.theme-switcher {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  z-index: 100;
+}
+
+.theme-toggle {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--surface-line);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 20px -10px rgba(0,0,0,0.5);
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.theme-toggle:hover {
+  border-color: var(--gold);
+}
+
+.theme-toggle:active {
+  transform: scale(0.94);
+}
+
+.theme-menu[hidden] {
+  display: none;
+}
+
+.theme-menu {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: 12px;
+  box-shadow: 0 16px 34px -14px rgba(0,0,0,0.55);
+}
+
+.theme-menu-title {
+  margin: 2px 6px 6px;
+  font-family: var(--font-body);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+.theme-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.theme-option em {
+  font-style: normal;
+  color: var(--ink-dim);
+  font-size: 0.72rem;
+}
+
+.theme-option:hover,
+.theme-option:focus-visible {
+  background: rgba(255,255,255,0.06);
+}
+
+.theme-option.is-active {
+  background: rgba(255,255,255,0.09);
+}
+
+.theme-swatch {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.25);
+  flex: 0 0 18px;
+}
+
+.theme-swatch-mystic {
+  background: linear-gradient(135deg, #c8a24d 0%, #1f1a30 60%);
+}
+
+.theme-swatch-celestial {
+  background: linear-gradient(135deg, #bcdcff 0%, #05070f 60%);
+}
+
+.theme-swatch-grimoire {
+  background: linear-gradient(135deg, #8a5a2b 0%, #e9dcbc 60%);
+}
+
+.theme-swatch-neon {
+  background: linear-gradient(135deg, #39f2ff 0%, #ff2fb0 60%);
+}
+
+.theme-swatch-minimal {
+  background: linear-gradient(135deg, #ff5a36 0%, #f7f7f5 60%);
+}
+
+.theme-swatch-gothic {
+  background: linear-gradient(135deg, #c8302f 0%, #0a0505 60%);
 }

@@ -832,6 +832,10 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  if (event.target.closest("#themeSwitcher")) {
+    return;
+  }
+
   const card = pullCard();
   showCard(card);
 });
@@ -927,3 +931,49 @@ if ("serviceWorker" in navigator) {
     });
   });
 }
+
+// ---- Theme switcher (preview-build only, not part of the real design) ----
+
+const themeToggleEl = document.getElementById("themeToggle");
+const themeMenuEl = document.getElementById("themeMenu");
+const themeOptionEls = document.querySelectorAll(".theme-option");
+let isThemeMenuOpen = false;
+
+function setThemeMenuOpen(open) {
+  isThemeMenuOpen = open;
+  themeMenuEl.hidden = !open;
+  themeToggleEl.setAttribute("aria-expanded", String(open));
+}
+
+function applyTheme(themeValue) {
+  if (themeValue) {
+    document.documentElement.setAttribute("data-theme", themeValue);
+  } else {
+    document.documentElement.removeAttribute("data-theme");
+  }
+
+  themeOptionEls.forEach((option) => {
+    option.classList.toggle("is-active", option.dataset.themeValue === themeValue);
+  });
+}
+
+themeToggleEl.addEventListener("click", (event) => {
+  event.stopPropagation();
+  setThemeMenuOpen(!isThemeMenuOpen);
+});
+
+themeOptionEls.forEach((option) => {
+  option.addEventListener("click", (event) => {
+    event.stopPropagation();
+    applyTheme(option.dataset.themeValue);
+    setThemeMenuOpen(false);
+  });
+});
+
+document.addEventListener("click", (event) => {
+  if (isThemeMenuOpen && !event.target.closest("#themeSwitcher")) {
+    setThemeMenuOpen(false);
+  }
+});
+
+applyTheme("");
