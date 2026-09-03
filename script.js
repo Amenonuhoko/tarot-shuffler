@@ -1,3 +1,22 @@
+// ---- Persisted preferences (shared localStorage helpers) ----
+
+function loadStoredValue(key, isValid, fallback) {
+  try {
+    const stored = localStorage.getItem(key);
+    return isValid(stored) ? stored : fallback;
+  } catch (err) {
+    return fallback;
+  }
+}
+
+function saveStoredValue(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch (err) {
+    // Storage unavailable (private mode, disabled, etc.) - preference just won't persist.
+  }
+}
+
 // ---- Deck data ----
 
 const MAJOR_ARCANA = [
@@ -505,20 +524,15 @@ const DECKS = {
 const DECK_STORAGE_KEY = "tarotPullDeck";
 
 function loadStoredDeckKey() {
-  try {
-    const stored = localStorage.getItem(DECK_STORAGE_KEY);
-    return Object.prototype.hasOwnProperty.call(DECKS, stored) ? stored : "classical";
-  } catch (err) {
-    return "classical";
-  }
+  return loadStoredValue(
+    DECK_STORAGE_KEY,
+    (value) => Object.prototype.hasOwnProperty.call(DECKS, value),
+    "classical"
+  );
 }
 
 function saveDeckKey(deckKey) {
-  try {
-    localStorage.setItem(DECK_STORAGE_KEY, deckKey);
-  } catch (err) {
-    // Storage unavailable (private mode, disabled, etc.) - deck choice just won't persist.
-  }
+  saveStoredValue(DECK_STORAGE_KEY, deckKey);
 }
 
 const initialDeckKey = loadStoredDeckKey();
@@ -677,7 +691,7 @@ function animateCardPull() {
 }
 
 function renderCardFace(card) {
-  arcanaLabelEl.textContent = card.arcana;
+  arcanaLabelEl.textContent = card.type || card.arcana;
   cardTitleEl.textContent = card.name;
   orientationRowEl.hidden = !activeDeck.allowReversed;
   orientationLabelEl.textContent = card.reversed ? "Reversed" : "Upright";
@@ -873,6 +887,10 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  if (isThemeMenuOpen) {
+    return;
+  }
+
   const card = pullCard();
   showCard(card);
 });
@@ -932,7 +950,6 @@ cardSlotEl.addEventListener("animationend", () => {
 });
 
 deckSelect.value = initialDeckKey;
-renderHistory();
 populateCardNames();
 setMenuOpen(wideLayoutQuery.matches);
 
@@ -961,20 +978,11 @@ const VALID_THEME_VALUES = new Set(
 );
 
 function loadStoredTheme() {
-  try {
-    const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    return VALID_THEME_VALUES.has(stored) ? stored : "";
-  } catch (err) {
-    return "";
-  }
+  return loadStoredValue(THEME_STORAGE_KEY, (value) => VALID_THEME_VALUES.has(value), "");
 }
 
 function saveTheme(themeValue) {
-  try {
-    localStorage.setItem(THEME_STORAGE_KEY, themeValue);
-  } catch (err) {
-    // Storage unavailable (private mode, disabled, etc.) - theme just won't persist.
-  }
+  saveStoredValue(THEME_STORAGE_KEY, themeValue);
 }
 
 const THEME_ICON_PATHS = {

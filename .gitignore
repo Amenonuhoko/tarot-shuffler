@@ -1,0 +1,14 @@
+# Shell/session environment files (not part of the site)
+.bash_profile
+.bashrc
+.gitconfig
+.gitmodules
+.mcp.json
+.profile
+.ripgreprc
+.zprofile
+.zshrc
+
+# Editor/IDE directories
+.idea
+.vscode
