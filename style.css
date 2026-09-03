@@ -111,8 +111,9 @@
 }
 
 /* ---- Theme: Blood Moon ----
-   Eclipse night: a blood-red halo behind brushed-silver metal, with
-   a slow pulse under the card like a heartbeat during totality. */
+   A real moon glows through the whole page, not just the card: the
+   eclipse lives in the background, while every component keeps its
+   normal shape with only small, consistent silver/red touches. */
 [data-theme="bloodmoon"] {
   --bg: #0a0606;
   --bg-glow: #2b0a0a;
@@ -129,7 +130,7 @@
   --font-body: 'Inter', system-ui, sans-serif;
 
   --radius-card: 10px;
-  --radius-art: 50%;
+  --radius-art: 10px;
   --radius-pill: 999px;
   --description-bg: rgba(156, 28, 28, 0.08);
   --panel-bg: rgba(23, 12, 12, 0.92);
@@ -1151,16 +1152,18 @@ body {
   border-bottom-color: rgba(232,195,104,0.18);
 }
 
-/* -- Blood Moon: eclipse glow, brushed silver, slow pulse -- */
+/* -- Blood Moon: the eclipse lives in the page, components stay their
+   normal shape with only small, consistent silver/red touches -- */
 
 [data-theme="bloodmoon"] body {
   background-image:
-    radial-gradient(circle at 50% 22%, rgba(156, 28, 28, 0.35), transparent 55%),
-    radial-gradient(circle at 50% 22%, rgba(217, 220, 227, 0.08), transparent 35%),
-    radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 55%);
+    radial-gradient(circle at 50% 16%, #e2e5eb 0%, #b7bac2 5%, rgba(156,28,28,0.85) 13%, rgba(156,28,28,0.4) 24%, transparent 42%),
+    radial-gradient(circle at 50% 16%, rgba(156, 28, 28, 0.3), transparent 60%),
+    radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 60%);
 }
 
 [data-theme="bloodmoon"] .card-face {
+  background: radial-gradient(circle at 50% -12%, rgba(156, 28, 28, 0.3), transparent 50%), var(--surface);
   border: 1px solid;
   border-image: linear-gradient(160deg, #fdfdfd 0%, #aeb2ba 30%, #55575e 50%, #aeb2ba 70%, #fdfdfd 100%) 1;
   animation: bloodmoon-pulse 5s ease-in-out infinite;
@@ -1210,8 +1213,8 @@ body {
 }
 
 [data-theme="bloodmoon"] .card-art {
-  background: radial-gradient(circle at 50% 50%, #1c0d0d 0%, #3a0f0f 42%, #7a1414 62%, #d9dce3 63%, #f4f1ee 66%, #1c0d0d 68%);
-  box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+  border: 1px solid rgba(217, 220, 227, 0.2);
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
 }
 
 [data-theme="bloodmoon"] .card-description {
