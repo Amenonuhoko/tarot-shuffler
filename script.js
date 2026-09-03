@@ -952,6 +952,34 @@ function setThemeMenuOpen(open) {
   themeToggleEl.setAttribute("aria-expanded", String(open));
 }
 
+let holoGlintTimer = null;
+
+function triggerHoloGlint() {
+  document.querySelectorAll(".card-face").forEach((face) => {
+    face.classList.remove("glinting");
+    void face.offsetWidth;
+    face.classList.add("glinting");
+  });
+}
+
+function scheduleHoloGlint() {
+  clearTimeout(holoGlintTimer);
+
+  if (document.documentElement.getAttribute("data-theme") !== "holo") {
+    return;
+  }
+
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    return;
+  }
+
+  const delay = 2600 + Math.random() * 4200;
+  holoGlintTimer = setTimeout(() => {
+    triggerHoloGlint();
+    scheduleHoloGlint();
+  }, delay);
+}
+
 function applyTheme(themeValue) {
   if (themeValue) {
     document.documentElement.setAttribute("data-theme", themeValue);
@@ -965,6 +993,13 @@ function applyTheme(themeValue) {
 
   const iconPath = THEME_ICON_PATHS[themeValue] || THEME_ICON_PATHS[""];
   themeToggleEl.innerHTML = `<svg viewBox="0 0 18 18" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${iconPath}</svg>`;
+
+  if (themeValue === "holo") {
+    triggerHoloGlint();
+    scheduleHoloGlint();
+  } else {
+    clearTimeout(holoGlintTimer);
+  }
 }
 
 themeToggleEl.addEventListener("click", (event) => {
