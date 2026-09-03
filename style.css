@@ -137,6 +137,79 @@
   --panel-bg: rgba(19, 12, 13, 0.94);
 }
 
+/* ---- PREVIEW: Mystic redesign directions (not yet a real theme) ----
+   Three takes on "gold-traced esoteric line art" for the default —
+   stars, planets, moons, eyes, pentagrams, star charts. */
+
+/* -- Preview: Celestial (minimal, elegant) -- */
+[data-theme="mystic-celestial"] {
+  --bg: #0a0714;
+  --bg-glow: #180f2c;
+  --surface: #140f28;
+  --surface-line: rgba(212, 175, 106, 0.32);
+  --gold: #d4af6a;
+  --gold-dim: #8a6f3d;
+  --ink: #f1ecd9;
+  --ink-dim: #a89a7a;
+  --lavender: #9d8fd6;
+
+  --font-display: 'Cormorant Garamond', serif;
+  --font-description: 'Cormorant Garamond', serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  --radius-card: 16px;
+  --radius-art: 10px;
+  --radius-pill: 999px;
+  --description-bg: rgba(212, 175, 106, 0.06);
+  --panel-bg: rgba(20, 15, 40, 0.88);
+}
+
+/* -- Preview: Grimoire (dense, occult) -- */
+[data-theme="mystic-grimoire"] {
+  --bg: #0d0a06;
+  --bg-glow: #1e1508;
+  --surface: #150f08;
+  --surface-line: #6b4f1e;
+  --gold: #e0b24a;
+  --gold-dim: #8f6f28;
+  --ink: #efe3c8;
+  --ink-dim: #a8926a;
+  --lavender: #b23b3b;
+
+  --font-display: 'Cinzel', serif;
+  --font-description: 'Cormorant Garamond', serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  --radius-card: 4px;
+  --radius-art: 2px;
+  --radius-pill: 999px;
+  --description-bg: rgba(224, 178, 74, 0.07);
+  --panel-bg: rgba(21, 15, 8, 0.92);
+}
+
+/* -- Preview: Orbit (cosmic, clean) -- */
+[data-theme="mystic-orbit"] {
+  --bg: #060713;
+  --bg-glow: #10142e;
+  --surface: #0d0f22;
+  --surface-line: rgba(212, 175, 106, 0.3);
+  --gold: #d8b76a;
+  --gold-dim: #82702f;
+  --ink: #eef0fb;
+  --ink-dim: #9aa0c2;
+  --lavender: #6fb8e8;
+
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-description: 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  --radius-card: 14px;
+  --radius-art: 8px;
+  --radius-pill: 999px;
+  --description-bg: rgba(212, 183, 106, 0.06);
+  --panel-bg: rgba(13, 15, 34, 0.88);
+}
+
 * { box-sizing: border-box; }
 
 html, body {
@@ -824,6 +897,27 @@ body {
    the palette/font variables defined above.
    ================================================================ */
 
+/* -- Shared decorative layer for the Mystic redesign previews:
+   a fixed watermark layer behind the page, one SVG motif per idea
+   (orbits, pentagram, eye, moons, constellation). Hidden unless a
+   preview theme turns a specific motif on. -- */
+
+.mystic-motif {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.mystic-motif svg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: none;
+  color: var(--gold);
+}
+
 /* -- Holographic Foil: dark opal glass, card and page as one surface -- */
 
 [data-theme="holo"] body {
@@ -1343,6 +1437,181 @@ body {
   text-shadow: 0 0 6px rgba(163, 16, 44, 0.7);
 }
 
+/* -- Preview: Celestial — thin gold linework, a faint watching eye,
+   a pair of crescents, and a small star chart, kept quiet -- */
+
+[data-theme="mystic-celestial"] .table,
+[data-theme="mystic-celestial"] .support-footer {
+  position: relative;
+  z-index: 1;
+}
+
+[data-theme="mystic-celestial"] body {
+  background-image:
+    radial-gradient(1px 1px at 15% 20%, var(--gold), transparent),
+    radial-gradient(1px 1px at 80% 15%, var(--gold), transparent),
+    radial-gradient(1.5px 1.5px at 30% 70%, var(--gold), transparent),
+    radial-gradient(1px 1px at 65% 82%, var(--gold), transparent),
+    radial-gradient(1px 1px at 90% 55%, var(--gold), transparent),
+    radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 55%);
+  background-repeat: no-repeat;
+}
+
+[data-theme="mystic-celestial"] .motif-eye {
+  display: block;
+  width: 240px;
+  opacity: 0.06;
+}
+
+[data-theme="mystic-celestial"] .motif-moons {
+  display: block;
+  width: 180px;
+  top: 12%;
+  opacity: 0.4;
+}
+
+[data-theme="mystic-celestial"] .motif-constellation {
+  display: block;
+  width: 220px;
+  top: 87%;
+  opacity: 0.3;
+}
+
+[data-theme="mystic-celestial"] .card-front::before,
+[data-theme="mystic-celestial"] .card-front::after {
+  content: "\2726";
+  position: absolute;
+  top: 10px;
+  color: var(--gold);
+  font-size: 0.75rem;
+  opacity: 0.75;
+  z-index: 3;
+}
+
+[data-theme="mystic-celestial"] .card-front::before {
+  left: 14px;
+}
+
+[data-theme="mystic-celestial"] .card-front::after {
+  right: 14px;
+}
+
+[data-theme="mystic-celestial"] .card-title {
+  font-style: italic;
+}
+
+/* -- Preview: Grimoire — a pentagram-in-circle watermark ringed
+   with chart ticks, double gold border, diamond corner marks -- */
+
+[data-theme="mystic-grimoire"] .table,
+[data-theme="mystic-grimoire"] .support-footer {
+  position: relative;
+  z-index: 1;
+}
+
+[data-theme="mystic-grimoire"] body {
+  background-image:
+    radial-gradient(1px 1px at 20% 25%, var(--gold), transparent),
+    radial-gradient(1px 1px at 75% 20%, var(--gold), transparent),
+    radial-gradient(1.5px 1.5px at 40% 75%, var(--gold), transparent),
+    radial-gradient(1px 1px at 85% 65%, var(--gold), transparent),
+    radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 55%);
+  background-repeat: no-repeat;
+}
+
+[data-theme="mystic-grimoire"] .motif-pentagram {
+  display: block;
+  width: 340px;
+  opacity: 0.1;
+}
+
+[data-theme="mystic-grimoire"] .card-front {
+  border: 1px solid var(--gold);
+  box-shadow: 0 0 0 4px var(--bg), 0 0 0 5px rgba(224, 178, 74, 0.4);
+}
+
+[data-theme="mystic-grimoire"] .card-front::before,
+[data-theme="mystic-grimoire"] .card-front::after {
+  content: "\25C6";
+  position: absolute;
+  top: 12px;
+  color: var(--gold);
+  font-size: 0.7rem;
+  opacity: 0.85;
+  z-index: 3;
+}
+
+[data-theme="mystic-grimoire"] .card-front::before {
+  left: 16px;
+}
+
+[data-theme="mystic-grimoire"] .card-front::after {
+  right: 16px;
+}
+
+[data-theme="mystic-grimoire"] .card-title {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: clamp(1.1rem, 5vw, 1.4rem);
+}
+
+/* -- Preview: Orbit — concentric gold orbit rings with a star chart
+   overhead, a soft halo behind the card, small planet-dot corners -- */
+
+[data-theme="mystic-orbit"] .table,
+[data-theme="mystic-orbit"] .support-footer {
+  position: relative;
+  z-index: 1;
+}
+
+[data-theme="mystic-orbit"] body {
+  background-image:
+    radial-gradient(1px 1px at 10% 30%, var(--gold), transparent),
+    radial-gradient(1px 1px at 85% 20%, var(--gold), transparent),
+    radial-gradient(1.5px 1.5px at 50% 85%, var(--gold), transparent),
+    radial-gradient(1px 1px at 70% 60%, var(--gold), transparent),
+    radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 55%);
+  background-repeat: no-repeat;
+}
+
+[data-theme="mystic-orbit"] .motif-orbits {
+  display: block;
+  width: 360px;
+  opacity: 0.16;
+}
+
+[data-theme="mystic-orbit"] .motif-constellation {
+  display: block;
+  width: 200px;
+  top: 9%;
+  opacity: 0.22;
+}
+
+[data-theme="mystic-orbit"] .card-front {
+  box-shadow: 0 0 40px -10px rgba(216, 183, 106, 0.3);
+}
+
+[data-theme="mystic-orbit"] .card-front::before,
+[data-theme="mystic-orbit"] .card-front::after {
+  content: "";
+  position: absolute;
+  top: 12px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+  opacity: 0.85;
+  z-index: 3;
+}
+
+[data-theme="mystic-orbit"] .card-front::before {
+  left: 14px;
+}
+
+[data-theme="mystic-orbit"] .card-front::after {
+  right: 14px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .card, .card.shuffling, .card-slot.pulling, .card-search-input.not-found,
   [data-theme="holo"] body, [data-theme="holo"] .card-face, [data-theme="holo"] .card-front::after, [data-theme="holo"] .card-title,
@@ -1449,4 +1718,16 @@ body {
 
 .theme-swatch-bloodmoon {
   background: linear-gradient(135deg, #f1f3f7 0%, #a3102c 55%, #07060a 100%);
+}
+
+.theme-swatch-mystic-celestial {
+  background: linear-gradient(135deg, #d4af6a 0%, #140f28 60%);
+}
+
+.theme-swatch-mystic-grimoire {
+  background: linear-gradient(135deg, #e0b24a 0%, #150f08 60%);
+}
+
+.theme-swatch-mystic-orbit {
+  background: linear-gradient(135deg, #d8b76a 0%, #0d0f22 60%);
 }
