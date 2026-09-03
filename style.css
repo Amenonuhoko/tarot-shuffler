@@ -62,8 +62,8 @@
    history) uses the same bracket/monospace language so nothing
    feels bolted on. */
 [data-theme="terminal"] {
-  --bg: #00110a;
-  --bg-glow: #00220f;
+  --bg: #000d07;
+  --bg-glow: #001c0c;
   --surface: #001a0d;
   --surface-line: #22ff7f;
   --gold: #22ff7f;
@@ -951,6 +951,7 @@ body {
   height: 100%;
   z-index: 0;
   pointer-events: none;
+  filter: blur(0.6px);
 }
 
 .terminal-rain[hidden] {
