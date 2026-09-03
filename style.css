@@ -21,6 +21,7 @@
   --label-transform: uppercase;
   --description-bg: rgba(20, 16, 31, 0.28);
   --panel-bg: rgba(31, 26, 48, 0.82);
+  --radius-icon: 50%;
 }
 
 /* ================================================================
@@ -30,65 +31,48 @@
    decoration) — these are not simple recolors.
    ================================================================ */
 
-/* ---- Theme: Holographic Foil ---- */
+/* ---- Theme: Holographic Foil ----
+   Dark opal glass, not a light card on a dark page: the shimmer
+   lives in both the background and the card so they read as one
+   surface. Body text stays solid bright ink for legibility; only
+   the title itself gets the moving gradient treatment. */
 [data-theme="holo"] {
-  --bg: #0c0716;
-  --bg-glow: #1b1030;
-  --surface: #15102a;
-  --surface-line: rgba(255,255,255,0.35);
-  --gold: #ffffff;
-  --gold-dim: #c9c2ff;
-  --ink: #ffffff;
-  --ink-dim: #cabdf5;
-  --lavender: #b9a6ff;
+  --bg: #0a0714;
+  --bg-glow: #170f2c;
+  --surface: #140f28;
+  --surface-line: rgba(210, 200, 255, 0.28);
+  --gold: #d9c8ff;
+  --gold-dim: #9a86d6;
+  --ink: #f5f2ff;
+  --ink-dim: #b7acdb;
+  --lavender: #8ee8d8;
 
   --font-display: 'Space Grotesk', sans-serif;
-  --font-description: 'Space Grotesk', sans-serif;
+  --font-description: 'Inter', system-ui, sans-serif;
   --font-body: 'Inter', system-ui, sans-serif;
 
-  --radius-card: 22px;
-  --radius-art: 16px;
+  --radius-card: 20px;
+  --radius-art: 14px;
   --radius-pill: 999px;
-  --description-bg: rgba(255,255,255,0.08);
-  --panel-bg: rgba(21, 16, 42, 0.7);
+  --description-bg: rgba(255,255,255,0.06);
+  --panel-bg: rgba(20, 15, 40, 0.85);
   --label-transform: uppercase;
 }
 
-/* ---- Theme: Gilded Frame ---- */
-[data-theme="frame"] {
-  --bg: #05130f;
-  --bg-glow: #0c261d;
-  --surface: #0b2019;
-  --surface-line: #d4af37;
-  --gold: #f2d27a;
-  --gold-dim: #a8842f;
-  --ink: #f4ead0;
-  --ink-dim: #b9a877;
-  --lavender: #f2d27a;
-
-  --font-display: 'Cinzel Decorative', serif;
-  --font-description: 'Cormorant Garamond', serif;
-  --font-body: 'Cormorant Garamond', serif;
-
-  --radius-card: 0px;
-  --radius-art: 0px;
-  --radius-pill: 0px;
-  --description-bg: rgba(212, 175, 55, 0.08);
-  --panel-bg: rgba(11, 32, 25, 0.9);
-  --label-transform: uppercase;
-}
-
-/* ---- Theme: Glitch Terminal ---- */
+/* ---- Theme: Glitch Terminal ----
+   Full CRT terminal: every control (deck picker, buttons, search,
+   history) uses the same bracket/monospace language so nothing
+   feels bolted on. */
 [data-theme="terminal"] {
-  --bg: #000000;
-  --bg-glow: #001505;
-  --surface: #020a04;
-  --surface-line: #1fff6b;
-  --gold: #1fff6b;
-  --gold-dim: #128f3d;
-  --ink: #a8ffc4;
-  --ink-dim: #3f9a5f;
-  --lavender: #ff2b6d;
+  --bg: #00110a;
+  --bg-glow: #00220f;
+  --surface: #001a0d;
+  --surface-line: #22ff7f;
+  --gold: #22ff7f;
+  --gold-dim: #14a355;
+  --ink: #b6ffd4;
+  --ink-dim: #4dbd7d;
+  --lavender: #ff4d8d;
 
   --font-display: 'Space Mono', monospace;
   --font-description: 'Space Mono', monospace;
@@ -97,46 +81,25 @@
   --radius-card: 0px;
   --radius-art: 0px;
   --radius-pill: 0px;
-  --description-bg: rgba(31, 255, 107, 0.06);
-  --panel-bg: rgba(2, 10, 4, 0.94);
+  --radius-icon: 0px;
+  --description-bg: rgba(34, 255, 127, 0.05);
+  --panel-bg: rgba(0, 26, 13, 0.96);
   --label-transform: uppercase;
 }
 
-/* ---- Theme: Torn Paper Punk ---- */
-[data-theme="punk"] {
-  --bg: #f2ede1;
-  --bg-glow: #fdfaf2;
-  --surface: #fffdf7;
-  --surface-line: #111111;
-  --gold: #ff2fa1;
-  --gold-dim: #c1005f;
-  --ink: #111111;
-  --ink-dim: #444444;
-  --lavender: #111111;
-
-  --font-display: 'Anton', sans-serif;
-  --font-description: 'Space Mono', monospace;
-  --font-body: 'Inter', system-ui, sans-serif;
-
-  --radius-card: 0px;
-  --radius-art: 0px;
-  --radius-pill: 0px;
-  --description-bg: #fffdf7;
-  --panel-bg: rgba(255, 253, 247, 0.97);
-  --label-transform: uppercase;
-}
-
-/* ---- Theme: Art Deco Luxe ---- */
+/* ---- Theme: Art Deco Luxe ----
+   Symmetrical geometric border language applied consistently across
+   the card, the deck picker, and every button. */
 [data-theme="deco"] {
-  --bg: #0b0b0b;
-  --bg-glow: #1a1608;
-  --surface: #14120a;
+  --bg: #0b0a06;
+  --bg-glow: #1e1810;
+  --surface: #16130b;
   --surface-line: #caa24a;
   --gold: #e8c368;
   --gold-dim: #8f7328;
   --ink: #f2e6c4;
   --ink-dim: #a4966a;
-  --lavender: #2e6e5e;
+  --lavender: #7fbfae;
 
   --font-display: 'Cinzel', serif;
   --font-description: 'Cormorant Garamond', serif;
@@ -145,33 +108,10 @@
   --radius-card: 0px;
   --radius-art: 0px;
   --radius-pill: 0px;
+  --radius-icon: 4px;
   --description-bg: rgba(232, 195, 104, 0.08);
-  --panel-bg: rgba(20, 18, 10, 0.92);
+  --panel-bg: rgba(22, 19, 11, 0.94);
   --label-transform: uppercase;
-}
-
-/* ---- Theme: Liquid Blob ---- */
-[data-theme="blob"] {
-  --bg: #fef6f0;
-  --bg-glow: #ffffff;
-  --surface: rgba(255,255,255,0.75);
-  --surface-line: rgba(120, 100, 200, 0.25);
-  --gold: #ff8a5c;
-  --gold-dim: #e06a3f;
-  --ink: #2c2440;
-  --ink-dim: #7b6f95;
-  --lavender: #8a7cff;
-
-  --font-display: 'Quicksand', sans-serif;
-  --font-description: 'Quicksand', sans-serif;
-  --font-body: 'Quicksand', sans-serif;
-
-  --radius-card: 40% 60% 55% 45% / 45% 40% 60% 55%;
-  --radius-art: 40% 60% 55% 45% / 45% 40% 60% 55%;
-  --radius-pill: 999px;
-  --description-bg: rgba(255,255,255,0.6);
-  --panel-bg: rgba(255,255,255,0.85);
-  --label-transform: none;
 }
 
 * { box-sizing: border-box; }
@@ -466,7 +406,7 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: var(--radius-icon);
   border: 1px solid var(--surface-line);
   background: var(--surface);
   color: var(--ink-dim);
@@ -549,7 +489,7 @@ body {
   appearance: none;
   -moz-appearance: none;
   -webkit-appearance: none;
-  border-radius: 50%;
+  border-radius: var(--radius-icon);
   border: 1px solid var(--surface-line);
   background: var(--surface);
   background-color: var(--surface);
@@ -859,49 +799,66 @@ body {
    the palette/font variables defined above.
    ================================================================ */
 
-/* -- Holographic Foil: animated iridescent sheen + glass card -- */
+/* -- Holographic Foil: dark opal glass, card and page as one surface -- */
 
 [data-theme="holo"] body {
   background-image:
-    radial-gradient(circle at 15% 15%, rgba(255,120,220,0.25), transparent 40%),
-    radial-gradient(circle at 85% 25%, rgba(120,220,255,0.25), transparent 40%),
-    radial-gradient(circle at 50% 90%, rgba(180,255,180,0.18), transparent 45%),
+    radial-gradient(circle at 12% 10%, rgba(255,150,220,0.14), transparent 45%),
+    radial-gradient(circle at 90% 20%, rgba(140,220,255,0.14), transparent 45%),
+    radial-gradient(circle at 50% 95%, rgba(160,255,210,0.10), transparent 50%),
     radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 55%);
 }
 
 [data-theme="holo"] .card-face {
   background:
-    linear-gradient(120deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.02) 40%, rgba(255,255,255,0.14) 60%, rgba(255,255,255,0.02) 100%),
-    linear-gradient(115deg, #ff9ad5, #a1c4fd, #fbe8a6, #a1ffce, #ff9ad5);
-  background-size: 200% 200%, 300% 300%;
-  animation: holo-shift 7s ease infinite;
-  border: 1px solid rgba(255,255,255,0.5);
-  backdrop-filter: blur(6px);
+    linear-gradient(120deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.02) 35%, rgba(255,255,255,0.10) 55%, rgba(255,255,255,0.02) 100%),
+    linear-gradient(115deg, rgba(255,154,213,0.28), rgba(161,196,253,0.28), rgba(251,232,166,0.24), rgba(161,255,206,0.28), rgba(255,154,213,0.28)),
+    var(--surface);
+  background-size: 200% 200%, 300% 300%, 100% 100%;
+  animation: holo-shift 9s ease infinite;
+  border: 1px solid var(--surface-line);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 28px 60px -22px rgba(0,0,0,0.75), 0 0 40px -14px rgba(180,160,255,0.35);
+  backdrop-filter: blur(10px);
 }
 
 [data-theme="holo"] .card-title {
-  background: linear-gradient(90deg, #fff, #ffd9f4, #d9f0ff, #fff);
+  background: linear-gradient(90deg, #ffffff, #ffd9f4, #d9f0ff, #e8ffe0, #ffffff);
   background-size: 300% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: holo-text 4s linear infinite;
+  animation: holo-text 5s linear infinite;
   text-transform: uppercase;
   letter-spacing: 0.03em;
+  filter: drop-shadow(0 1px 8px rgba(255,255,255,0.25));
+}
+
+[data-theme="holo"] .arcana-label,
+[data-theme="holo"] .orientation-label,
+[data-theme="holo"] .hint,
+[data-theme="holo"] .card-description {
+  color: var(--ink);
+}
+
+[data-theme="holo"] .card-description {
+  color: var(--ink-dim);
 }
 
 [data-theme="holo"] .btn,
 [data-theme="holo"] .flip-btn,
 [data-theme="holo"] .search-btn,
-[data-theme="holo"] .menu-toggle {
-  background: linear-gradient(120deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04));
+[data-theme="holo"] .menu-toggle,
+[data-theme="holo"] .card-search-input,
+[data-theme="holo"] .history-panel,
+[data-theme="holo"] .deck-selector select {
+  background: linear-gradient(120deg, rgba(255,255,255,0.10), rgba(255,255,255,0.02));
   backdrop-filter: blur(8px);
 }
 
 @keyframes holo-shift {
-  0% { background-position: 0% 0%, 0% 50%; }
-  50% { background-position: 100% 100%, 100% 50%; }
-  100% { background-position: 0% 0%, 0% 50%; }
+  0% { background-position: 0% 0%, 0% 50%, 0 0; }
+  50% { background-position: 100% 100%, 100% 50%, 0 0; }
+  100% { background-position: 0% 0%, 0% 50%, 0 0; }
 }
 
 @keyframes holo-text {
@@ -909,235 +866,141 @@ body {
   100% { background-position: 300% 0%; }
 }
 
-/* -- Gilded Frame: museum-frame border + corner flourishes -- */
-
-[data-theme="frame"] .card-face {
-  border: 10px solid;
-  border-image: repeating-linear-gradient(45deg, #f2d27a, #f2d27a 4px, #8a6a1f 4px, #8a6a1f 8px) 10;
-  box-shadow: inset 0 0 0 3px #05130f, inset 0 0 0 5px #f2d27a, 0 25px 50px -15px rgba(0,0,0,0.7);
-  position: relative;
-}
-
-[data-theme="frame"] .card-face::before,
-[data-theme="frame"] .card-face::after {
-  position: absolute;
-  font-size: 1.4rem;
-  color: var(--gold);
-  z-index: 3;
-}
-
-[data-theme="frame"] .card-face::before {
-  content: "\2766";
-  top: 10px;
-  left: 12px;
-}
-
-[data-theme="frame"] .card-face::after {
-  content: "\2766";
-  bottom: 10px;
-  right: 12px;
-}
-
-[data-theme="frame"] .card-title {
-  letter-spacing: 0.06em;
-  border-bottom: 2px solid var(--gold);
-  padding-bottom: 6px;
-}
-
-[data-theme="frame"] .btn,
-[data-theme="frame"] .search-btn,
-[data-theme="frame"] .menu-toggle {
-  border: 2px solid var(--gold);
-  background: var(--surface);
-}
-
-/* -- Glitch Terminal: CRT window chrome + RGB-split glitch text -- */
+/* -- Glitch Terminal: full CRT chrome, every control in the same language -- */
 
 [data-theme="terminal"] body {
   background-image:
-    repeating-linear-gradient(0deg, rgba(31,255,107,0.05) 0px, rgba(31,255,107,0.05) 1px, transparent 1px, transparent 3px),
+    repeating-linear-gradient(0deg, rgba(34,255,127,0.05) 0px, rgba(34,255,127,0.05) 1px, transparent 1px, transparent 3px),
+    radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(0,0,0,0.55) 100%),
     radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 55%);
 }
 
 [data-theme="terminal"] .card-face {
   border: 1px solid var(--gold);
-  box-shadow: 0 0 0 1px rgba(31,255,107,0.3), 0 0 34px rgba(31,255,107,0.35);
-  padding-top: 26px;
-  position: relative;
+  box-shadow: 0 0 0 1px rgba(34,255,127,0.25), 0 0 30px rgba(34,255,127,0.3);
 }
 
 [data-theme="terminal"] .card-face::before {
   content: "";
   position: absolute;
-  top: 10px;
-  left: 12px;
-  width: 8px;
-  height: 8px;
+  top: -12px;
+  left: 14px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: #ff5f56;
-  box-shadow: 16px 0 0 #ffbd2e, 32px 0 0 #1fff6b;
+  box-shadow: 14px 0 0 #ffbd2e, 28px 0 0 var(--gold);
 }
 
 [data-theme="terminal"] .card-title {
-  text-shadow: 2px 0 #ff2b6d, -2px 0 #00e5ff;
-  animation: terminal-flicker 3.2s infinite;
+  text-shadow: 2px 0 #ff4d8d, -2px 0 #00e5ff;
+  animation: terminal-flicker 4s infinite;
 }
 
 [data-theme="terminal"] .arcana-label::before {
   content: "> ";
 }
 
-[data-theme="terminal"] .card-description::before {
-  content: "$ ";
+[data-theme="terminal"] .deck-selector span::before {
+  content: "> ";
+}
+
+[data-theme="terminal"] .hint::after {
+  content: "\2588";
+  margin-left: 4px;
+  animation: terminal-blink 1s steps(1) infinite;
+}
+
+[data-theme="terminal"] .deck-selector select,
+[data-theme="terminal"] .card-search-input,
+[data-theme="terminal"] .search-btn,
+[data-theme="terminal"] .history-panel,
+[data-theme="terminal"] .btn,
+[data-theme="terminal"] .flip-btn,
+[data-theme="terminal"] .menu-toggle {
+  background: #000;
+  border-color: var(--gold);
+}
+
+[data-theme="terminal"] .history-header,
+[data-theme="terminal"] .history-table th {
   color: var(--gold);
 }
 
-[data-theme="terminal"] .btn,
-[data-theme="terminal"] .search-btn,
-[data-theme="terminal"] .menu-toggle {
-  border: 1px solid var(--gold);
-  background: #000;
+[data-theme="terminal"] .history-table th,
+[data-theme="terminal"] .history-table td {
+  border-bottom-color: rgba(34,255,127,0.15);
+}
+
+[data-theme="terminal"] .card-search-input::placeholder {
+  color: var(--ink-dim);
 }
 
 @keyframes terminal-flicker {
-  0%, 92%, 100% { opacity: 1; text-shadow: 2px 0 #ff2b6d, -2px 0 #00e5ff; }
-  93% { opacity: 0.6; text-shadow: 4px 0 #ff2b6d, -4px 0 #00e5ff; }
-  95% { opacity: 1; text-shadow: -2px 0 #ff2b6d, 2px 0 #00e5ff; }
+  0%, 92%, 100% { opacity: 1; text-shadow: 2px 0 #ff4d8d, -2px 0 #00e5ff; }
+  93% { opacity: 0.65; text-shadow: 4px 0 #ff4d8d, -4px 0 #00e5ff; }
+  95% { opacity: 1; text-shadow: -2px 0 #ff4d8d, 2px 0 #00e5ff; }
 }
 
-/* -- Torn Paper Punk: ripped-edge sticker on halftone paper -- */
-
-[data-theme="punk"] body {
-  background-image:
-    radial-gradient(#00000022 1px, transparent 1px),
-    radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 55%);
-  background-size: 10px 10px, auto;
+@keyframes terminal-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
 }
 
-[data-theme="punk"] .card-slot {
-  transform: rotate(-2deg);
-}
-
-[data-theme="punk"] .card-face {
-  clip-path: polygon(
-    2% 4%, 18% 0%, 40% 2%, 60% 0%, 82% 3%, 100% 0%,
-    98% 20%, 100% 45%, 97% 65%, 100% 88%, 96% 100%,
-    75% 97%, 55% 100%, 35% 98%, 15% 100%, 0% 92%,
-    3% 70%, 0% 48%, 4% 25%
-  );
-  border: 3px solid #111111;
-  filter: drop-shadow(7px 8px 0 #111111);
-}
-
-[data-theme="punk"] .card-title {
-  text-transform: uppercase;
-  -webkit-text-stroke: 1px #111;
-  letter-spacing: 0.01em;
-}
-
-[data-theme="punk"] .btn,
-[data-theme="punk"] .search-btn,
-[data-theme="punk"] .menu-toggle {
-  border: 3px solid #111111;
-  filter: drop-shadow(3px 3px 0 #111111);
-  transform: rotate(-1deg);
-}
-
-[data-theme="punk"] .flip-btn {
-  border: 2px solid #111111;
-}
-
-/* -- Art Deco Luxe: sunburst backdrop + clipped octagon card -- */
+/* -- Art Deco Luxe: one consistent cut-corner + double-line language -- */
 
 [data-theme="deco"] body {
   background-image:
-    repeating-conic-gradient(from 0deg at 50% 15%, rgba(232,195,104,0.10) 0deg 4deg, transparent 4deg 12deg),
+    repeating-conic-gradient(from 0deg at 50% 12%, rgba(232,195,104,0.14) 0deg 3deg, transparent 3deg 12deg),
+    radial-gradient(ellipse at 50% 12%, transparent 35%, var(--bg) 78%),
     radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 55%);
 }
 
 [data-theme="deco"] .card-face {
   clip-path: polygon(20px 0, calc(100% - 20px) 0, 100% 20px, 100% calc(100% - 20px), calc(100% - 20px) 100%, 20px 100%, 0 calc(100% - 20px), 0 20px);
   border: 2px solid var(--gold);
-  box-shadow: inset 0 0 0 5px #0b0b0b, inset 0 0 0 7px var(--gold), 0 25px 50px -15px rgba(0,0,0,0.8);
+  box-shadow: inset 0 0 0 5px #0b0a06, inset 0 0 0 7px var(--gold), 0 25px 50px -15px rgba(0,0,0,0.8);
 }
 
 [data-theme="deco"] .card-title {
   text-transform: uppercase;
-  letter-spacing: 0.18em;
-  font-size: clamp(1.1rem, 5vw, 1.5rem);
+  letter-spacing: 0.16em;
+  font-size: clamp(1.05rem, 5vw, 1.4rem);
 }
 
-[data-theme="deco"] .btn,
+[data-theme="deco"] .deck-selector {
+  border-bottom: 1px solid var(--surface-line);
+  padding-bottom: 10px;
+}
+
+[data-theme="deco"] .deck-selector select,
+[data-theme="deco"] .card-search-input,
 [data-theme="deco"] .search-btn,
+[data-theme="deco"] .btn,
 [data-theme="deco"] .menu-toggle {
   border: 1px solid var(--gold);
-  clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
+  clip-path: polygon(9px 0, calc(100% - 9px) 0, 100% 9px, 100% calc(100% - 9px), calc(100% - 9px) 100%, 9px 100%, 0 calc(100% - 9px), 0 9px);
 }
 
-/* -- Liquid Blob: morphing organic shapes + floating gradient blobs -- */
-
-[data-theme="blob"] body {
-  position: relative;
-  overflow-x: hidden;
+[data-theme="deco"] .history-panel {
+  border: 1px solid var(--gold);
+  clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px);
 }
 
-[data-theme="blob"] body::before,
-[data-theme="blob"] body::after {
-  content: "";
-  position: fixed;
-  width: 260px;
-  height: 260px;
-  border-radius: 50%;
-  filter: blur(50px);
-  z-index: 0;
-  animation: blob-float 12s ease-in-out infinite;
+[data-theme="deco"] .history-header,
+[data-theme="deco"] .history-table th {
+  color: var(--gold);
 }
 
-[data-theme="blob"] body::before {
-  top: -60px;
-  left: -60px;
-  background: #ffd6c2;
-}
-
-[data-theme="blob"] body::after {
-  bottom: -60px;
-  right: -60px;
-  background: #c2d6ff;
-  animation-delay: -6s;
-}
-
-[data-theme="blob"] .card-face {
-  animation: blob-morph 9s ease-in-out infinite;
-  border: none;
-}
-
-[data-theme="blob"] .card-title {
-  font-weight: 700;
-}
-
-[data-theme="blob"] .btn,
-[data-theme="blob"] .flip-btn,
-[data-theme="blob"] .search-btn,
-[data-theme="blob"] .menu-toggle {
-  border: none;
-  box-shadow: 0 8px 20px -10px rgba(120,100,200,0.4);
-}
-
-@keyframes blob-float {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(30px, -20px) scale(1.1); }
-}
-
-@keyframes blob-morph {
-  0%, 100% { border-radius: 40% 60% 55% 45% / 45% 40% 60% 55%; }
-  50% { border-radius: 55% 45% 40% 60% / 55% 60% 40% 45%; }
+[data-theme="deco"] .history-table th,
+[data-theme="deco"] .history-table td {
+  border-bottom-color: rgba(232,195,104,0.18);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .card, .card.shuffling, .card-slot.pulling, .card-search-input.not-found,
   [data-theme="holo"] .card-face, [data-theme="holo"] .card-title,
-  [data-theme="terminal"] .card-title,
-  [data-theme="blob"] body::before, [data-theme="blob"] body::after, [data-theme="blob"] .card-face {
+  [data-theme="terminal"] .card-title, [data-theme="terminal"] .hint::after {
     animation: none !important;
     transition: none !important;
   }
@@ -1228,22 +1091,10 @@ body {
   background: linear-gradient(135deg, #ff9ad5 0%, #a1c4fd 33%, #fbe8a6 66%, #a1ffce 100%);
 }
 
-.theme-swatch-frame {
-  background: linear-gradient(135deg, #f2d27a 0%, #05130f 60%);
-}
-
 .theme-swatch-terminal {
-  background: linear-gradient(135deg, #1fff6b 0%, #000000 60%);
-}
-
-.theme-swatch-punk {
-  background: linear-gradient(135deg, #ff2fa1 0%, #f2ede1 60%);
+  background: linear-gradient(135deg, #22ff7f 0%, #000000 60%);
 }
 
 .theme-swatch-deco {
-  background: linear-gradient(135deg, #e8c368 0%, #0b0b0b 60%);
-}
-
-.theme-swatch-blob {
-  background: linear-gradient(135deg, #ff8a5c 0%, #8a7cff 60%);
+  background: linear-gradient(135deg, #e8c368 0%, #0b0a06 60%);
 }

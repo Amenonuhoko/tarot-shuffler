@@ -939,6 +939,13 @@ const themeMenuEl = document.getElementById("themeMenu");
 const themeOptionEls = document.querySelectorAll(".theme-option");
 let isThemeMenuOpen = false;
 
+const THEME_ICON_PATHS = {
+  "": '<path d="M9 1 L11 7 L17 9 L11 11 L9 17 L7 11 L1 9 L7 7 Z"/>',
+  holo: '<path d="M4 7 L9 2 L14 7 L9 16 Z"/><path d="M4 7 L14 7"/><path d="M6.5 7 L9 2 L11.5 7"/>',
+  terminal: '<path d="M3 5 L8 9 L3 13"/><path d="M9.5 14 L15 14"/>',
+  deco: '<path d="M9 16 L9 2 M9 16 L4.5 4 M9 16 L13.5 4 M9 16 L1.5 9.5 M9 16 L16.5 9.5"/>'
+};
+
 function setThemeMenuOpen(open) {
   isThemeMenuOpen = open;
   themeMenuEl.hidden = !open;
@@ -955,6 +962,9 @@ function applyTheme(themeValue) {
   themeOptionEls.forEach((option) => {
     option.classList.toggle("is-active", option.dataset.themeValue === themeValue);
   });
+
+  const iconPath = THEME_ICON_PATHS[themeValue] || THEME_ICON_PATHS[""];
+  themeToggleEl.innerHTML = `<svg viewBox="0 0 18 18" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${iconPath}</svg>`;
 }
 
 themeToggleEl.addEventListener("click", (event) => {
