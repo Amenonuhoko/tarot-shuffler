@@ -1031,6 +1031,7 @@ const terminalRainCanvas = document.getElementById("terminalRain");
 const TERMINAL_RAIN_FONT_SIZE = 16;
 const TERMINAL_RAIN_FAST_STEP_MS = 55;
 const TERMINAL_RAIN_SLOW_STEP_MS = 220;
+const TERMINAL_RAIN_TRAIL_LENGTH = 22;
 let terminalRainCtx = null;
 let terminalRainFrame = null;
 let terminalRainColumns = [];
@@ -1046,7 +1047,7 @@ function resizeTerminalRain() {
   terminalRainColumns = new Array(columnCount).fill(0).map((_, i) => ({
     x: i * TERMINAL_RAIN_FONT_SIZE,
     y: Math.random() * -300,
-    char: Math.random() > 0.5 ? "1" : "0",
+    trail: new Array(TERMINAL_RAIN_TRAIL_LENGTH).fill(""),
     elapsed: Math.random() * TERMINAL_RAIN_FAST_STEP_MS,
     hasLooped: false,
   }));
@@ -1058,9 +1059,7 @@ function drawTerminalRain(now) {
   const delta = terminalRainLastTime ? Math.min(now - terminalRainLastTime, 100) : 16;
   terminalRainLastTime = now;
 
-  terminalRainCtx.fillStyle = "rgba(0, 17, 10, 0.15)";
-  terminalRainCtx.fillRect(0, 0, terminalRainCanvas.width, terminalRainCanvas.height);
-  terminalRainCtx.fillStyle = "#22ff7f";
+  terminalRainCtx.clearRect(0, 0, terminalRainCanvas.width, terminalRainCanvas.height);
   terminalRainCtx.font = `${TERMINAL_RAIN_FONT_SIZE}px 'Space Mono', monospace`;
 
   terminalRainColumns.forEach((col) => {
@@ -1069,13 +1068,28 @@ function drawTerminalRain(now) {
     if (col.elapsed >= stepMs) {
       col.elapsed = 0;
       col.y += TERMINAL_RAIN_FONT_SIZE;
-      col.char = Math.random() > 0.5 ? "1" : "0";
-      if (col.y > terminalRainCanvas.height && Math.random() > 0.975) {
-        col.y = 0;
+      col.trail.unshift(Math.random() > 0.5 ? "1" : "0");
+      col.trail.length = TERMINAL_RAIN_TRAIL_LENGTH;
+
+      const trailBottom = terminalRainCanvas.height + TERMINAL_RAIN_TRAIL_LENGTH * TERMINAL_RAIN_FONT_SIZE;
+      const shouldRespawn = col.y > trailBottom
+        || (col.y > terminalRainCanvas.height && Math.random() > 0.9);
+      if (shouldRespawn) {
+        col.y = Math.random() * -100;
+        col.trail.fill("");
         col.hasLooped = true;
       }
     }
-    terminalRainCtx.fillText(col.char, col.x, col.y);
+
+    col.trail.forEach((char, i) => {
+      if (!char) {
+        return;
+      }
+      terminalRainCtx.fillStyle = i === 0
+        ? "rgba(210, 255, 225, 0.95)"
+        : `rgba(34, 255, 127, ${(0.55 * Math.pow(0.88, i)).toFixed(3)})`;
+      terminalRainCtx.fillText(char, col.x, col.y - i * TERMINAL_RAIN_FONT_SIZE);
+    });
   });
 }
 

@@ -1000,30 +1000,19 @@ body {
   position: absolute;
   left: 0;
   right: 0;
-  top: -60px;
-  height: 60px;
-  background: linear-gradient(180deg, transparent 0%, rgba(34,255,127,0.08) 30%, rgba(180,255,210,0.5) 50%, rgba(34,255,127,0.08) 70%, transparent 100%);
+  top: -10px;
+  height: 10px;
+  background: linear-gradient(180deg, transparent 0%, rgba(34,255,127,0.1) 35%, rgba(210,255,225,0.8) 50%, rgba(34,255,127,0.1) 65%, transparent 100%);
   pointer-events: none;
   z-index: 2;
-  animation: terminal-scan-sweep 4.5s linear infinite;
+  animation: terminal-scan-sweep 3.6s cubic-bezier(0.3, 0, 0.7, 1) infinite;
 }
 
 @keyframes terminal-scan-sweep {
-  0% { top: -60px; }
-  100% { top: 100%; }
-}
-
-[data-theme="terminal"] .card-face::before {
-  content: "";
-  position: absolute;
-  top: 7px;
-  left: 10px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #ff5f56;
-  box-shadow: 12px 0 0 #ffbd2e, 24px 0 0 var(--gold);
-  z-index: 2;
+  0% { top: -10px; }
+  88% { top: 100%; }
+  88.5% { top: -10px; }
+  100% { top: -10px; }
 }
 
 [data-theme="terminal"] .card-title {
