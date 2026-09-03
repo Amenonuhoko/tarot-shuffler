@@ -1441,6 +1441,12 @@ body {
   display: block;
   width: 420px;
   opacity: 0.2;
+  animation: mystic-chart-spin 220s linear infinite;
+}
+
+@keyframes mystic-chart-spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
 [data-theme="mystic-orbit"] .motif-constellation {
@@ -1482,7 +1488,8 @@ body {
   [data-theme="holo"] body, [data-theme="holo"] .card-face, [data-theme="holo"] .card-front::after, [data-theme="holo"] .card-title,
   [data-theme="terminal"] body, [data-theme="terminal"] .card-face, [data-theme="terminal"] .card-front::after, [data-theme="terminal"] .card-title, [data-theme="terminal"] .hint::after,
   [data-theme="deco"] body::before, [data-theme="deco"] .card-title,
-  [data-theme="bloodmoon"] .card-face, [data-theme="bloodmoon"] .card-title, [data-theme="bloodmoon"] .hint::after {
+  [data-theme="bloodmoon"] .card-face, [data-theme="bloodmoon"] .card-title, [data-theme="bloodmoon"] .hint::after,
+  [data-theme="mystic-orbit"] .motif-orbits {
     animation: none !important;
     transition: none !important;
   }
