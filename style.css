@@ -111,29 +111,29 @@
 }
 
 /* ---- Theme: Blood Moon ----
-   A real moon glows through the whole page, not just the card: the
-   eclipse lives in the background, while every component keeps its
-   normal shape with only small, consistent silver/red touches. */
+   Gothic and restrained, like a Castlevania night sky: a dim coppery
+   eclipse barely visible above near-black, brushed silver trim, and
+   deep oxblood as the only accent color — nothing glows loudly. */
 [data-theme="bloodmoon"] {
-  --bg: #0a0606;
-  --bg-glow: #2b0a0a;
-  --surface: #170c0c;
-  --surface-line: #6e6f76;
-  --gold: #d9dce3;
-  --gold-dim: #8a8d96;
-  --ink: #f4f1ee;
-  --ink-dim: #b99a9a;
-  --lavender: #9c1c1c;
+  --bg: #07060a;
+  --bg-glow: #180b0a;
+  --surface: #120d0d;
+  --surface-line: #47484e;
+  --gold: #e7e9ee;
+  --gold-dim: #6f7178;
+  --ink: #e9e4e1;
+  --ink-dim: #8c7f7f;
+  --lavender: #7a2e1a;
 
   --font-display: 'Cinzel Decorative', serif;
   --font-description: 'Cormorant Garamond', serif;
   --font-body: 'Inter', system-ui, sans-serif;
 
-  --radius-card: 10px;
-  --radius-art: 10px;
+  --radius-card: 8px;
+  --radius-art: 8px;
   --radius-pill: 999px;
-  --description-bg: rgba(156, 28, 28, 0.08);
-  --panel-bg: rgba(23, 12, 12, 0.92);
+  --description-bg: rgba(122, 46, 26, 0.06);
+  --panel-bg: rgba(18, 13, 13, 0.94);
 }
 
 * { box-sizing: border-box; }
@@ -1152,26 +1152,30 @@ body {
   border-bottom-color: rgba(232,195,104,0.18);
 }
 
-/* -- Blood Moon: the eclipse lives in the page, components stay their
-   normal shape with only small, consistent silver/red touches -- */
+/* -- Blood Moon: gothic restraint, not a glowing spotlight — a dim
+   coppery eclipse barely visible above a near-black night, with
+   brushed silver that only catches a sharp glint now and then -- */
 
 [data-theme="bloodmoon"] body {
   background-image:
-    radial-gradient(circle at 50% 16%, #e2e5eb 0%, #b7bac2 5%, rgba(156,28,28,0.85) 13%, rgba(156,28,28,0.4) 24%, transparent 42%),
-    radial-gradient(circle at 50% 16%, rgba(156, 28, 28, 0.3), transparent 60%),
-    radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 60%);
+    radial-gradient(circle at 50% 12%, rgba(122, 46, 26, 0.4) 0%, rgba(122, 46, 26, 0.14) 38%, transparent 62%),
+    radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 55%);
 }
 
 [data-theme="bloodmoon"] .card-face {
-  background: radial-gradient(circle at 50% -12%, rgba(156, 28, 28, 0.3), transparent 50%), var(--surface);
   border: 1px solid;
-  border-image: linear-gradient(160deg, #fdfdfd 0%, #aeb2ba 30%, #55575e 50%, #aeb2ba 70%, #fdfdfd 100%) 1;
-  animation: bloodmoon-pulse 5s ease-in-out infinite;
+  border-image: linear-gradient(160deg, #34363c 0%, #eef0f4 8%, #9a9da5 18%, #34363c 34%, #eef0f4 48%, #9a9da5 62%, #34363c 100%) 1;
+  box-shadow: 0 0 0 1px rgba(231,233,238,0.06), 0 0 22px -12px rgba(122,46,26,0.55), 0 20px 42px -22px rgba(0,0,0,0.85);
+  animation: bloodmoon-rim 9s ease-in-out infinite;
 }
 
-@keyframes bloodmoon-pulse {
-  0%, 100% { box-shadow: 0 0 0 1px rgba(217,220,227,0.12), 0 0 26px -8px rgba(156,28,28,0.5), 0 22px 44px -20px rgba(0,0,0,0.85); }
-  50% { box-shadow: 0 0 0 1px rgba(217,220,227,0.2), 0 0 42px -6px rgba(156,28,28,0.75), 0 22px 44px -20px rgba(0,0,0,0.85); }
+@keyframes bloodmoon-rim {
+  0%, 84%, 100% {
+    box-shadow: 0 0 0 1px rgba(231,233,238,0.06), 0 0 22px -12px rgba(122,46,26,0.55), 0 20px 42px -22px rgba(0,0,0,0.85);
+  }
+  91% {
+    box-shadow: 0 0 0 1px rgba(231,233,238,0.4), 0 0 18px -2px rgba(231,233,238,0.55), 0 0 22px -12px rgba(122,46,26,0.55), 0 20px 42px -22px rgba(0,0,0,0.85);
+  }
 }
 
 [data-theme="bloodmoon"] .card-face::before,
@@ -1179,11 +1183,11 @@ body {
   content: "\263E";
   position: absolute;
   top: 12px;
-  color: var(--gold);
-  font-size: 1rem;
+  color: var(--gold-dim);
+  font-size: 0.85rem;
   line-height: 1;
   z-index: 3;
-  text-shadow: 0 0 8px rgba(156, 28, 28, 0.8);
+  opacity: 0.85;
 }
 
 [data-theme="bloodmoon"] .card-face::before {
@@ -1197,41 +1201,45 @@ body {
 
 [data-theme="bloodmoon"] .card-title {
   font-weight: 700;
-  letter-spacing: 0.03em;
-  background: linear-gradient(100deg, #7c7f88, #fdfdfd, #c6cad2, #fdfdfd, #7c7f88);
-  background-size: 250% 100%;
+  letter-spacing: 0.02em;
+  background: linear-gradient(100deg, var(--gold) 42%, #ffffff 50%, var(--gold) 58%);
+  background-size: 260% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: bloodmoon-shimmer 7s linear infinite;
-  text-shadow: 0 0 18px rgba(156, 28, 28, 0.35);
+  animation: bloodmoon-glint 9s ease-in-out infinite, bloodmoon-title-flash 9s ease-in-out infinite;
 }
 
-@keyframes bloodmoon-shimmer {
-  0% { background-position: 0% 0%; }
-  100% { background-position: 250% 0%; }
+@keyframes bloodmoon-glint {
+  0%, 78% { background-position: 0% 0%; }
+  92% { background-position: 160% 0%; }
+  100% { background-position: 260% 0%; }
+}
+
+@keyframes bloodmoon-title-flash {
+  0%, 84%, 100% { text-shadow: none; }
+  91% { text-shadow: 0 0 16px rgba(255,255,255,0.6); }
 }
 
 [data-theme="bloodmoon"] .card-art {
-  border: 1px solid rgba(217, 220, 227, 0.2);
-  box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+  border: 1px solid rgba(231, 233, 238, 0.12);
 }
 
 [data-theme="bloodmoon"] .card-description {
   color: var(--ink);
-  border-color: rgba(217, 220, 227, 0.25);
+  border-color: rgba(231, 233, 238, 0.15);
 }
 
 [data-theme="bloodmoon"] .hint::after {
   content: "\263E";
   margin-left: 6px;
   display: inline-block;
-  animation: bloodmoon-glow 2.4s ease-in-out infinite;
+  animation: bloodmoon-glow 4.5s ease-in-out infinite;
 }
 
 @keyframes bloodmoon-glow {
-  0%, 100% { opacity: 0.45; text-shadow: 0 0 2px rgba(156,28,28,0.3); }
-  50% { opacity: 1; text-shadow: 0 0 10px rgba(156,28,28,0.9); }
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.9; }
 }
 
 [data-theme="bloodmoon"] .deck-selector select,
@@ -1241,7 +1249,7 @@ body {
 [data-theme="bloodmoon"] .btn,
 [data-theme="bloodmoon"] .flip-btn,
 [data-theme="bloodmoon"] .menu-toggle {
-  border-color: rgba(217, 220, 227, 0.35);
+  border-color: rgba(231, 233, 238, 0.2);
 }
 
 [data-theme="bloodmoon"] .btn-secondary:hover,
@@ -1250,7 +1258,7 @@ body {
 [data-theme="bloodmoon"] .search-btn:hover,
 [data-theme="bloodmoon"] .menu-toggle:hover {
   border-color: var(--gold);
-  box-shadow: 0 0 12px rgba(156, 28, 28, 0.4);
+  box-shadow: 0 0 10px rgba(122, 46, 26, 0.4);
 }
 
 [data-theme="bloodmoon"] .history-header,
@@ -1260,15 +1268,11 @@ body {
 
 [data-theme="bloodmoon"] .history-table th,
 [data-theme="bloodmoon"] .history-table td {
-  border-bottom-color: rgba(217,220,227,0.15);
-}
-
-[data-theme="bloodmoon"] .orientation-label {
-  text-shadow: 0 0 6px rgba(217, 220, 227, 0.4);
+  border-bottom-color: rgba(231,233,238,0.1);
 }
 
 [data-theme="bloodmoon"] .orientation-label.is-reversed {
-  text-shadow: 0 0 8px rgba(156, 28, 28, 0.75);
+  text-shadow: 0 0 6px rgba(122, 46, 26, 0.6);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1376,5 +1380,5 @@ body {
 }
 
 .theme-swatch-bloodmoon {
-  background: linear-gradient(135deg, #d9dce3 0%, #9c1c1c 55%, #0a0606 100%);
+  background: linear-gradient(135deg, #e7e9ee 0%, #7a2e1a 55%, #07060a 100%);
 }
