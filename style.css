@@ -1040,7 +1040,6 @@ body {
   border-image: linear-gradient(135deg, #fff6da 0%, #f0cb6e 20%, #a8842f 40%, #f0cb6e 55%, #fff6da 68%, #a8842f 82%, #f0cb6e 100%) 1;
   box-shadow: none;
   filter: drop-shadow(0 0 22px rgba(240, 203, 110, 0.45)) drop-shadow(0 22px 40px rgba(0, 0, 0, 0.8));
-  position: relative;
 }
 
 [data-theme="deco"] .card-face::before,
