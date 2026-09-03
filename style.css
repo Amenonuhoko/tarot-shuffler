@@ -1433,6 +1433,24 @@ body {
     radial-gradient(1.1px 1.1px at 88% 22%, rgba(241,243,247,0.85), transparent),
     radial-gradient(0.7px 0.7px at 95% 55%, var(--gold), transparent),
     radial-gradient(1px 1px at 97% 12%, var(--gold), transparent),
+    radial-gradient(0.6px 0.6px at 2% 35%, var(--gold), transparent),
+    radial-gradient(1.8px 1.8px at 9% 5%, rgba(230,178,120,0.85), transparent),
+    radial-gradient(0.5px 0.5px at 14% 62%, var(--gold), transparent),
+    radial-gradient(1px 1px at 20% 85%, rgba(241,243,247,0.8), transparent),
+    radial-gradient(0.7px 0.7px at 30% 40%, var(--gold), transparent),
+    radial-gradient(2.2px 2.2px at 37% 20%, rgba(230,178,120,0.7), transparent),
+    radial-gradient(0.5px 0.5px at 44% 65%, var(--gold), transparent),
+    radial-gradient(1.2px 1.2px at 50% 92%, var(--gold), transparent),
+    radial-gradient(0.8px 0.8px at 56% 35%, rgba(241,243,247,0.8), transparent),
+    radial-gradient(0.6px 0.6px at 62% 8%, var(--gold), transparent),
+    radial-gradient(1.6px 1.6px at 68% 58%, rgba(230,178,120,0.8), transparent),
+    radial-gradient(0.9px 0.9px at 73% 82%, var(--gold), transparent),
+    radial-gradient(0.5px 0.5px at 79% 30%, var(--gold), transparent),
+    radial-gradient(2px 2px at 84% 90%, rgba(241,243,247,0.85), transparent),
+    radial-gradient(0.7px 0.7px at 91% 5%, var(--gold), transparent),
+    radial-gradient(1.3px 1.3px at 96% 68%, var(--gold), transparent),
+    radial-gradient(0.6px 0.6px at 6% 88%, rgba(230,178,120,0.75), transparent),
+    radial-gradient(1px 1px at 40% 78%, var(--gold), transparent),
     radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 55%);
   background-repeat: no-repeat;
 }
@@ -1450,10 +1468,23 @@ body {
 }
 
 [data-theme="mystic-orbit"] .card-front {
-  border-width: 1px;
-  border-style: dashed;
-  border-color: var(--gold);
   box-shadow: 0 0 40px -10px rgba(216, 183, 106, 0.3);
+}
+
+.mystic-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  pointer-events: none;
+  z-index: 3;
+}
+
+[data-theme="mystic-orbit"] .mystic-frame {
+  display: block;
+  color: var(--gold);
+  opacity: 0.8;
 }
 
 [data-theme="mystic-orbit"] .card-front::before,
@@ -1461,7 +1492,7 @@ body {
   content: "";
   position: absolute;
   top: 11px;
-  width: 17px;
+  width: 22px;
   height: 17px;
   opacity: 0.85;
   z-index: 3;
@@ -1470,13 +1501,13 @@ body {
 }
 
 [data-theme="mystic-orbit"] .card-front::before {
-  left: 13px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23d8b76a' stroke-width='1'%3E%3Cpath d='M8,1 A7,7 0 1,0 8,15 A5,5 0 1,1 8,1 Z'/%3E%3C/svg%3E");
+  left: 11px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 16' fill='none' stroke='%23d8b76a' stroke-width='1'%3E%3Cpath d='M9,1.4 A6.6,6.6 0 1,0 9,14.6 A5,5 0 1,1 9,1.4 Z'/%3E%3Cpath d='M16,2.6 L16.7,4.3 L18.4,5 L16.7,5.7 L16,7.4 L15.3,5.7 L13.6,5 L15.3,4.3 Z' stroke-width='0.6'/%3E%3C/svg%3E");
 }
 
 [data-theme="mystic-orbit"] .card-front::after {
-  right: 13px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23d8b76a' stroke-width='1'%3E%3Ccircle cx='8' cy='8' r='3.2'/%3E%3Cpath d='M8,2.6 L8,0.6 M8,13.4 L8,15.4 M2.6,8 L0.6,8 M13.4,8 L15.4,8 M4.6,4.6 L3.2,3.2 M11.4,11.4 L12.8,12.8 M4.6,11.4 L3.2,12.8 M11.4,4.6 L12.8,3.2'/%3E%3C/svg%3E");
+  right: 11px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23d8b76a' stroke-width='1'%3E%3Ccircle cx='8' cy='8' r='3'/%3E%3Cpath d='M8,2.2 L8,0.4 M8,13.8 L8,15.6 M2.2,8 L0.4,8 M13.8,8 L15.6,8'/%3E%3Cpath d='M4.4,4.4 L3.4,3.4 M11.6,11.6 L12.6,12.6 M4.4,11.6 L3.4,12.6 M11.6,4.4 L12.6,3.4' stroke-width='0.55'/%3E%3C/svg%3E");
 }
 
 @media (prefers-reduced-motion: reduce) {
