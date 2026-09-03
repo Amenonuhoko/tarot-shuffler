@@ -143,9 +143,9 @@
 
 /* -- Preview: Orbit (cosmic, clean) -- */
 [data-theme="mystic-orbit"] {
-  --bg: #060713;
-  --bg-glow: #10142e;
-  --surface: #0d0f22;
+  --bg: #0a0714;
+  --bg-glow: #180f2c;
+  --surface: #140f28;
   --surface-line: rgba(212, 175, 106, 0.3);
   --gold: #d8b76a;
   --gold-dim: #82702f;
@@ -161,7 +161,7 @@
   --radius-art: 8px;
   --radius-pill: 999px;
   --description-bg: rgba(212, 183, 106, 0.06);
-  --panel-bg: rgba(13, 15, 34, 0.88);
+  --panel-bg: rgba(20, 15, 40, 0.88);
 }
 
 * { box-sizing: border-box; }
