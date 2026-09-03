@@ -1032,10 +1032,15 @@ const TERMINAL_RAIN_FONT_SIZE = 16;
 const TERMINAL_RAIN_FAST_STEP_MS = 55;
 const TERMINAL_RAIN_SLOW_STEP_MS = 220;
 const TERMINAL_RAIN_TRAIL_LENGTH = 22;
+const TERMINAL_RAIN_MAX_DROPS = 2;
 let terminalRainCtx = null;
 let terminalRainFrame = null;
 let terminalRainColumns = [];
 let terminalRainLastTime = 0;
+
+function makeTerminalRainDrop(y) {
+  return { y, trail: new Array(TERMINAL_RAIN_TRAIL_LENGTH).fill("") };
+}
 
 function resizeTerminalRain() {
   if (!terminalRainCanvas) {
@@ -1046,10 +1051,9 @@ function resizeTerminalRain() {
   const columnCount = Math.ceil(terminalRainCanvas.width / TERMINAL_RAIN_FONT_SIZE);
   terminalRainColumns = new Array(columnCount).fill(0).map((_, i) => ({
     x: i * TERMINAL_RAIN_FONT_SIZE,
-    y: Math.random() * -300,
-    trail: new Array(TERMINAL_RAIN_TRAIL_LENGTH).fill(""),
     elapsed: Math.random() * TERMINAL_RAIN_FAST_STEP_MS,
     hasLooped: false,
+    drops: [makeTerminalRainDrop(Math.random() * -300)],
   }));
 }
 
@@ -1067,25 +1071,37 @@ function drawTerminalRain(now) {
     const stepMs = col.hasLooped ? TERMINAL_RAIN_SLOW_STEP_MS : TERMINAL_RAIN_FAST_STEP_MS;
     if (col.elapsed >= stepMs) {
       col.elapsed = 0;
-      col.y += TERMINAL_RAIN_FONT_SIZE;
-      col.trail.unshift(Math.random() > 0.5 ? "1" : "0");
-      col.trail.length = TERMINAL_RAIN_TRAIL_LENGTH;
 
-      if (col.y > terminalRainCanvas.height && Math.random() > 0.975) {
-        col.y = 0;
-        col.trail.fill("");
+      col.drops.forEach((drop) => {
+        drop.y += TERMINAL_RAIN_FONT_SIZE;
+        drop.trail.unshift(Math.random() > 0.5 ? "1" : "0");
+        drop.trail.length = TERMINAL_RAIN_TRAIL_LENGTH;
+      });
+
+      const trailBottom = terminalRainCanvas.height + TERMINAL_RAIN_TRAIL_LENGTH * TERMINAL_RAIN_FONT_SIZE;
+      col.drops = col.drops.filter((drop) => drop.y <= trailBottom);
+
+      // A new drop doesn't need to wait for the previous one to fully fall off —
+      // it can start once the newest drop is most of the way down.
+      const newestDrop = col.drops[col.drops.length - 1];
+      const canSpawn = col.drops.length < TERMINAL_RAIN_MAX_DROPS
+        && (!newestDrop || newestDrop.y > terminalRainCanvas.height * 0.6);
+      if (canSpawn && Math.random() > 0.975) {
+        col.drops.push(makeTerminalRainDrop(0));
         col.hasLooped = true;
       }
     }
 
-    col.trail.forEach((char, i) => {
-      if (!char) {
-        return;
-      }
-      terminalRainCtx.fillStyle = i === 0
-        ? "rgba(210, 255, 225, 0.95)"
-        : `rgba(34, 255, 127, ${(0.55 * Math.pow(0.88, i)).toFixed(3)})`;
-      terminalRainCtx.fillText(char, col.x, col.y - i * TERMINAL_RAIN_FONT_SIZE);
+    col.drops.forEach((drop) => {
+      drop.trail.forEach((char, i) => {
+        if (!char) {
+          return;
+        }
+        terminalRainCtx.fillStyle = i === 0
+          ? "rgba(210, 255, 225, 0.95)"
+          : `rgba(34, 255, 127, ${(0.55 * Math.pow(0.88, i)).toFixed(3)})`;
+        terminalRainCtx.fillText(char, col.x, drop.y - i * TERMINAL_RAIN_FONT_SIZE);
+      });
     });
   });
 }

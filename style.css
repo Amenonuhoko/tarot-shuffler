@@ -1019,12 +1019,12 @@ body {
   content: "";
   position: absolute;
   top: 7px;
-  right: 10px;
+  left: calc(100% - 40px);
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background: #ff5f56;
-  box-shadow: -12px 0 0 #ffbd2e, -24px 0 0 var(--gold);
+  box-shadow: 12px 0 0 #ffbd2e, 24px 0 0 var(--gold);
   z-index: 2;
 }
 
