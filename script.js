@@ -991,8 +991,6 @@ const THEME_ICON_PATHS = {
   terminal: '<path d="M3 5 L8 9 L3 13"/><path d="M9.5 14 L15 14"/>',
   deco: '<path d="M9 16 L9 2 M9 16 L4.5 4 M9 16 L13.5 4 M9 16 L1.5 9.5 M9 16 L16.5 9.5"/>',
   bloodmoon: '<circle cx="9" cy="9" r="4.5" fill="currentColor" stroke="none"/><circle cx="9" cy="9" r="7.4" stroke-dasharray="1.2 2.4"/>',
-  "mystic-celestial": '<path d="M9 2 L10.6 7.4 L16 9 L10.6 10.6 L9 16 L7.4 10.6 L2 9 L7.4 7.4 Z"/>',
-  "mystic-grimoire": '<path d="M9 2 L13.11 14.66 L2.34 6.84 L15.66 6.84 L4.89 14.66 Z"/>',
   "mystic-orbit": '<circle cx="9" cy="9" r="7"/><circle cx="9" cy="9" r="3.5"/><circle cx="14.5" cy="6" r="1" fill="currentColor" stroke="none"/>'
 };
 
