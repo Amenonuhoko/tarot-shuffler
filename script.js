@@ -932,7 +932,7 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-// ---- Theme switcher (preview-build only, not part of the real design) ----
+// ---- Theme switcher ----
 
 const themeToggleEl = document.getElementById("themeToggle");
 const themeMenuEl = document.getElementById("themeMenu");
