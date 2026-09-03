@@ -979,7 +979,6 @@ body {
 [data-theme="terminal"] .card-face {
   border: 1px solid var(--gold);
   box-shadow: 0 0 0 1px rgba(34,255,127,0.25), 0 0 30px rgba(34,255,127,0.3);
-  overflow: hidden;
   animation: terminal-card-glitch 7s linear infinite;
 }
 
