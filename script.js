@@ -947,6 +947,28 @@ const themeMenuEl = document.getElementById("themeMenu");
 const themeOptionEls = document.querySelectorAll(".theme-option");
 let isThemeMenuOpen = false;
 
+const THEME_STORAGE_KEY = "tarotPullTheme";
+const VALID_THEME_VALUES = new Set(
+  Array.from(themeOptionEls).map((option) => option.dataset.themeValue)
+);
+
+function loadStoredTheme() {
+  try {
+    const stored = localStorage.getItem(THEME_STORAGE_KEY);
+    return VALID_THEME_VALUES.has(stored) ? stored : "";
+  } catch (err) {
+    return "";
+  }
+}
+
+function saveTheme(themeValue) {
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, themeValue);
+  } catch (err) {
+    // Storage unavailable (private mode, disabled, etc.) - theme just won't persist.
+  }
+}
+
 const THEME_ICON_PATHS = {
   "": '<path d="M9 1 L11 7 L17 9 L11 11 L9 17 L7 11 L1 9 L7 7 Z"/>',
   holo: '<path d="M4 7 L9 2 L14 7 L9 16 Z"/><path d="M4 7 L14 7"/><path d="M6.5 7 L9 2 L11.5 7"/>',
@@ -1014,6 +1036,7 @@ function applyTheme(themeValue) {
     : "Search for a card…";
 
   renderHistory();
+  saveTheme(themeValue);
 }
 
 themeToggleEl.addEventListener("click", (event) => {
@@ -1035,4 +1058,4 @@ document.addEventListener("click", (event) => {
   }
 });
 
-applyTheme("");
+applyTheme(loadStoredTheme());
