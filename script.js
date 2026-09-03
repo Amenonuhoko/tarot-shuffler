@@ -1027,6 +1027,74 @@ function scheduleHoloGlint() {
   }, delay);
 }
 
+const terminalRainCanvas = document.getElementById("terminalRain");
+const TERMINAL_RAIN_FONT_SIZE = 16;
+let terminalRainCtx = null;
+let terminalRainFrame = null;
+let terminalRainColumns = [];
+
+function resizeTerminalRain() {
+  if (!terminalRainCanvas) {
+    return;
+  }
+  terminalRainCanvas.width = window.innerWidth;
+  terminalRainCanvas.height = window.innerHeight;
+  const columnCount = Math.ceil(terminalRainCanvas.width / TERMINAL_RAIN_FONT_SIZE);
+  terminalRainColumns = new Array(columnCount).fill(0).map(() => Math.random() * -100);
+}
+
+function drawTerminalRain() {
+  terminalRainCtx.fillStyle = "rgba(0, 17, 10, 0.15)";
+  terminalRainCtx.fillRect(0, 0, terminalRainCanvas.width, terminalRainCanvas.height);
+  terminalRainCtx.fillStyle = "#22ff7f";
+  terminalRainCtx.font = `${TERMINAL_RAIN_FONT_SIZE}px 'Space Mono', monospace`;
+
+  terminalRainColumns.forEach((y, i) => {
+    terminalRainCtx.fillText(Math.random() > 0.5 ? "1" : "0", i * TERMINAL_RAIN_FONT_SIZE, y);
+    if (y > terminalRainCanvas.height && Math.random() > 0.975) {
+      terminalRainColumns[i] = 0;
+    } else {
+      terminalRainColumns[i] = y + TERMINAL_RAIN_FONT_SIZE;
+    }
+  });
+
+  terminalRainFrame = requestAnimationFrame(drawTerminalRain);
+}
+
+function startTerminalRain() {
+  if (!terminalRainCanvas || terminalRainFrame || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    return;
+  }
+  terminalRainCtx = terminalRainCanvas.getContext("2d");
+  resizeTerminalRain();
+  terminalRainCanvas.hidden = false;
+  terminalRainFrame = requestAnimationFrame(drawTerminalRain);
+}
+
+function stopTerminalRain() {
+  if (terminalRainFrame) {
+    cancelAnimationFrame(terminalRainFrame);
+    terminalRainFrame = null;
+  }
+  if (terminalRainCanvas) {
+    terminalRainCanvas.hidden = true;
+  }
+}
+
+window.addEventListener("resize", () => {
+  if (terminalRainFrame) {
+    resizeTerminalRain();
+  }
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    stopTerminalRain();
+  } else if (document.documentElement.getAttribute("data-theme") === "terminal") {
+    startTerminalRain();
+  }
+});
+
 function applyTheme(themeValue) {
   if (themeValue) {
     document.documentElement.setAttribute("data-theme", themeValue);
@@ -1051,6 +1119,12 @@ function applyTheme(themeValue) {
     scheduleHoloGlint();
   } else {
     clearTimeout(holoGlintTimer);
+  }
+
+  if (themeValue === "terminal") {
+    startTerminalRain();
+  } else {
+    stopTerminalRain();
   }
 
   cardSearchInputEl.placeholder = themeValue === "terminal"
