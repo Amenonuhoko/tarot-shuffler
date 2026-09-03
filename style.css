@@ -854,7 +854,7 @@ body {
   isolation: isolate;
 }
 
-[data-theme="holo"] .card-face::after {
+[data-theme="holo"] .card-front::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -867,7 +867,7 @@ body {
   opacity: 0;
 }
 
-[data-theme="holo"] .card-face.glinting::after {
+[data-theme="holo"] .card-front.glinting::after {
   animation: holo-glint-sweep 3.4s cubic-bezier(0.3, 0.65, 0.4, 1) 1;
 }
 
@@ -995,7 +995,7 @@ body {
   }
 }
 
-[data-theme="terminal"] .card-face::after {
+[data-theme="terminal"] .card-front::after {
   content: "";
   position: absolute;
   left: 0;
@@ -1015,7 +1015,7 @@ body {
   100% { top: -10px; }
 }
 
-[data-theme="terminal"] .card-face::before {
+[data-theme="terminal"] .card-front::before {
   content: "";
   position: absolute;
   top: 7px;
@@ -1131,8 +1131,8 @@ body {
   filter: drop-shadow(0 0 22px rgba(240, 203, 110, 0.45)) drop-shadow(0 22px 40px rgba(0, 0, 0, 0.8));
 }
 
-[data-theme="deco"] .card-face::before,
-[data-theme="deco"] .card-face::after {
+[data-theme="deco"] .card-front::before,
+[data-theme="deco"] .card-front::after {
   position: absolute;
   color: var(--gold);
   font-size: 1.1rem;
@@ -1141,13 +1141,13 @@ body {
   text-shadow: 0 0 6px rgba(240, 203, 110, 0.7);
 }
 
-[data-theme="deco"] .card-face::before {
+[data-theme="deco"] .card-front::before {
   content: "\25C6";
   top: 14px;
   left: 16px;
 }
 
-[data-theme="deco"] .card-face::after {
+[data-theme="deco"] .card-front::after {
   content: "\25C6";
   top: 14px;
   right: 16px;
@@ -1246,8 +1246,8 @@ body {
   }
 }
 
-[data-theme="bloodmoon"] .card-face::before,
-[data-theme="bloodmoon"] .card-face::after {
+[data-theme="bloodmoon"] .card-front::before,
+[data-theme="bloodmoon"] .card-front::after {
   content: "\263E";
   position: absolute;
   top: 12px;
@@ -1259,11 +1259,11 @@ body {
   text-shadow: 0 0 4px rgba(241,243,247,0.5);
 }
 
-[data-theme="bloodmoon"] .card-face::before {
+[data-theme="bloodmoon"] .card-front::before {
   left: 14px;
 }
 
-[data-theme="bloodmoon"] .card-face::after {
+[data-theme="bloodmoon"] .card-front::after {
   right: 14px;
   transform: scaleX(-1);
 }
@@ -1345,8 +1345,8 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .card, .card.shuffling, .card-slot.pulling, .card-search-input.not-found,
-  [data-theme="holo"] body, [data-theme="holo"] .card-face, [data-theme="holo"] .card-face::after, [data-theme="holo"] .card-title,
-  [data-theme="terminal"] body, [data-theme="terminal"] .card-face, [data-theme="terminal"] .card-face::after, [data-theme="terminal"] .card-title, [data-theme="terminal"] .hint::after,
+  [data-theme="holo"] body, [data-theme="holo"] .card-face, [data-theme="holo"] .card-front::after, [data-theme="holo"] .card-title,
+  [data-theme="terminal"] body, [data-theme="terminal"] .card-face, [data-theme="terminal"] .card-front::after, [data-theme="terminal"] .card-title, [data-theme="terminal"] .hint::after,
   [data-theme="deco"] body::before, [data-theme="deco"] .card-title,
   [data-theme="bloodmoon"] .card-face, [data-theme="bloodmoon"] .card-title, [data-theme="bloodmoon"] .hint::after {
     animation: none !important;
