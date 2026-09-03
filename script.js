@@ -1029,11 +1029,12 @@ function scheduleHoloGlint() {
 
 const terminalRainCanvas = document.getElementById("terminalRain");
 const TERMINAL_RAIN_FONT_SIZE = 16;
-const TERMINAL_RAIN_STEP_MS = 220;
+const TERMINAL_RAIN_FAST_STEP_MS = 55;
+const TERMINAL_RAIN_SLOW_STEP_MS = 220;
 let terminalRainCtx = null;
 let terminalRainFrame = null;
 let terminalRainColumns = [];
-let terminalRainLastStep = 0;
+let terminalRainLastTime = 0;
 
 function resizeTerminalRain() {
   if (!terminalRainCanvas) {
@@ -1042,29 +1043,39 @@ function resizeTerminalRain() {
   terminalRainCanvas.width = window.innerWidth;
   terminalRainCanvas.height = window.innerHeight;
   const columnCount = Math.ceil(terminalRainCanvas.width / TERMINAL_RAIN_FONT_SIZE);
-  terminalRainColumns = new Array(columnCount).fill(0).map(() => Math.random() * -100);
+  terminalRainColumns = new Array(columnCount).fill(0).map((_, i) => ({
+    x: i * TERMINAL_RAIN_FONT_SIZE,
+    y: Math.random() * -300,
+    char: Math.random() > 0.5 ? "1" : "0",
+    elapsed: Math.random() * TERMINAL_RAIN_FAST_STEP_MS,
+    hasLooped: false,
+  }));
 }
 
 function drawTerminalRain(now) {
   terminalRainFrame = requestAnimationFrame(drawTerminalRain);
 
-  if (now - terminalRainLastStep < TERMINAL_RAIN_STEP_MS) {
-    return;
-  }
-  terminalRainLastStep = now;
+  const delta = terminalRainLastTime ? Math.min(now - terminalRainLastTime, 100) : 16;
+  terminalRainLastTime = now;
 
   terminalRainCtx.fillStyle = "rgba(0, 17, 10, 0.15)";
   terminalRainCtx.fillRect(0, 0, terminalRainCanvas.width, terminalRainCanvas.height);
   terminalRainCtx.fillStyle = "#22ff7f";
   terminalRainCtx.font = `${TERMINAL_RAIN_FONT_SIZE}px 'Space Mono', monospace`;
 
-  terminalRainColumns.forEach((y, i) => {
-    terminalRainCtx.fillText(Math.random() > 0.5 ? "1" : "0", i * TERMINAL_RAIN_FONT_SIZE, y);
-    if (y > terminalRainCanvas.height && Math.random() > 0.975) {
-      terminalRainColumns[i] = 0;
-    } else {
-      terminalRainColumns[i] = y + TERMINAL_RAIN_FONT_SIZE;
+  terminalRainColumns.forEach((col) => {
+    col.elapsed += delta;
+    const stepMs = col.hasLooped ? TERMINAL_RAIN_SLOW_STEP_MS : TERMINAL_RAIN_FAST_STEP_MS;
+    if (col.elapsed >= stepMs) {
+      col.elapsed = 0;
+      col.y += TERMINAL_RAIN_FONT_SIZE;
+      col.char = Math.random() > 0.5 ? "1" : "0";
+      if (col.y > terminalRainCanvas.height && Math.random() > 0.975) {
+        col.y = 0;
+        col.hasLooped = true;
+      }
     }
+    terminalRainCtx.fillText(col.char, col.x, col.y);
   });
 }
 
@@ -1075,7 +1086,7 @@ function startTerminalRain() {
   terminalRainCtx = terminalRainCanvas.getContext("2d");
   resizeTerminalRain();
   terminalRainCanvas.hidden = false;
-  terminalRainLastStep = 0;
+  terminalRainLastTime = 0;
   terminalRainFrame = requestAnimationFrame(drawTerminalRain);
 }
 

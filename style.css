@@ -1001,8 +1001,7 @@ body {
   right: 0;
   top: -60px;
   height: 60px;
-  background: linear-gradient(180deg, transparent 0%, rgba(34,255,127,0.05) 30%, rgba(34,255,127,0.35) 50%, rgba(34,255,127,0.05) 70%, transparent 100%);
-  mix-blend-mode: screen;
+  background: linear-gradient(180deg, transparent 0%, rgba(34,255,127,0.08) 30%, rgba(180,255,210,0.5) 50%, rgba(34,255,127,0.08) 70%, transparent 100%);
   pointer-events: none;
   z-index: 2;
   animation: terminal-scan-sweep 4.5s linear infinite;
