@@ -502,7 +502,27 @@ const DECKS = {
   custom: { name: "Oracle of the Divine", cards: buildCustomDeck(), allowReversed: false }
 };
 
-let activeDeck = DECKS.classical;
+const DECK_STORAGE_KEY = "tarotPullDeck";
+
+function loadStoredDeckKey() {
+  try {
+    const stored = localStorage.getItem(DECK_STORAGE_KEY);
+    return Object.prototype.hasOwnProperty.call(DECKS, stored) ? stored : "classical";
+  } catch (err) {
+    return "classical";
+  }
+}
+
+function saveDeckKey(deckKey) {
+  try {
+    localStorage.setItem(DECK_STORAGE_KEY, deckKey);
+  } catch (err) {
+    // Storage unavailable (private mode, disabled, etc.) - deck choice just won't persist.
+  }
+}
+
+const initialDeckKey = loadStoredDeckKey();
+let activeDeck = DECKS[initialDeckKey];
 
 function mulberry32(seed) {
   return function () {
@@ -783,7 +803,7 @@ function closeMenuIfCompact() {
   }
 }
 
-function resetReading() {
+function clearCardDisplay() {
   cardEl.classList.remove("flipped");
   isFlipped = false;
 
@@ -800,9 +820,13 @@ function resetReading() {
   cardArtImgEl.classList.remove("loaded");
   cardArtFallbackEl.classList.remove("hidden");
   hintEl.textContent = "Tap anywhere to pull a card";
-  pullHistory = [];
   currentCard = null;
   flipBtn.hidden = true;
+}
+
+function resetReading() {
+  clearCardDisplay();
+  pullHistory = [];
   renderHistory();
   populateCardNames();
   reseedRandom();
@@ -815,6 +839,7 @@ menuToggle.addEventListener("click", (event) => {
 
 deckSelect.addEventListener("change", () => {
   activeDeck = DECKS[deckSelect.value];
+  saveDeckKey(deckSelect.value);
   resetReading();
   closeMenuIfCompact();
 });
@@ -844,6 +869,10 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  if (event.target.closest(".card-description")) {
+    return;
+  }
+
   const card = pullCard();
   showCard(card);
 });
@@ -858,25 +887,7 @@ shuffleBtn.addEventListener("click", () => {
   const wasFlipped = isFlipped;
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  cardEl.classList.remove("flipped");
-  isFlipped = false;
-
-  arcanaLabelEl.textContent = "Major Arcana";
-  cardTitleEl.textContent = "\u2014";
-  orientationLabelEl.textContent = "";
-  orientationLabelEl.classList.remove("is-reversed");
-  cardDescriptionEl.textContent = "";
-  cardArtEl.classList.remove("is-reversed");
-  cardFrontContentEl.classList.remove("is-reversed");
-  cardArtImgEl.onload = null;
-  cardArtImgEl.onerror = null;
-  cardArtImgEl.removeAttribute("src");
-  cardArtImgEl.classList.remove("loaded");
-  cardArtFallbackEl.classList.remove("hidden");
-  hintEl.textContent = "Tap anywhere to pull a card";
-  currentCard = null;
-  flipBtn.hidden = true;
-
+  clearCardDisplay();
   reseedRandom();
 
   if (wasFlipped && !prefersReducedMotion) {
@@ -920,10 +931,7 @@ cardSlotEl.addEventListener("animationend", () => {
   cardSlotEl.classList.remove("pulling");
 });
 
-cardSlotEl.addEventListener("animationend", () => {
-  cardSlotEl.classList.remove("pulling");
-});
-
+deckSelect.value = initialDeckKey;
 renderHistory();
 populateCardNames();
 setMenuOpen(wideLayoutQuery.matches);
@@ -1018,7 +1026,12 @@ function applyTheme(themeValue) {
   }
 
   themeOptionEls.forEach((option) => {
-    option.classList.toggle("is-active", option.dataset.themeValue === themeValue);
+    const isActive = option.dataset.themeValue === themeValue;
+    option.classList.toggle("is-active", isActive);
+    const currentTag = option.querySelector(".theme-current-tag");
+    if (currentTag) {
+      currentTag.hidden = !isActive;
+    }
   });
 
   const iconPath = THEME_ICON_PATHS[themeValue] || THEME_ICON_PATHS[""];
