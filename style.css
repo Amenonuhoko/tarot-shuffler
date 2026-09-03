@@ -1054,7 +1054,7 @@ body {
 
 [data-theme="deco"] .card-face::after {
   content: "\25C6";
-  bottom: 14px;
+  top: 14px;
   right: 16px;
 }
 
