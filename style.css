@@ -979,6 +979,39 @@ body {
 [data-theme="terminal"] .card-face {
   border: 1px solid var(--gold);
   box-shadow: 0 0 0 1px rgba(34,255,127,0.25), 0 0 30px rgba(34,255,127,0.3);
+  overflow: hidden;
+  animation: terminal-card-glitch 7s linear infinite;
+}
+
+@keyframes terminal-card-glitch {
+  0%, 95%, 100% {
+    box-shadow: 0 0 0 1px rgba(34,255,127,0.25), 0 0 30px rgba(34,255,127,0.3);
+  }
+  96% {
+    box-shadow: 3px 0 0 rgba(255,59,48,0.4), -3px 0 0 rgba(0,229,255,0.4), 0 0 0 1px rgba(34,255,127,0.25), 0 0 30px rgba(34,255,127,0.3);
+  }
+  97.5% {
+    box-shadow: -2px 0 0 rgba(255,59,48,0.4), 2px 0 0 rgba(0,229,255,0.4), 0 0 0 1px rgba(34,255,127,0.25), 0 0 30px rgba(34,255,127,0.3);
+  }
+}
+
+[data-theme="terminal"] .card-face::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -60px;
+  height: 60px;
+  background: linear-gradient(180deg, transparent 0%, rgba(34,255,127,0.05) 30%, rgba(34,255,127,0.35) 50%, rgba(34,255,127,0.05) 70%, transparent 100%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 2;
+  animation: terminal-scan-sweep 4.5s linear infinite;
+}
+
+@keyframes terminal-scan-sweep {
+  0% { top: -60px; }
+  100% { top: 100%; }
 }
 
 [data-theme="terminal"] .card-face::before {
@@ -1312,7 +1345,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .card, .card.shuffling, .card-slot.pulling, .card-search-input.not-found,
   [data-theme="holo"] body, [data-theme="holo"] .card-face, [data-theme="holo"] .card-face::after, [data-theme="holo"] .card-title,
-  [data-theme="terminal"] body, [data-theme="terminal"] .card-title, [data-theme="terminal"] .hint::after,
+  [data-theme="terminal"] body, [data-theme="terminal"] .card-face, [data-theme="terminal"] .card-face::after, [data-theme="terminal"] .card-title, [data-theme="terminal"] .hint::after,
   [data-theme="deco"] body::before, [data-theme="deco"] .card-title,
   [data-theme="bloodmoon"] .card-face, [data-theme="bloodmoon"] .card-title, [data-theme="bloodmoon"] .hint::after {
     animation: none !important;
