@@ -10,40 +10,9 @@
 <link rel="stylesheet" href="style.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Grenze+Gotisch:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Cinzel:wght@500;600&family=Cinzel+Decorative:wght@700;900&family=Playfair+Display:wght@600;700&family=EB+Garamond:ital,wght@0,500;1,500&family=Orbitron:wght@600;800&family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Grenze+Gotisch:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Cinzel:wght@500;600&family=Cinzel+Decorative:wght@700;900&family=Playfair+Display:wght@600;700&family=EB+Garamond:ital,wght@0,500;1,500&family=Orbitron:wght@600;800&family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&family=Anton&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-
-<div class="theme-switcher" id="themeSwitcher">
-  <button class="theme-toggle" id="themeToggle" type="button" aria-label="Change design theme" aria-expanded="false" aria-controls="themeMenu">&#127912;</button>
-  <div class="theme-menu" id="themeMenu" hidden>
-    <p class="theme-menu-title">Preview design</p>
-    <button class="theme-option" data-theme-value="" type="button">
-      <span class="theme-swatch theme-swatch-mystic"></span>
-      Mystic Violet <em>(current)</em>
-    </button>
-    <button class="theme-option" data-theme-value="celestial" type="button">
-      <span class="theme-swatch theme-swatch-celestial"></span>
-      Celestial Midnight
-    </button>
-    <button class="theme-option" data-theme-value="grimoire" type="button">
-      <span class="theme-swatch theme-swatch-grimoire"></span>
-      Vintage Grimoire
-    </button>
-    <button class="theme-option" data-theme-value="neon" type="button">
-      <span class="theme-swatch theme-swatch-neon"></span>
-      Neon Arcade
-    </button>
-    <button class="theme-option" data-theme-value="minimal" type="button">
-      <span class="theme-swatch theme-swatch-minimal"></span>
-      Minimalist Mono
-    </button>
-    <button class="theme-option" data-theme-value="gothic" type="button">
-      <span class="theme-swatch theme-swatch-gothic"></span>
-      Blood Moon Gothic
-    </button>
-  </div>
-</div>
 
 <div class="table">
 
@@ -101,6 +70,41 @@
             <span></span>
             <span></span>
           </button>
+        </div>
+
+        <div class="menu-wrap theme-wrap" id="themeSwitcher">
+          <button class="menu-toggle theme-toggle" id="themeToggle" type="button" aria-label="Change design theme" aria-expanded="false" aria-controls="themeMenu">&#127912;</button>
+          <div class="theme-menu" id="themeMenu" hidden>
+            <p class="theme-menu-title">Preview design</p>
+            <button class="theme-option" data-theme-value="" type="button">
+              <span class="theme-swatch theme-swatch-mystic"></span>
+              Mystic Violet <em>(current)</em>
+            </button>
+            <button class="theme-option" data-theme-value="holo" type="button">
+              <span class="theme-swatch theme-swatch-holo"></span>
+              Holographic Foil
+            </button>
+            <button class="theme-option" data-theme-value="frame" type="button">
+              <span class="theme-swatch theme-swatch-frame"></span>
+              Gilded Frame
+            </button>
+            <button class="theme-option" data-theme-value="terminal" type="button">
+              <span class="theme-swatch theme-swatch-terminal"></span>
+              Glitch Terminal
+            </button>
+            <button class="theme-option" data-theme-value="punk" type="button">
+              <span class="theme-swatch theme-swatch-punk"></span>
+              Torn Paper Punk
+            </button>
+            <button class="theme-option" data-theme-value="deco" type="button">
+              <span class="theme-swatch theme-swatch-deco"></span>
+              Art Deco Luxe
+            </button>
+            <button class="theme-option" data-theme-value="blob" type="button">
+              <span class="theme-swatch theme-swatch-blob"></span>
+              Liquid Blob
+            </button>
+          </div>
         </div>
       </div>
 

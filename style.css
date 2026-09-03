@@ -23,138 +23,155 @@
   --panel-bg: rgba(31, 26, 48, 0.82);
 }
 
-/* ---- Theme: Celestial Midnight ---- */
-[data-theme="celestial"] {
-  --bg: #05070f;
-  --bg-glow: #0d1730;
-  --surface: #101a33;
-  --surface-line: #23335c;
-  --gold: #bcdcff;
-  --gold-dim: #6f88b8;
-  --ink: #eaf1ff;
-  --ink-dim: #7f93c2;
-  --lavender: #9fb8ff;
+/* ================================================================
+   BOMBASTIC THEME DIRECTIONS
+   Each theme redefines the base palette/font variables AND applies
+   structural overrides further down this file (shape, animation,
+   decoration) — these are not simple recolors.
+   ================================================================ */
+
+/* ---- Theme: Holographic Foil ---- */
+[data-theme="holo"] {
+  --bg: #0c0716;
+  --bg-glow: #1b1030;
+  --surface: #15102a;
+  --surface-line: rgba(255,255,255,0.35);
+  --gold: #ffffff;
+  --gold-dim: #c9c2ff;
+  --ink: #ffffff;
+  --ink-dim: #cabdf5;
+  --lavender: #b9a6ff;
+
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-description: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  --radius-card: 22px;
+  --radius-art: 16px;
+  --radius-pill: 999px;
+  --description-bg: rgba(255,255,255,0.08);
+  --panel-bg: rgba(21, 16, 42, 0.7);
+  --label-transform: uppercase;
+}
+
+/* ---- Theme: Gilded Frame ---- */
+[data-theme="frame"] {
+  --bg: #05130f;
+  --bg-glow: #0c261d;
+  --surface: #0b2019;
+  --surface-line: #d4af37;
+  --gold: #f2d27a;
+  --gold-dim: #a8842f;
+  --ink: #f4ead0;
+  --ink-dim: #b9a877;
+  --lavender: #f2d27a;
+
+  --font-display: 'Cinzel Decorative', serif;
+  --font-description: 'Cormorant Garamond', serif;
+  --font-body: 'Cormorant Garamond', serif;
+
+  --radius-card: 0px;
+  --radius-art: 0px;
+  --radius-pill: 0px;
+  --description-bg: rgba(212, 175, 55, 0.08);
+  --panel-bg: rgba(11, 32, 25, 0.9);
+  --label-transform: uppercase;
+}
+
+/* ---- Theme: Glitch Terminal ---- */
+[data-theme="terminal"] {
+  --bg: #000000;
+  --bg-glow: #001505;
+  --surface: #020a04;
+  --surface-line: #1fff6b;
+  --gold: #1fff6b;
+  --gold-dim: #128f3d;
+  --ink: #a8ffc4;
+  --ink-dim: #3f9a5f;
+  --lavender: #ff2b6d;
+
+  --font-display: 'Space Mono', monospace;
+  --font-description: 'Space Mono', monospace;
+  --font-body: 'Space Mono', monospace;
+
+  --radius-card: 0px;
+  --radius-art: 0px;
+  --radius-pill: 0px;
+  --description-bg: rgba(31, 255, 107, 0.06);
+  --panel-bg: rgba(2, 10, 4, 0.94);
+  --label-transform: uppercase;
+}
+
+/* ---- Theme: Torn Paper Punk ---- */
+[data-theme="punk"] {
+  --bg: #f2ede1;
+  --bg-glow: #fdfaf2;
+  --surface: #fffdf7;
+  --surface-line: #111111;
+  --gold: #ff2fa1;
+  --gold-dim: #c1005f;
+  --ink: #111111;
+  --ink-dim: #444444;
+  --lavender: #111111;
+
+  --font-display: 'Anton', sans-serif;
+  --font-description: 'Space Mono', monospace;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  --radius-card: 0px;
+  --radius-art: 0px;
+  --radius-pill: 0px;
+  --description-bg: #fffdf7;
+  --panel-bg: rgba(255, 253, 247, 0.97);
+  --label-transform: uppercase;
+}
+
+/* ---- Theme: Art Deco Luxe ---- */
+[data-theme="deco"] {
+  --bg: #0b0b0b;
+  --bg-glow: #1a1608;
+  --surface: #14120a;
+  --surface-line: #caa24a;
+  --gold: #e8c368;
+  --gold-dim: #8f7328;
+  --ink: #f2e6c4;
+  --ink-dim: #a4966a;
+  --lavender: #2e6e5e;
 
   --font-display: 'Cinzel', serif;
   --font-description: 'Cormorant Garamond', serif;
   --font-body: 'Inter', system-ui, sans-serif;
 
-  --radius-card: 10px;
-  --radius-art: 6px;
-  --radius-pill: 10px;
-  --card-shadow: 0 0 46px -8px rgba(140, 185, 255, 0.35);
-  --bg-texture:
-    radial-gradient(1px 1px at 12% 22%, rgba(255,255,255,0.75), transparent),
-    radial-gradient(1px 1px at 82% 15%, rgba(255,255,255,0.55), transparent),
-    radial-gradient(1px 1px at 65% 78%, rgba(255,255,255,0.6), transparent),
-    radial-gradient(1px 1px at 30% 88%, rgba(255,255,255,0.4), transparent),
-    radial-gradient(1px 1px at 92% 60%, rgba(255,255,255,0.5), transparent),
-    radial-gradient(1px 1px at 45% 45%, rgba(255,255,255,0.35), transparent),
-    radial-gradient(1.5px 1.5px at 20% 60%, rgba(255,255,255,0.6), transparent),
-    radial-gradient(1.5px 1.5px at 75% 92%, rgba(255,255,255,0.45), transparent);
+  --radius-card: 0px;
+  --radius-art: 0px;
+  --radius-pill: 0px;
+  --description-bg: rgba(232, 195, 104, 0.08);
+  --panel-bg: rgba(20, 18, 10, 0.92);
+  --label-transform: uppercase;
 }
 
-/* ---- Theme: Vintage Grimoire ---- */
-[data-theme="grimoire"] {
-  --bg: #e9dcbc;
-  --bg-glow: #f6ecd2;
-  --surface: #f8efd8;
-  --surface-line: #c6b183;
-  --gold: #8a5a2b;
-  --gold-dim: #ab875a;
-  --ink: #3b2a18;
-  --ink-dim: #6b5636;
-  --lavender: #7a4a2e;
-
-  --font-display: 'Playfair Display', serif;
-  --font-description: 'EB Garamond', serif;
-  --font-body: 'Inter', system-ui, sans-serif;
-
-  --radius-card: 4px;
-  --radius-art: 3px;
-  --radius-pill: 6px;
-  --card-shadow: 0 12px 26px -14px rgba(60, 40, 10, 0.45);
-  --bg-texture:
-    radial-gradient(ellipse at 50% 35%, transparent 45%, rgba(60,40,10,0.10) 100%),
-    repeating-linear-gradient(45deg, rgba(60,40,10,0.03) 0px, rgba(60,40,10,0.03) 1px, transparent 1px, transparent 3px);
-  --label-transform: none;
-  --description-bg: rgba(60, 40, 10, 0.06);
-  --panel-bg: rgba(248, 239, 216, 0.9);
-}
-
-/* ---- Theme: Neon Arcade ---- */
-[data-theme="neon"] {
-  --bg: #050208;
-  --bg-glow: #1a0630;
-  --surface: #140a24;
-  --surface-line: #5a2a6e;
-  --gold: #39f2ff;
-  --gold-dim: #ff2fb0;
-  --ink: #f2eaff;
-  --ink-dim: #b48ce0;
-  --lavender: #ff2fb0;
-
-  --font-display: 'Orbitron', sans-serif;
-  --font-description: 'Space Mono', monospace;
-  --font-body: 'Inter', system-ui, sans-serif;
-
-  --radius-card: 4px;
-  --radius-art: 2px;
-  --radius-pill: 4px;
-  --card-shadow: 0 0 26px rgba(57, 242, 255, 0.35), 0 0 55px rgba(255, 47, 176, 0.2);
-  --bg-texture:
-    repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 3px),
-    radial-gradient(ellipse at 20% 10%, rgba(255,47,176,0.12) 0%, transparent 55%),
-    radial-gradient(ellipse at 85% 85%, rgba(57,242,255,0.12) 0%, transparent 55%);
-}
-
-/* ---- Theme: Minimalist Mono ---- */
-[data-theme="minimal"] {
-  --bg: #f7f7f5;
+/* ---- Theme: Liquid Blob ---- */
+[data-theme="blob"] {
+  --bg: #fef6f0;
   --bg-glow: #ffffff;
-  --surface: #ffffff;
-  --surface-line: #e2e2df;
-  --gold: #ff5a36;
-  --gold-dim: #c2431f;
-  --ink: #141414;
-  --ink-dim: #6b6b68;
-  --lavender: #2563eb;
+  --surface: rgba(255,255,255,0.75);
+  --surface-line: rgba(120, 100, 200, 0.25);
+  --gold: #ff8a5c;
+  --gold-dim: #e06a3f;
+  --ink: #2c2440;
+  --ink-dim: #7b6f95;
+  --lavender: #8a7cff;
 
-  --font-display: 'Space Grotesk', sans-serif;
-  --font-description: 'Inter', system-ui, sans-serif;
-  --font-body: 'Inter', system-ui, sans-serif;
+  --font-display: 'Quicksand', sans-serif;
+  --font-description: 'Quicksand', sans-serif;
+  --font-body: 'Quicksand', sans-serif;
 
-  --radius-card: 8px;
-  --radius-art: 6px;
-  --radius-pill: 8px;
-  --card-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 10px 26px -14px rgba(0,0,0,0.18);
-  --bg-texture: none;
+  --radius-card: 40% 60% 55% 45% / 45% 40% 60% 55%;
+  --radius-art: 40% 60% 55% 45% / 45% 40% 60% 55%;
+  --radius-pill: 999px;
+  --description-bg: rgba(255,255,255,0.6);
+  --panel-bg: rgba(255,255,255,0.85);
   --label-transform: none;
-  --description-bg: rgba(0, 0, 0, 0.03);
-  --panel-bg: rgba(255, 255, 255, 0.96);
-}
-
-/* ---- Theme: Blood Moon Gothic ---- */
-[data-theme="gothic"] {
-  --bg: #0a0505;
-  --bg-glow: #200606;
-  --surface: #170808;
-  --surface-line: #4a1010;
-  --gold: #c8302f;
-  --gold-dim: #7a1010;
-  --ink: #f1dede;
-  --ink-dim: #a06a6a;
-  --lavender: #8a1c1c;
-
-  --font-display: 'Cinzel Decorative', serif;
-  --font-description: 'Cormorant Garamond', serif;
-  --font-body: 'Inter', system-ui, sans-serif;
-
-  --radius-card: 2px;
-  --radius-art: 2px;
-  --radius-pill: 3px;
-  --card-shadow: 0 22px 55px -12px rgba(200, 48, 47, 0.45);
-  --bg-texture: radial-gradient(ellipse at 50% 28%, transparent 30%, rgba(0,0,0,0.6) 100%);
 }
 
 * { box-sizing: border-box; }
@@ -836,8 +853,291 @@ body {
   }
 }
 
+/* ================================================================
+   STRUCTURAL THEME OVERRIDES
+   Shape, decoration, and animation per theme — layered on top of
+   the palette/font variables defined above.
+   ================================================================ */
+
+/* -- Holographic Foil: animated iridescent sheen + glass card -- */
+
+[data-theme="holo"] body {
+  background-image:
+    radial-gradient(circle at 15% 15%, rgba(255,120,220,0.25), transparent 40%),
+    radial-gradient(circle at 85% 25%, rgba(120,220,255,0.25), transparent 40%),
+    radial-gradient(circle at 50% 90%, rgba(180,255,180,0.18), transparent 45%),
+    radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 55%);
+}
+
+[data-theme="holo"] .card-face {
+  background:
+    linear-gradient(120deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.02) 40%, rgba(255,255,255,0.14) 60%, rgba(255,255,255,0.02) 100%),
+    linear-gradient(115deg, #ff9ad5, #a1c4fd, #fbe8a6, #a1ffce, #ff9ad5);
+  background-size: 200% 200%, 300% 300%;
+  animation: holo-shift 7s ease infinite;
+  border: 1px solid rgba(255,255,255,0.5);
+  backdrop-filter: blur(6px);
+}
+
+[data-theme="holo"] .card-title {
+  background: linear-gradient(90deg, #fff, #ffd9f4, #d9f0ff, #fff);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: holo-text 4s linear infinite;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+[data-theme="holo"] .btn,
+[data-theme="holo"] .flip-btn,
+[data-theme="holo"] .search-btn,
+[data-theme="holo"] .menu-toggle {
+  background: linear-gradient(120deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04));
+  backdrop-filter: blur(8px);
+}
+
+@keyframes holo-shift {
+  0% { background-position: 0% 0%, 0% 50%; }
+  50% { background-position: 100% 100%, 100% 50%; }
+  100% { background-position: 0% 0%, 0% 50%; }
+}
+
+@keyframes holo-text {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 300% 0%; }
+}
+
+/* -- Gilded Frame: museum-frame border + corner flourishes -- */
+
+[data-theme="frame"] .card-face {
+  border: 10px solid;
+  border-image: repeating-linear-gradient(45deg, #f2d27a, #f2d27a 4px, #8a6a1f 4px, #8a6a1f 8px) 10;
+  box-shadow: inset 0 0 0 3px #05130f, inset 0 0 0 5px #f2d27a, 0 25px 50px -15px rgba(0,0,0,0.7);
+  position: relative;
+}
+
+[data-theme="frame"] .card-face::before,
+[data-theme="frame"] .card-face::after {
+  position: absolute;
+  font-size: 1.4rem;
+  color: var(--gold);
+  z-index: 3;
+}
+
+[data-theme="frame"] .card-face::before {
+  content: "\2766";
+  top: 10px;
+  left: 12px;
+}
+
+[data-theme="frame"] .card-face::after {
+  content: "\2766";
+  bottom: 10px;
+  right: 12px;
+}
+
+[data-theme="frame"] .card-title {
+  letter-spacing: 0.06em;
+  border-bottom: 2px solid var(--gold);
+  padding-bottom: 6px;
+}
+
+[data-theme="frame"] .btn,
+[data-theme="frame"] .search-btn,
+[data-theme="frame"] .menu-toggle {
+  border: 2px solid var(--gold);
+  background: var(--surface);
+}
+
+/* -- Glitch Terminal: CRT window chrome + RGB-split glitch text -- */
+
+[data-theme="terminal"] body {
+  background-image:
+    repeating-linear-gradient(0deg, rgba(31,255,107,0.05) 0px, rgba(31,255,107,0.05) 1px, transparent 1px, transparent 3px),
+    radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 55%);
+}
+
+[data-theme="terminal"] .card-face {
+  border: 1px solid var(--gold);
+  box-shadow: 0 0 0 1px rgba(31,255,107,0.3), 0 0 34px rgba(31,255,107,0.35);
+  padding-top: 26px;
+  position: relative;
+}
+
+[data-theme="terminal"] .card-face::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff5f56;
+  box-shadow: 16px 0 0 #ffbd2e, 32px 0 0 #1fff6b;
+}
+
+[data-theme="terminal"] .card-title {
+  text-shadow: 2px 0 #ff2b6d, -2px 0 #00e5ff;
+  animation: terminal-flicker 3.2s infinite;
+}
+
+[data-theme="terminal"] .arcana-label::before {
+  content: "> ";
+}
+
+[data-theme="terminal"] .card-description::before {
+  content: "$ ";
+  color: var(--gold);
+}
+
+[data-theme="terminal"] .btn,
+[data-theme="terminal"] .search-btn,
+[data-theme="terminal"] .menu-toggle {
+  border: 1px solid var(--gold);
+  background: #000;
+}
+
+@keyframes terminal-flicker {
+  0%, 92%, 100% { opacity: 1; text-shadow: 2px 0 #ff2b6d, -2px 0 #00e5ff; }
+  93% { opacity: 0.6; text-shadow: 4px 0 #ff2b6d, -4px 0 #00e5ff; }
+  95% { opacity: 1; text-shadow: -2px 0 #ff2b6d, 2px 0 #00e5ff; }
+}
+
+/* -- Torn Paper Punk: ripped-edge sticker on halftone paper -- */
+
+[data-theme="punk"] body {
+  background-image:
+    radial-gradient(#00000022 1px, transparent 1px),
+    radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 55%);
+  background-size: 10px 10px, auto;
+}
+
+[data-theme="punk"] .card-slot {
+  transform: rotate(-2deg);
+}
+
+[data-theme="punk"] .card-face {
+  clip-path: polygon(
+    2% 4%, 18% 0%, 40% 2%, 60% 0%, 82% 3%, 100% 0%,
+    98% 20%, 100% 45%, 97% 65%, 100% 88%, 96% 100%,
+    75% 97%, 55% 100%, 35% 98%, 15% 100%, 0% 92%,
+    3% 70%, 0% 48%, 4% 25%
+  );
+  border: 3px solid #111111;
+  filter: drop-shadow(7px 8px 0 #111111);
+}
+
+[data-theme="punk"] .card-title {
+  text-transform: uppercase;
+  -webkit-text-stroke: 1px #111;
+  letter-spacing: 0.01em;
+}
+
+[data-theme="punk"] .btn,
+[data-theme="punk"] .search-btn,
+[data-theme="punk"] .menu-toggle {
+  border: 3px solid #111111;
+  filter: drop-shadow(3px 3px 0 #111111);
+  transform: rotate(-1deg);
+}
+
+[data-theme="punk"] .flip-btn {
+  border: 2px solid #111111;
+}
+
+/* -- Art Deco Luxe: sunburst backdrop + clipped octagon card -- */
+
+[data-theme="deco"] body {
+  background-image:
+    repeating-conic-gradient(from 0deg at 50% 15%, rgba(232,195,104,0.10) 0deg 4deg, transparent 4deg 12deg),
+    radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 55%);
+}
+
+[data-theme="deco"] .card-face {
+  clip-path: polygon(20px 0, calc(100% - 20px) 0, 100% 20px, 100% calc(100% - 20px), calc(100% - 20px) 100%, 20px 100%, 0 calc(100% - 20px), 0 20px);
+  border: 2px solid var(--gold);
+  box-shadow: inset 0 0 0 5px #0b0b0b, inset 0 0 0 7px var(--gold), 0 25px 50px -15px rgba(0,0,0,0.8);
+}
+
+[data-theme="deco"] .card-title {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: clamp(1.1rem, 5vw, 1.5rem);
+}
+
+[data-theme="deco"] .btn,
+[data-theme="deco"] .search-btn,
+[data-theme="deco"] .menu-toggle {
+  border: 1px solid var(--gold);
+  clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
+}
+
+/* -- Liquid Blob: morphing organic shapes + floating gradient blobs -- */
+
+[data-theme="blob"] body {
+  position: relative;
+  overflow-x: hidden;
+}
+
+[data-theme="blob"] body::before,
+[data-theme="blob"] body::after {
+  content: "";
+  position: fixed;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  filter: blur(50px);
+  z-index: 0;
+  animation: blob-float 12s ease-in-out infinite;
+}
+
+[data-theme="blob"] body::before {
+  top: -60px;
+  left: -60px;
+  background: #ffd6c2;
+}
+
+[data-theme="blob"] body::after {
+  bottom: -60px;
+  right: -60px;
+  background: #c2d6ff;
+  animation-delay: -6s;
+}
+
+[data-theme="blob"] .card-face {
+  animation: blob-morph 9s ease-in-out infinite;
+  border: none;
+}
+
+[data-theme="blob"] .card-title {
+  font-weight: 700;
+}
+
+[data-theme="blob"] .btn,
+[data-theme="blob"] .flip-btn,
+[data-theme="blob"] .search-btn,
+[data-theme="blob"] .menu-toggle {
+  border: none;
+  box-shadow: 0 8px 20px -10px rgba(120,100,200,0.4);
+}
+
+@keyframes blob-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, -20px) scale(1.1); }
+}
+
+@keyframes blob-morph {
+  0%, 100% { border-radius: 40% 60% 55% 45% / 45% 40% 60% 55%; }
+  50% { border-radius: 55% 45% 40% 60% / 55% 60% 40% 45%; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .card, .card.shuffling, .card-slot.pulling, .card-search-input.not-found {
+  .card, .card.shuffling, .card-slot.pulling, .card-search-input.not-found,
+  [data-theme="holo"] .card-face, [data-theme="holo"] .card-title,
+  [data-theme="terminal"] .card-title,
+  [data-theme="blob"] body::before, [data-theme="blob"] body::after, [data-theme="blob"] .card-face {
     animation: none !important;
     transition: none !important;
   }
@@ -845,36 +1145,8 @@ body {
 
 /* ---- Theme switcher (preview-build only, not part of the real design) ---- */
 
-.theme-switcher {
-  position: fixed;
-  top: max(12px, env(safe-area-inset-top));
-  right: max(12px, env(safe-area-inset-right));
-  z-index: 100;
-}
-
 .theme-toggle {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  border: 1px solid var(--surface-line);
-  background: var(--surface);
-  color: var(--ink);
   font-size: 1.1rem;
-  line-height: 1;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8px 20px -10px rgba(0,0,0,0.5);
-  transition: border-color 0.15s ease, transform 0.15s ease;
-}
-
-.theme-toggle:hover {
-  border-color: var(--gold);
-}
-
-.theme-toggle:active {
-  transform: scale(0.94);
 }
 
 .theme-menu[hidden] {
@@ -883,7 +1155,7 @@ body {
 
 .theme-menu {
   position: absolute;
-  top: 50px;
+  bottom: 58px;
   right: 0;
   width: 220px;
   display: flex;
@@ -894,6 +1166,7 @@ body {
   border: 1px solid var(--surface-line);
   border-radius: 12px;
   box-shadow: 0 16px 34px -14px rgba(0,0,0,0.55);
+  z-index: 20;
 }
 
 .theme-menu-title {
@@ -951,22 +1224,26 @@ body {
   background: linear-gradient(135deg, #c8a24d 0%, #1f1a30 60%);
 }
 
-.theme-swatch-celestial {
-  background: linear-gradient(135deg, #bcdcff 0%, #05070f 60%);
+.theme-swatch-holo {
+  background: linear-gradient(135deg, #ff9ad5 0%, #a1c4fd 33%, #fbe8a6 66%, #a1ffce 100%);
 }
 
-.theme-swatch-grimoire {
-  background: linear-gradient(135deg, #8a5a2b 0%, #e9dcbc 60%);
+.theme-swatch-frame {
+  background: linear-gradient(135deg, #f2d27a 0%, #05130f 60%);
 }
 
-.theme-swatch-neon {
-  background: linear-gradient(135deg, #39f2ff 0%, #ff2fb0 60%);
+.theme-swatch-terminal {
+  background: linear-gradient(135deg, #1fff6b 0%, #000000 60%);
 }
 
-.theme-swatch-minimal {
-  background: linear-gradient(135deg, #ff5a36 0%, #f7f7f5 60%);
+.theme-swatch-punk {
+  background: linear-gradient(135deg, #ff2fa1 0%, #f2ede1 60%);
 }
 
-.theme-swatch-gothic {
-  background: linear-gradient(135deg, #c8302f 0%, #0a0505 60%);
+.theme-swatch-deco {
+  background: linear-gradient(135deg, #e8c368 0%, #0b0b0b 60%);
+}
+
+.theme-swatch-blob {
+  background: linear-gradient(135deg, #ff8a5c 0%, #8a7cff 60%);
 }
