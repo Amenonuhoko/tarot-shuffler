@@ -1029,9 +1029,11 @@ function scheduleHoloGlint() {
 
 const terminalRainCanvas = document.getElementById("terminalRain");
 const TERMINAL_RAIN_FONT_SIZE = 16;
+const TERMINAL_RAIN_STEP_MS = 220;
 let terminalRainCtx = null;
 let terminalRainFrame = null;
 let terminalRainColumns = [];
+let terminalRainLastStep = 0;
 
 function resizeTerminalRain() {
   if (!terminalRainCanvas) {
@@ -1043,7 +1045,14 @@ function resizeTerminalRain() {
   terminalRainColumns = new Array(columnCount).fill(0).map(() => Math.random() * -100);
 }
 
-function drawTerminalRain() {
+function drawTerminalRain(now) {
+  terminalRainFrame = requestAnimationFrame(drawTerminalRain);
+
+  if (now - terminalRainLastStep < TERMINAL_RAIN_STEP_MS) {
+    return;
+  }
+  terminalRainLastStep = now;
+
   terminalRainCtx.fillStyle = "rgba(0, 17, 10, 0.15)";
   terminalRainCtx.fillRect(0, 0, terminalRainCanvas.width, terminalRainCanvas.height);
   terminalRainCtx.fillStyle = "#22ff7f";
@@ -1057,8 +1066,6 @@ function drawTerminalRain() {
       terminalRainColumns[i] = y + TERMINAL_RAIN_FONT_SIZE;
     }
   });
-
-  terminalRainFrame = requestAnimationFrame(drawTerminalRain);
 }
 
 function startTerminalRain() {
@@ -1068,6 +1075,7 @@ function startTerminalRain() {
   terminalRainCtx = terminalRainCanvas.getContext("2d");
   resizeTerminalRain();
   terminalRainCanvas.hidden = false;
+  terminalRainLastStep = 0;
   terminalRainFrame = requestAnimationFrame(drawTerminalRain);
 }
 
