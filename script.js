@@ -1071,11 +1071,8 @@ function drawTerminalRain(now) {
       col.trail.unshift(Math.random() > 0.5 ? "1" : "0");
       col.trail.length = TERMINAL_RAIN_TRAIL_LENGTH;
 
-      const trailBottom = terminalRainCanvas.height + TERMINAL_RAIN_TRAIL_LENGTH * TERMINAL_RAIN_FONT_SIZE;
-      const shouldRespawn = col.y > trailBottom
-        || (col.y > terminalRainCanvas.height && Math.random() > 0.9);
-      if (shouldRespawn) {
-        col.y = Math.random() * -100;
+      if (col.y > terminalRainCanvas.height && Math.random() > 0.975) {
+        col.y = 0;
         col.trail.fill("");
         col.hasLooped = true;
       }

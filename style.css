@@ -1015,6 +1015,19 @@ body {
   100% { top: -10px; }
 }
 
+[data-theme="terminal"] .card-face::before {
+  content: "";
+  position: absolute;
+  top: 7px;
+  right: 10px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ff5f56;
+  box-shadow: -12px 0 0 #ffbd2e, -24px 0 0 var(--gold);
+  z-index: 2;
+}
+
 [data-theme="terminal"] .card-title {
   text-shadow: 2px 0 var(--lavender), -2px 0 #00e5ff;
   animation: terminal-flicker 4s infinite;
