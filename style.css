@@ -72,7 +72,7 @@
   --gold-dim: #14a355;
   --ink: #b6ffd4;
   --ink-dim: #4dbd7d;
-  --lavender: #ff4d8d;
+  --lavender: #ff3b30;
 
   --font-display: 'Space Mono', monospace;
   --font-description: 'Space Mono', monospace;
@@ -886,6 +886,15 @@ body {
 [data-theme="holo"] .deck-selector select {
   background: linear-gradient(120deg, rgba(255,255,255,0.10), rgba(255,255,255,0.02));
   backdrop-filter: blur(8px);
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+[data-theme="holo"] .btn:active,
+[data-theme="holo"] .flip-btn:active,
+[data-theme="holo"] .search-btn:active,
+[data-theme="holo"] .menu-toggle:active {
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.35), 0 0 20px rgba(255,255,255,0.55);
+  border-color: rgba(255,255,255,0.6);
 }
 
 @keyframes holo-shift {
@@ -916,18 +925,23 @@ body {
 [data-theme="terminal"] .card-face::before {
   content: "";
   position: absolute;
-  top: -12px;
-  left: 14px;
-  width: 7px;
-  height: 7px;
+  top: 7px;
+  left: 10px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: #ff5f56;
-  box-shadow: 14px 0 0 #ffbd2e, 28px 0 0 var(--gold);
+  box-shadow: 12px 0 0 #ffbd2e, 24px 0 0 var(--gold);
+  z-index: 2;
 }
 
 [data-theme="terminal"] .card-title {
-  text-shadow: 2px 0 #ff4d8d, -2px 0 #00e5ff;
+  text-shadow: 2px 0 var(--lavender), -2px 0 #00e5ff;
   animation: terminal-flicker 4s infinite;
+}
+
+[data-theme="terminal"] .orientation-label.is-reversed {
+  text-shadow: 0 0 6px rgba(255, 59, 48, 0.6);
 }
 
 [data-theme="terminal"] .arcana-label::before {
@@ -980,30 +994,104 @@ body {
   50%, 100% { opacity: 0; }
 }
 
-/* -- Art Deco Luxe: one consistent cut-corner + double-line language -- */
+/* -- Art Deco Luxe: decadent, regal, shiny gold from every surface -- */
 
 [data-theme="deco"] body {
-  background-image:
-    repeating-conic-gradient(from 0deg at 50% 12%, rgba(232,195,104,0.14) 0deg 3deg, transparent 3deg 12deg),
-    radial-gradient(ellipse at 50% 12%, transparent 35%, var(--bg) 78%),
-    radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 55%);
+  position: relative;
+  overflow-x: hidden;
+}
+
+[data-theme="deco"] body::before {
+  content: "";
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 220vmax;
+  height: 220vmax;
+  background: repeating-conic-gradient(from 0deg, rgba(232,195,104,0.16) 0deg 2.2deg, transparent 2.2deg 10deg);
+  transform: translate(-50%, -50%);
+  animation: deco-spin 140s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+[data-theme="deco"] body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 20%, transparent 30%, var(--bg) 78%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+[data-theme="deco"] .table,
+[data-theme="deco"] .support-footer {
+  position: relative;
+  z-index: 1;
 }
 
 [data-theme="deco"] .card-face {
   clip-path: polygon(20px 0, calc(100% - 20px) 0, 100% 20px, 100% calc(100% - 20px), calc(100% - 20px) 100%, 20px 100%, 0 calc(100% - 20px), 0 20px);
-  border: 2px solid var(--gold);
-  box-shadow: inset 0 0 0 5px #0b0a06, inset 0 0 0 7px var(--gold), 0 25px 50px -15px rgba(0,0,0,0.8);
+  border: 3px solid;
+  border-image: linear-gradient(135deg, #fff6da 0%, #f0cb6e 25%, #a8842f 50%, #f0cb6e 75%, #fff6da 100%) 1;
+  box-shadow:
+    inset 0 0 0 5px #0b0a06,
+    inset 0 0 0 7px var(--gold),
+    0 0 50px -14px rgba(240, 203, 110, 0.5),
+    0 25px 50px -15px rgba(0,0,0,0.85);
+  position: relative;
+}
+
+[data-theme="deco"] .card-face::before,
+[data-theme="deco"] .card-face::after {
+  position: absolute;
+  color: var(--gold);
+  font-size: 1.1rem;
+  line-height: 1;
+  z-index: 3;
+  text-shadow: 0 0 6px rgba(240, 203, 110, 0.7);
+}
+
+[data-theme="deco"] .card-face::before {
+  content: "\25C6";
+  top: 14px;
+  left: 16px;
+}
+
+[data-theme="deco"] .card-face::after {
+  content: "\25C6";
+  bottom: 14px;
+  right: 16px;
 }
 
 [data-theme="deco"] .card-title {
   text-transform: uppercase;
   letter-spacing: 0.16em;
   font-size: clamp(1.05rem, 5vw, 1.4rem);
+  background: linear-gradient(90deg, #a8842f, #fff6da, #f0cb6e, #fff6da, #a8842f);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: deco-shimmer 6s linear infinite;
 }
 
 [data-theme="deco"] .deck-selector {
   border-bottom: 1px solid var(--surface-line);
   padding-bottom: 10px;
+  position: relative;
+}
+
+[data-theme="deco"] .deck-selector::after {
+  content: "\25C6";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  transform: translateX(-50%);
+  font-size: 0.6rem;
+  color: var(--gold);
+  background: var(--bg);
+  padding: 0 6px;
 }
 
 [data-theme="deco"] .deck-selector select,
@@ -1013,16 +1101,28 @@ body {
 [data-theme="deco"] .menu-toggle {
   border: 1px solid var(--gold);
   clip-path: polygon(9px 0, calc(100% - 9px) 0, 100% 9px, 100% calc(100% - 9px), calc(100% - 9px) 100%, 9px 100%, 0 calc(100% - 9px), 0 9px);
+  box-shadow: 0 0 14px -6px rgba(240, 203, 110, 0.6);
 }
 
 [data-theme="deco"] .history-panel {
   border: 1px solid var(--gold);
   clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px);
+  box-shadow: 0 0 20px -8px rgba(240, 203, 110, 0.5);
 }
 
 [data-theme="deco"] .history-header,
 [data-theme="deco"] .history-table th {
   color: var(--gold);
+}
+
+@keyframes deco-spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes deco-shimmer {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 250% 0%; }
 }
 
 [data-theme="deco"] .history-table th,

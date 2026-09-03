@@ -583,10 +583,18 @@ let isMenuOpen = false;
 let pullHistory = [];
 let currentCard = null;
 
+function formatHistoryCount(count) {
+  if (document.documentElement.getAttribute("data-theme") === "terminal") {
+    return `[${String(count).padStart(2, "0")}/10]`;
+  }
+
+  return `${count} / 10`;
+}
+
 function renderHistory() {
   if (pullHistory.length === 0) {
     historyBody.innerHTML = '<tr><td colspan="3" class="history-empty">No pulls yet</td></tr>';
-    historyCount.textContent = "0 / 10";
+    historyCount.textContent = formatHistoryCount(0);
     return;
   }
 
@@ -605,7 +613,7 @@ function renderHistory() {
     .join("");
 
   historyBody.innerHTML = rows;
-  historyCount.textContent = `${pullHistory.length} / 10`;
+  historyCount.textContent = formatHistoryCount(pullHistory.length);
 }
 
 function getCardTypeSymbol(card) {
@@ -1000,6 +1008,12 @@ function applyTheme(themeValue) {
   } else {
     clearTimeout(holoGlintTimer);
   }
+
+  cardSearchInputEl.placeholder = themeValue === "terminal"
+    ? "search --card=…"
+    : "Search for a card…";
+
+  renderHistory();
 }
 
 themeToggleEl.addEventListener("click", (event) => {
