@@ -1166,15 +1166,15 @@ body {
 [data-theme="bloodmoon"] .card-face {
   border: 1.5px solid var(--gold);
   box-shadow: 0 0 0 1px rgba(241,243,247,0.3), 0 0 14px -5px rgba(241,243,247,0.5), 0 0 26px -10px rgba(163,16,44,0.65), 0 20px 42px -22px rgba(0,0,0,0.85);
-  animation: bloodmoon-rim 9s ease-in-out infinite;
+  animation: bloodmoon-rim 6s ease-in-out infinite;
 }
 
 @keyframes bloodmoon-rim {
-  0%, 84%, 100% {
+  0%, 100% {
     box-shadow: 0 0 0 1px rgba(241,243,247,0.3), 0 0 14px -5px rgba(241,243,247,0.5), 0 0 26px -10px rgba(163,16,44,0.65), 0 20px 42px -22px rgba(0,0,0,0.85);
   }
-  91% {
-    box-shadow: 0 0 0 1.5px rgba(241,243,247,0.85), 0 0 24px 0px rgba(241,243,247,0.75), 0 0 26px -10px rgba(163,16,44,0.65), 0 20px 42px -22px rgba(0,0,0,0.85);
+  50% {
+    box-shadow: 0 0 0 1.5px rgba(241,243,247,0.55), 0 0 18px -3px rgba(241,243,247,0.55), 0 0 26px -10px rgba(163,16,44,0.65), 0 20px 42px -22px rgba(0,0,0,0.85);
   }
 }
 
@@ -1208,18 +1208,17 @@ body {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: bloodmoon-glint 9s ease-in-out infinite, bloodmoon-title-flash 9s ease-in-out infinite;
+  animation: bloodmoon-glint 6s linear infinite, bloodmoon-title-flash 6s ease-in-out infinite;
 }
 
 @keyframes bloodmoon-glint {
-  0%, 78% { background-position: 0% 0%; }
-  92% { background-position: 160% 0%; }
+  0% { background-position: 0% 0%; }
   100% { background-position: 260% 0%; }
 }
 
 @keyframes bloodmoon-title-flash {
-  0%, 84%, 100% { text-shadow: none; }
-  91% { text-shadow: 0 0 16px rgba(255,255,255,0.6); }
+  0%, 100% { text-shadow: none; }
+  50% { text-shadow: 0 0 10px rgba(255,255,255,0.35); }
 }
 
 [data-theme="bloodmoon"] .card-art {
