@@ -625,7 +625,7 @@ function formatHistoryCount(count) {
   return `${count} / 10`;
 }
 
-function renderHistory() {
+function renderHistory(animateNew = false) {
   if (pullHistory.length === 0) {
     historyBody.innerHTML = '<tr><td colspan="3" class="history-empty">No pulls yet</td></tr>';
     historyCount.textContent = formatHistoryCount(0);
@@ -636,8 +636,9 @@ function renderHistory() {
     .slice(0, 10)
     .map((entry, idx) => {
       const type = getCardTypeSymbol(entry.card);
+      const enterClass = animateNew && idx === 0 ? " history-row-enter" : "";
       return `
-      <tr class="history-row" data-history-index="${idx}" tabindex="0" role="button" aria-label="View ${entry.card.name}">
+      <tr class="history-row${enterClass}" data-history-index="${idx}" tabindex="0" role="button" aria-label="View ${entry.card.name}">
         <td class="history-type" title="${type.label}" aria-label="${type.label}">${type.symbol}</td>
         <td>${entry.card.name}</td>
         <td class="history-state" title="${entry.card.reversed ? "Reversed" : "Upright"}" aria-label="${entry.card.reversed ? "Reversed" : "Upright"}">${entry.card.reversed ? "↓" : "↑"}</td>
@@ -681,7 +682,7 @@ function addToHistory(card) {
   pullHistory.unshift({ index: pullHistory.length + 1, card });
   pullHistory = pullHistory.slice(0, 10);
   pullHistory = pullHistory.map((entry, idx) => ({ ...entry, index: idx + 1 }));
-  renderHistory();
+  renderHistory(true);
 }
 
 function animateCardPull() {
@@ -705,6 +706,12 @@ function renderCardFace(card) {
   loadCardArt(card);
 }
 
+function triggerRevealFanfare() {
+  cardEl.classList.remove("revealing");
+  void cardEl.offsetWidth;
+  cardEl.classList.add("revealing");
+}
+
 function openCard(card) {
   renderCardFace(card);
   animateCardPull();
@@ -712,6 +719,17 @@ function openCard(card) {
   cardEl.classList.add("flipped");
   isFlipped = true;
   hintEl.textContent = "Tap anywhere to draw again";
+
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (prefersReducedMotion) {
+    triggerRevealFanfare();
+  } else {
+    cardEl.addEventListener("transitionend", (event) => {
+      if (event.propertyName === "transform") {
+        triggerRevealFanfare();
+      }
+    }, { once: true });
+  }
 }
 
 function revealCard(card) {
@@ -897,8 +915,10 @@ document.addEventListener("click", (event) => {
 
 function startShuffleShake() {
   cardEl.classList.remove("shuffling");
+  cardSlotEl.classList.remove("shuffle-fan");
   void cardEl.offsetWidth;
   cardEl.classList.add("shuffling");
+  cardSlotEl.classList.add("shuffle-fan");
 }
 
 shuffleBtn.addEventListener("click", () => {
@@ -941,12 +961,20 @@ flipBtn.addEventListener("click", (event) => {
   renderCardFace(currentCard);
 });
 
-cardEl.addEventListener("animationend", () => {
-  cardEl.classList.remove("shuffling");
+cardEl.addEventListener("animationend", (event) => {
+  if (event.animationName === "shuffle-shake") {
+    cardEl.classList.remove("shuffling");
+  } else if (event.animationName === "reveal-pop") {
+    cardEl.classList.remove("revealing");
+  }
 });
 
-cardSlotEl.addEventListener("animationend", () => {
-  cardSlotEl.classList.remove("pulling");
+cardSlotEl.addEventListener("animationend", (event) => {
+  if (event.animationName === "pull-card") {
+    cardSlotEl.classList.remove("pulling");
+  } else if (event.animationName === "shuffle-slot-glow") {
+    cardSlotEl.classList.remove("shuffle-fan");
+  }
 });
 
 deckSelect.value = initialDeckKey;
