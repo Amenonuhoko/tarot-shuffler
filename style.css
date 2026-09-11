@@ -1125,6 +1125,19 @@ body {
   filter: drop-shadow(0 1px 8px rgba(255,255,255,0.25));
 }
 
+/* The title's own infinite shimmer and the reveal cascade both use
+   the `animation` shorthand, so a plain override would silently
+   drop one or the other. Combine them via longhands instead, scoped
+   specifically enough to win regardless of source order. */
+[data-theme="holo"] .card-front-content.content-cascade > .card-title {
+  animation-name: holo-text, content-reveal;
+  animation-duration: 5s, 0.65s;
+  animation-timing-function: linear, ease-out;
+  animation-iteration-count: infinite, 1;
+  animation-fill-mode: none, backwards;
+  animation-delay: 0s, 0.16s;
+}
+
 [data-theme="holo"] .arcana-label,
 [data-theme="holo"] .orientation-label,
 [data-theme="holo"] .hint {
@@ -1266,6 +1279,15 @@ body {
   animation: terminal-flicker 4s infinite;
 }
 
+[data-theme="terminal"] .card-front-content.content-cascade > .card-title {
+  animation-name: terminal-flicker, content-reveal;
+  animation-duration: 4s, 0.65s;
+  animation-timing-function: ease, ease-out;
+  animation-iteration-count: infinite, 1;
+  animation-fill-mode: none, backwards;
+  animation-delay: 0s, 0.16s;
+}
+
 [data-theme="terminal"] .orientation-label.is-reversed {
   text-shadow: 0 0 6px rgba(255, 59, 48, 0.6);
 }
@@ -1398,6 +1420,15 @@ body {
   animation: deco-shimmer 6s linear infinite;
 }
 
+[data-theme="deco"] .card-front-content.content-cascade > .card-title {
+  animation-name: deco-shimmer, content-reveal;
+  animation-duration: 6s, 0.65s;
+  animation-timing-function: linear, ease-out;
+  animation-iteration-count: infinite, 1;
+  animation-fill-mode: none, backwards;
+  animation-delay: 0s, 0.16s;
+}
+
 [data-theme="deco"] .deck-selector {
   border-bottom: 1px solid var(--surface-line);
   padding-bottom: 10px;
@@ -1510,6 +1541,15 @@ body {
   background-clip: text;
   color: transparent;
   animation: bloodmoon-glint 6s linear infinite, bloodmoon-title-flash 6s ease-in-out infinite;
+}
+
+[data-theme="bloodmoon"] .card-front-content.content-cascade > .card-title {
+  animation-name: bloodmoon-glint, bloodmoon-title-flash, content-reveal;
+  animation-duration: 6s, 6s, 0.65s;
+  animation-timing-function: linear, ease-in-out, ease-out;
+  animation-iteration-count: infinite, infinite, 1;
+  animation-fill-mode: none, none, backwards;
+  animation-delay: 0s, 0s, 0.16s;
 }
 
 @keyframes bloodmoon-glint {
