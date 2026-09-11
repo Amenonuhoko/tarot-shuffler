@@ -391,33 +391,36 @@ body {
 }
 
 .card.revealing {
-  animation: reveal-pop 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: reveal-pop 0.7s cubic-bezier(0.3, 0, 0.2, 1);
 }
 
 @keyframes reveal-pop {
-  0% { transform: rotateY(180deg) scale(1); }
-  35% { transform: rotateY(180deg) scale(1.09); }
+  0% { transform: rotateY(180deg) scale(0.99); }
+  50% { transform: rotateY(180deg) scale(1.018); }
   100% { transform: rotateY(180deg) scale(1); }
 }
+
+/* A slow gold aura blooming and settling, not a flash -- */
 
 .reveal-flash {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--gold) 65%, white) 0%, transparent 60%);
+  background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--gold) 55%, transparent) 0%, transparent 65%);
   opacity: 0;
   pointer-events: none;
   z-index: 4;
+  filter: blur(3px);
 }
 
 .card.revealing .reveal-flash {
-  animation: reveal-flash-burst 0.65s ease-out;
+  animation: reveal-flash-burst 1.3s ease-out;
 }
 
 @keyframes reveal-flash-burst {
-  0% { opacity: 0; transform: scale(0.6); }
-  35% { opacity: 0.9; transform: scale(1.05); }
-  100% { opacity: 0; transform: scale(1.5); }
+  0% { opacity: 0; transform: scale(0.94); }
+  45% { opacity: 0.45; transform: scale(1.02); }
+  100% { opacity: 0; transform: scale(1.1); }
 }
 
 .reveal-flash::before {
@@ -425,45 +428,52 @@ body {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  border: 2px solid color-mix(in srgb, var(--gold) 70%, white);
-  opacity: 0;
 }
 
 .card.revealing .reveal-flash::before {
-  animation: reveal-ring-expand 0.75s ease-out;
+  animation: reveal-aura-glow 1.3s ease-out;
 }
 
-@keyframes reveal-ring-expand {
-  0% { opacity: 0.9; transform: scale(0.85); }
-  100% { opacity: 0; transform: scale(1.3); }
+@keyframes reveal-aura-glow {
+  0% { box-shadow: 0 0 0 0 transparent; }
+  45% { box-shadow: 0 0 30px 2px color-mix(in srgb, var(--gold) 40%, transparent); }
+  100% { box-shadow: 0 0 0 0 transparent; }
 }
 
-/* -- Reveal cascade: the card's own content unveils itself piece by
-   piece (label, title, art, orientation, description) instead of
-   appearing all at once. Content must be explicitly hidden while
-   "pending" because the 3D flip itself exposes the front face
-   (via backface-visibility) partway through its own rotation,
-   well before any JS-triggered reveal class would otherwise apply. -- */
+/* -- Reveal cascade: the card's own content materializes out of a
+   soft mist piece by piece (label, title, art, orientation,
+   description) instead of appearing all at once. Content must be
+   explicitly hidden while "pending" because the 3D flip itself
+   exposes the front face (via backface-visibility) partway through
+   its own rotation, well before any JS-triggered reveal class
+   would otherwise apply. -- */
 
 .card-front-content > * {
   opacity: 1;
   transform: translateY(0);
+  filter: blur(0);
 }
 
 .card-front-content.content-pending > * {
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(6px);
+  filter: blur(4px);
 }
 
 .card-front-content.content-cascade > * {
-  animation: content-reveal 0.4s ease-out backwards;
+  animation: content-reveal 0.65s ease-out backwards;
 }
 
-.card-front-content.content-cascade > *:nth-child(1) { animation-delay: 0.02s; }
-.card-front-content.content-cascade > *:nth-child(2) { animation-delay: 0.09s; }
-.card-front-content.content-cascade > *:nth-child(3) { animation-delay: 0.17s; }
-.card-front-content.content-cascade > *:nth-child(4) { animation-delay: 0.27s; }
-.card-front-content.content-cascade > *:nth-child(5) { animation-delay: 0.35s; }
+.card-front-content.content-cascade > *:nth-child(1) { animation-delay: 0.06s; }
+.card-front-content.content-cascade > *:nth-child(2) { animation-delay: 0.16s; }
+.card-front-content.content-cascade > *:nth-child(3) { animation-delay: 0.28s; }
+.card-front-content.content-cascade > *:nth-child(4) { animation-delay: 0.42s; }
+.card-front-content.content-cascade > *:nth-child(5) { animation-delay: 0.54s; }
+
+@keyframes content-reveal {
+  0% { opacity: 0; transform: translateY(6px); filter: blur(4px); }
+  100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
 
 @keyframes content-reveal {
   0% { opacity: 0; transform: translateY(8px); }
@@ -1627,6 +1637,7 @@ body {
   .card-front-content.content-pending > * {
     opacity: 1 !important;
     transform: none !important;
+    filter: none !important;
   }
 }
 
