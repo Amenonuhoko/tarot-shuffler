@@ -303,19 +303,20 @@ body {
   100% { transform: scale(1); }
 }
 
-/* -- Shuffle fanfare: a pair of ghost cards riffle out from behind
-   the real card, plus a glow pulse around the whole slot -- */
+/* -- Shuffle fanfare: a riffle/bridge shuffle. A handful of ghost
+   cards behind the real one arc out to alternating sides in a
+   staggered cascade (like a deck being bridged and interleaved),
+   plus a glow pulse around the whole slot. The stagger is what
+   sells "a big stack of many cards", not just one card fanning. -- */
 
-.shuffle-fx {
+.deck-stack {
   position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 0;
 }
 
-.shuffle-fx::before,
-.shuffle-fx::after {
-  content: "";
+.deck-card {
   position: absolute;
   inset: 0;
   border-radius: var(--radius-card);
@@ -326,26 +327,38 @@ body {
 }
 
 .card-slot.shuffle-fan {
-  animation: shuffle-slot-glow 0.85s ease-out;
+  animation: shuffle-slot-glow 1.2s ease-out;
 }
 
-.card-slot.shuffle-fan .shuffle-fx::before {
-  animation: shuffle-fan-out 0.85s cubic-bezier(0.22, 1, 0.36, 1);
-  --fan-x: -30px;
-  --fan-rot: -14deg;
+.card-slot.shuffle-fan .deck-card:nth-child(odd) {
+  animation: riffle-left 0.95s cubic-bezier(0.32, 0, 0.2, 1);
 }
 
-.card-slot.shuffle-fan .shuffle-fx::after {
-  animation: shuffle-fan-out 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.06s;
-  --fan-x: 30px;
-  --fan-rot: 14deg;
+.card-slot.shuffle-fan .deck-card:nth-child(even) {
+  animation: riffle-right 0.95s cubic-bezier(0.32, 0, 0.2, 1);
 }
 
-@keyframes shuffle-fan-out {
-  0% { opacity: 0; transform: translateX(0) rotate(0deg) scale(0.95); }
-  30% { opacity: 0.9; transform: translateX(var(--fan-x)) rotate(var(--fan-rot)) scale(1); }
-  70% { opacity: 0.55; transform: translateX(calc(var(--fan-x) * 0.45)) rotate(calc(var(--fan-rot) * 0.45)) scale(0.99); }
-  100% { opacity: 0; transform: translateX(0) rotate(0deg) scale(0.96); }
+.card-slot.shuffle-fan .deck-card:nth-child(1) { animation-delay: 0s; }
+.card-slot.shuffle-fan .deck-card:nth-child(2) { animation-delay: 0.05s; }
+.card-slot.shuffle-fan .deck-card:nth-child(3) { animation-delay: 0.1s; }
+.card-slot.shuffle-fan .deck-card:nth-child(4) { animation-delay: 0.15s; }
+.card-slot.shuffle-fan .deck-card:nth-child(5) { animation-delay: 0.2s; }
+.card-slot.shuffle-fan .deck-card:nth-child(6) { animation-delay: 0.25s; }
+
+@keyframes riffle-left {
+  0% { opacity: 0; transform: translate(0, 0) rotate(0deg) scale(0.96); }
+  18% { opacity: 0.9; }
+  42% { opacity: 1; transform: translate(-38px, -16px) rotate(-17deg) scale(1.01); }
+  72% { opacity: 0.7; transform: translate(-9px, 3px) rotate(-5deg) scale(0.99); }
+  100% { opacity: 0; transform: translate(0, 0) rotate(0deg) scale(0.97); }
+}
+
+@keyframes riffle-right {
+  0% { opacity: 0; transform: translate(0, 0) rotate(0deg) scale(0.96); }
+  18% { opacity: 0.9; }
+  42% { opacity: 1; transform: translate(38px, -16px) rotate(17deg) scale(1.01); }
+  72% { opacity: 0.7; transform: translate(9px, 3px) rotate(5deg) scale(0.99); }
+  100% { opacity: 0; transform: translate(0, 0) rotate(0deg) scale(0.97); }
 }
 
 @keyframes shuffle-slot-glow {
@@ -376,17 +389,19 @@ body {
 }
 
 .card.shuffling {
-  animation: shuffle-shake 0.85s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+  animation: shuffle-shake 1.2s cubic-bezier(0.36, 0.07, 0.19, 0.97);
 }
 
 @keyframes shuffle-shake {
   0% { transform: rotateY(var(--y, 0)) rotate(0deg) translateX(0) scale(1); }
-  10% { transform: rotateY(var(--y, 0)) rotate(-6deg) translateX(-10px) scale(1.03); }
-  25% { transform: rotateY(var(--y, 0)) rotate(6deg) translateX(10px) scale(1.03); }
-  40% { transform: rotateY(var(--y, 0)) rotate(-5deg) translateX(-7px) scale(1.02); }
-  55% { transform: rotateY(var(--y, 0)) rotate(5deg) translateX(7px) scale(1.02); }
-  70% { transform: rotateY(var(--y, 0)) rotate(-3deg) translateX(-4px) scale(1.01); }
-  85% { transform: rotateY(var(--y, 0)) rotate(2deg) translateX(2px) scale(1.005); }
+  8% { transform: rotateY(var(--y, 0)) rotate(-6deg) translateX(-10px) scale(1.03); }
+  18% { transform: rotateY(var(--y, 0)) rotate(6deg) translateX(10px) scale(1.03); }
+  30% { transform: rotateY(var(--y, 0)) rotate(-5deg) translateX(-7px) scale(1.02); }
+  42% { transform: rotateY(var(--y, 0)) rotate(5deg) translateX(7px) scale(1.02); }
+  55% { transform: rotateY(var(--y, 0)) rotate(-4deg) translateX(-5px) scale(1.015); }
+  68% { transform: rotateY(var(--y, 0)) rotate(3deg) translateX(4px) scale(1.01); }
+  82% { transform: rotateY(var(--y, 0)) rotate(-2deg) translateX(2px) scale(1.005); }
+  92% { transform: rotateY(var(--y, 0)) rotate(1deg) translateX(-1px) scale(1.002); }
   100% { transform: rotateY(var(--y, 0)) rotate(0deg) translateX(0) scale(1); }
 }
 
@@ -1661,8 +1676,8 @@ body {
   .card, .card.shuffling, .card.revealing, .reveal-flash, .card.revealing .reveal-flash,
   .reveal-flash::before, .card.revealing .reveal-flash::before,
   .card-front-content.content-cascade > *,
-  .card-slot.pulling, .card-slot.shuffle-fan, .shuffle-fx::before, .shuffle-fx::after,
-  .card-slot.shuffle-fan .shuffle-fx::before, .card-slot.shuffle-fan .shuffle-fx::after,
+  .card-slot.pulling, .card-slot.shuffle-fan, .deck-card,
+  .card-slot.shuffle-fan .deck-card:nth-child(odd), .card-slot.shuffle-fan .deck-card:nth-child(even),
   .history-row-enter, .card-search-input.not-found,
   [data-theme="holo"] body, [data-theme="holo"] .card-face, [data-theme="holo"] .card-front::after, [data-theme="holo"] .card-title,
   [data-theme="terminal"] body, [data-theme="terminal"] .card-face, [data-theme="terminal"] .card-front::after, [data-theme="terminal"] .card-title, [data-theme="terminal"] .hint::after,
