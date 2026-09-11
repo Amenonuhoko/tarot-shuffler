@@ -706,13 +706,30 @@ function renderCardFace(card) {
   loadCardArt(card);
 }
 
+function onCardFlipTransitionEnd(callback) {
+  function handler(event) {
+    if (event.target !== cardEl || event.propertyName !== "transform") {
+      return;
+    }
+    cardEl.removeEventListener("transitionend", handler);
+    callback();
+  }
+  cardEl.addEventListener("transitionend", handler);
+}
+
 function triggerRevealFanfare() {
   cardEl.classList.remove("revealing");
   void cardEl.offsetWidth;
   cardEl.classList.add("revealing");
+
+  cardFrontContentEl.classList.remove("content-pending", "content-cascade");
+  void cardFrontContentEl.offsetWidth;
+  cardFrontContentEl.classList.add("content-cascade");
 }
 
 function openCard(card) {
+  cardFrontContentEl.classList.remove("content-cascade");
+  cardFrontContentEl.classList.add("content-pending");
   renderCardFace(card);
   animateCardPull();
   flipBtn.hidden = !activeDeck.allowReversed;
@@ -724,11 +741,7 @@ function openCard(card) {
   if (prefersReducedMotion) {
     triggerRevealFanfare();
   } else {
-    cardEl.addEventListener("transitionend", (event) => {
-      if (event.propertyName === "transform") {
-        triggerRevealFanfare();
-      }
-    }, { once: true });
+    onCardFlipTransitionEnd(triggerRevealFanfare);
   }
 }
 
@@ -745,7 +758,7 @@ function revealCard(card) {
   if (prefersReducedMotion) {
     openCard(card);
   } else {
-    cardEl.addEventListener("transitionend", () => openCard(card), { once: true });
+    onCardFlipTransitionEnd(() => openCard(card));
   }
 }
 
@@ -929,7 +942,7 @@ shuffleBtn.addEventListener("click", () => {
   reseedRandom();
 
   if (wasFlipped && !prefersReducedMotion) {
-    cardEl.addEventListener("transitionend", startShuffleShake, { once: true });
+    onCardFlipTransitionEnd(startShuffleShake);
   } else {
     startShuffleShake();
   }

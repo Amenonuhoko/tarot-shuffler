@@ -391,12 +391,12 @@ body {
 }
 
 .card.revealing {
-  animation: reveal-pop 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: reveal-pop 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @keyframes reveal-pop {
   0% { transform: rotateY(180deg) scale(1); }
-  40% { transform: rotateY(180deg) scale(1.06); }
+  35% { transform: rotateY(180deg) scale(1.09); }
   100% { transform: rotateY(180deg) scale(1); }
 }
 
@@ -411,13 +411,63 @@ body {
 }
 
 .card.revealing .reveal-flash {
-  animation: reveal-flash-burst 0.6s ease-out;
+  animation: reveal-flash-burst 0.65s ease-out;
 }
 
 @keyframes reveal-flash-burst {
   0% { opacity: 0; transform: scale(0.6); }
   35% { opacity: 0.9; transform: scale(1.05); }
   100% { opacity: 0; transform: scale(1.5); }
+}
+
+.reveal-flash::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 2px solid color-mix(in srgb, var(--gold) 70%, white);
+  opacity: 0;
+}
+
+.card.revealing .reveal-flash::before {
+  animation: reveal-ring-expand 0.75s ease-out;
+}
+
+@keyframes reveal-ring-expand {
+  0% { opacity: 0.9; transform: scale(0.85); }
+  100% { opacity: 0; transform: scale(1.3); }
+}
+
+/* -- Reveal cascade: the card's own content unveils itself piece by
+   piece (label, title, art, orientation, description) instead of
+   appearing all at once. Content must be explicitly hidden while
+   "pending" because the 3D flip itself exposes the front face
+   (via backface-visibility) partway through its own rotation,
+   well before any JS-triggered reveal class would otherwise apply. -- */
+
+.card-front-content > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card-front-content.content-pending > * {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.card-front-content.content-cascade > * {
+  animation: content-reveal 0.4s ease-out backwards;
+}
+
+.card-front-content.content-cascade > *:nth-child(1) { animation-delay: 0.02s; }
+.card-front-content.content-cascade > *:nth-child(2) { animation-delay: 0.09s; }
+.card-front-content.content-cascade > *:nth-child(3) { animation-delay: 0.17s; }
+.card-front-content.content-cascade > *:nth-child(4) { animation-delay: 0.27s; }
+.card-front-content.content-cascade > *:nth-child(5) { animation-delay: 0.35s; }
+
+@keyframes content-reveal {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 .card-face {
@@ -1559,6 +1609,8 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .card, .card.shuffling, .card.revealing, .reveal-flash, .card.revealing .reveal-flash,
+  .reveal-flash::before, .card.revealing .reveal-flash::before,
+  .card-front-content.content-cascade > *,
   .card-slot.pulling, .card-slot.shuffle-fan, .shuffle-fx::before, .shuffle-fx::after,
   .card-slot.shuffle-fan .shuffle-fx::before, .card-slot.shuffle-fan .shuffle-fx::after,
   .history-row-enter, .card-search-input.not-found,
@@ -1570,6 +1622,11 @@ body {
   :root:not([data-theme]) .card-front {
     animation: none !important;
     transition: none !important;
+  }
+
+  .card-front-content.content-pending > * {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }
 
