@@ -90,7 +90,42 @@ const CUSTOM_TYPE_SYMBOLS = {
   Advisor: { symbol: "◉", label: "Advisor: Eye" },
   Challenge: { symbol: "☠", label: "Challenge: Skull" },
   Desire: { symbol: "♡", label: "Desire: Heart" },
-  Symbol: { symbol: "✦", label: "Symbol" }
+  Symbol: { symbol: "✦", label: "Symbol" },
+  Selves: { symbol: "☉", label: "Selves: Sun" },
+  Places: { symbol: "▲", label: "Places: Peak" },
+  Tools: { symbol: "⚙", label: "Tools: Gear" },
+  Initiations: { symbol: "☥", label: "Initiations: Ankh" }
+};
+
+const ARCHETYPE_SELVES = [
+  "The Innocent", "The Orphan", "The Warrior", "The Caregiver",
+  "The Seeker", "The Lover", "The Destroyer", "The Creator",
+  "The Ruler", "The Sage", "The Trickster", "The Shadow"
+];
+
+const ARCHETYPE_PLACES = [
+  "The Threshold", "The Forest", "The Underworld", "The Mountain Peak",
+  "The Crossroads", "The Garden", "The Labyrinth", "The Spire",
+  "The Hearth", "The Wasteland", "The Shore", "The Sanctuary"
+];
+
+const ARCHETYPE_TOOLS = [
+  "The Sword", "The Cup", "The Key", "The Ledger",
+  "The Torch", "The Compass", "The Mask", "The Scroll",
+  "The Anchor", "The Thread", "The Lantern", "The Shield"
+];
+
+const ARCHETYPE_INITIATIONS = [
+  "The Call", "The Trial", "The Descent", "The Death",
+  "The Rebirth", "The Return", "The Vow", "The Sacrifice",
+  "The Awakening", "The Union", "The Revelation", "The Ordeal"
+];
+
+const ARCHETYPE_COLORS = {
+  Selves: "#b8654f",
+  Places: "#4f7a5e",
+  Tools: "#5c7a94",
+  Initiations: "#6b4f8f"
 };
 
 const CARD_MEANINGS = {
@@ -470,6 +505,57 @@ const CUSTOM_MEANINGS = {
   "The Apocalypse": "A revelation or unveiling; in eschatology, a cataclysmic event marking the end of an age and the disclosure of hidden truth."
 };
 
+const ARCHETYPE_MEANINGS = {
+  "The Innocent": "A nature that meets the world with trust and hope, not yet hardened by disappointment.",
+  "The Orphan": "A self shaped by early loss, resourceful and wary, unwilling to depend on being rescued.",
+  "The Warrior": "A will that meets conflict head-on, guided by discipline rather than rage.",
+  "The Caregiver": "A devotion to nurturing others, sometimes at the cost of one's own needs.",
+  "The Seeker": "A restlessness that can't settle for the familiar, always reaching for something more.",
+  "The Lover": "A drive toward connection, passion, and the risk of being truly known.",
+  "The Destroyer": "The part of the self willing to tear down what no longer serves, to clear the ground.",
+  "The Creator": "An impulse to make something from nothing, to give shape to the unformed.",
+  "The Ruler": "A need to bring order to chaos, to take responsibility for what one commands.",
+  "The Sage": "A patient pursuit of understanding, valuing truth over comfort.",
+  "The Trickster": "A delight in mischief and disruption, breaking rules to reveal what they hide.",
+  "The Shadow": "The self's disowned parts, kept from view yet shaping behavior from beneath.",
+  "The Threshold": "The boundary between what was and what is becoming, crossed but not yet settled.",
+  "The Forest": "A wild unknown where the familiar paths mean nothing and instinct must lead.",
+  "The Underworld": "The depths one must descend into to face what has been buried or denied.",
+  "The Mountain Peak": "A hard-won clarity, reached only through isolation and sustained effort.",
+  "The Crossroads": "A point of decision, and the quiet weight of every road not taken.",
+  "The Garden": "A cultivated space of growth, tended with patience and care.",
+  "The Labyrinth": "A winding trial where the way forward is indistinguishable from the way back.",
+  "The Spire": "Ambition built high and alone, isolated from the ground that once held it.",
+  "The Hearth": "Home, warmth, and the return to comfort after distance or hardship.",
+  "The Wasteland": "A barren stretch left behind by neglect, waiting on renewal.",
+  "The Shore": "The edge between two worlds, neither fully one nor the other.",
+  "The Sanctuary": "A place of shelter, set apart from harm, where one may finally rest.",
+  "The Sword": "Decisive action; the will to cut away what no longer belongs.",
+  "The Cup": "The vessel that holds what is felt, offered or kept close.",
+  "The Key": "Access; the means to open what has been sealed or hidden.",
+  "The Ledger": "A record of debts and dues, the tally that eventually comes due.",
+  "The Torch": "Guidance carried into the dark, illuminating only what is near.",
+  "The Compass": "A sense of direction when the way forward isn't obvious.",
+  "The Mask": "A concealment or performed identity, worn to protect or to deceive.",
+  "The Scroll": "Recorded knowledge, inherited wisdom passed down from those before.",
+  "The Anchor": "Stability; that which holds one fast against the pull of the tide.",
+  "The Thread": "A fragile connection, the line that can be followed back home.",
+  "The Lantern": "Hope carried forward, small but enough to see the next step.",
+  "The Shield": "Defense; the readiness to protect what matters most.",
+  "The Call": "The summons to begin, the first disruption of an ordinary life.",
+  "The Trial": "A test that demands proof of readiness before the way opens.",
+  "The Descent": "A willing or unwilling fall into depths that must be faced.",
+  "The Death": "An ending necessary before anything new can take its place.",
+  "The Rebirth": "Emergence, transformed by what was survived below.",
+  "The Return": "Carrying what was learned back to the life that was left behind.",
+  "The Vow": "A binding commitment made with full knowledge of its cost.",
+  "The Sacrifice": "Giving up something valued so that something greater may follow.",
+  "The Awakening": "A sudden clarity that cannot be unseen once it arrives.",
+  "The Union": "A coming together, the integration of what was once divided.",
+  "The Revelation": "A hidden truth made known, changing everything that follows.",
+  "The Ordeal": "The darkest test faced before the way forward finally opens."
+};
+
 function slugify(name) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
@@ -516,9 +602,35 @@ function buildCustomDeck() {
   }));
 }
 
+function buildArchetypesDeck() {
+  const groups = [
+    { type: "Selves", names: ARCHETYPE_SELVES },
+    { type: "Places", names: ARCHETYPE_PLACES },
+    { type: "Tools", names: ARCHETYPE_TOOLS },
+    { type: "Initiations", names: ARCHETYPE_INITIATIONS }
+  ];
+
+  const cards = [];
+  groups.forEach(({ type, names }) => {
+    names.forEach((name, index) => {
+      cards.push({
+        name,
+        arcana: "Archetypes",
+        type,
+        color: ARCHETYPE_COLORS[type],
+        slug: `archetypes-${slugify(name)}-${index}`,
+        meaning: ARCHETYPE_MEANINGS[name]
+      });
+    });
+  });
+
+  return cards;
+}
+
 const DECKS = {
   classical: { name: "Tarot of the Divine", cards: CLASSICAL_DECK, allowReversed: true },
-  custom: { name: "Oracle of the Divine", cards: buildCustomDeck(), allowReversed: false }
+  custom: { name: "Oracle of the Divine", cards: buildCustomDeck(), allowReversed: false },
+  archetypes: { name: "Archetypes", cards: buildArchetypesDeck(), allowReversed: false }
 };
 
 const DECK_STORAGE_KEY = "tarotPullDeck";
