@@ -183,14 +183,23 @@
 <div class="table">
 
   <main class="stage">
-    <label class="deck-selector" for="deckSelect">
-      <span>Deck</span>
-      <select id="deckSelect" aria-label="Choose a deck">
-        <option value="classical">Tarot of the Divine</option>
-        <option value="custom">Oracle of the Divine</option>
-        <option value="archetypes">Archetypes</option>
-      </select>
-    </label>
+    <div class="deck-selector-row" id="deckSelectorRow">
+      <div class="selector-toggle" id="selectorToggle" hidden>
+        <button class="selector-toggle-btn is-active" type="button" data-mode="deck">Deck</button>
+        <button class="selector-toggle-btn" type="button" data-mode="spread">Spread</button>
+      </div>
+
+      <label class="deck-selector" for="deckSelect" id="deckSelectorLabel">
+        <span>Deck</span>
+        <select id="deckSelect" aria-label="Choose a deck">
+          <option value="classical">Tarot of the Divine</option>
+          <option value="custom">Oracle of the Divine</option>
+          <option value="archetypes">Archetypes</option>
+        </select>
+      </label>
+
+      <div class="spread-menu" id="spreadMenu" hidden></div>
+    </div>
 
     <div class="card-slot" id="cardSlot">
       <div class="deck-stack" id="deckStack" aria-hidden="true">
@@ -244,6 +253,11 @@
       </div>
     </div>
 
+    <div class="spread-info-popover" id="spreadInfoPopover" hidden>
+      <button class="spread-info-close" id="spreadInfoClose" type="button" aria-label="Close">&times;</button>
+      <div class="spread-info-body" id="spreadInfoBody"></div>
+    </div>
+
     <div class="bottom-group">
       <p class="hint" id="hint">Tap anywhere to pull a card</p>
 
@@ -287,8 +301,6 @@
       </div>
 
       <div class="history-panel" id="historyPanel" hidden>
-        <div class="spread-menu" id="spreadMenu" hidden></div>
-
         <div class="card-search">
           <input class="card-search-input" id="cardSearchInput" type="text" list="cardNamesList" placeholder="Search for a card&hellip;" autocomplete="off" aria-label="Search for a card">
           <button class="search-btn" id="cardSearchBtn" type="button" aria-label="Search">&#8981;</button>

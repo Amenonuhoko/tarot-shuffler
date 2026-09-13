@@ -689,46 +689,51 @@ const DECKS = {
 // Spreads from the Archetype Deck guidebook. "pool" restricts a position to
 // one of the deck's four types (Selves/Places/Tools/Initiations); omitting it
 // draws from the whole 78-card deck. "layout" selects the CSS arrangement.
+// "intro"/"blurb" feed the info popover in the spread picker.
 const ARCHETYPE_SPREADS = [
   {
     name: "The Inner Quest",
     layout: "square",
+    intro: "The signature spread of the deck. Draw one card from each pile - Selves, Places, Tools, Initiations - and watch a narrative of your life unfold.",
     positions: [
-      { role: "Who", pool: "Selves" },
-      { role: "Where", pool: "Places" },
-      { role: "With What", pool: "Tools" },
-      { role: "Why", pool: "Initiations" }
+      { role: "Who", pool: "Selves", blurb: "The archetypal side of the story - the part of the self most dominant right now." },
+      { role: "Where", pool: "Places", blurb: "The archetypal setting - the energy surrounding and influencing this chapter." },
+      { role: "With What", pool: "Tools", blurb: "The archetypal tool you must use, find, or give up so destiny can unfold." },
+      { role: "Why", pool: "Initiations", blurb: "The deeper purpose - the mythic theme your whole journey is “about.”" }
     ]
   },
   {
     name: "The Heroine's Journey",
     layout: "row",
+    intro: "Based on Joseph Campbell's story arc. A great reading for the precipice of a milestone - a new year, a big relationship, a graduation, a birthday, a trip.",
     positions: [
-      { role: "The Call" },
-      { role: "The Threshold" },
-      { role: "The Ordeal" },
-      { role: "The Boon" },
-      { role: "The Return" }
+      { role: "The Call", blurb: "The inner voice, agitation, or inspiration that prompts you to embark on a new journey." },
+      { role: "The Threshold", blurb: "The obstacle to leaving - the habit that wants to hold you back, as it likely has before." },
+      { role: "The Ordeal", blurb: "The profound challenge you'll face along the way - the shadow that reveals itself so you can grow." },
+      { role: "The Boon", blurb: "The reward, wisdom, or blessing you attain on the return - mystical, not a creature comfort." },
+      { role: "The Return", blurb: "What to expect upon your return - the “homecoming” that tests integrating real change." }
     ]
   },
   {
     name: "The Axis Mundi",
     layout: "axis",
+    intro: "A sacred model of the cosmos linking sky and earth, the cosmic and the everyday. Good for exploring what role divinity plays in your life.",
     positions: [
-      { role: "Underworld" },
-      { role: "Past" },
-      { role: "Heaven" },
-      { role: "Future" },
-      { role: "Self" }
+      { role: "Underworld", blurb: "What remains unconscious, perhaps causing trouble until it becomes known." },
+      { role: "Past", blurb: "What still lingers in your energy field - to release, or a lesson resurfacing now." },
+      { role: "Heaven", blurb: "The potential blessing or guide watching over the situation - an otherworldly grace." },
+      { role: "Future", blurb: "What's next, welcomed or not - the image on the horizon, personal and collective." },
+      { role: "Self", blurb: "The stable, central force holding your whole sense of self together." }
     ]
   },
   {
     name: "Summon the Divine",
     layout: "vertical",
+    intro: "Modeled on the spine as a vertical path toward divinity. Focusing on the root, heart, and crown gives a clear view of the spiritual, emotional, and physical.",
     positions: [
-      { role: "Root" },
-      { role: "Heart" },
-      { role: "Crown" }
+      { role: "Root", blurb: "The archetypal foundation - grounding, fears, habits, and stuckness in your primary relationships and community." },
+      { role: "Heart", blurb: "The image currently residing in the heart - a deep longing, calling, or conflict at the center of it all." },
+      { role: "Crown", blurb: "The archetypal energy of the divinity within - what's blocking ascension, and how you can serve the world." }
     ]
   }
 ];
@@ -799,6 +804,11 @@ const cardSearchBtn = document.getElementById("cardSearchBtn");
 const cardNamesListEl = document.getElementById("cardNamesList");
 const spreadMenuEl = document.getElementById("spreadMenu");
 const historySectionEl = document.getElementById("historySection");
+const selectorToggleEl = document.getElementById("selectorToggle");
+const deckSelectorLabelEl = document.getElementById("deckSelectorLabel");
+const spreadInfoPopoverEl = document.getElementById("spreadInfoPopover");
+const spreadInfoBodyEl = document.getElementById("spreadInfoBody");
+const spreadInfoCloseEl = document.getElementById("spreadInfoClose");
 const wideLayoutQuery = window.matchMedia(
   "(orientation: landscape) and (min-width: 700px) and (min-height: 560px)"
 );
@@ -1000,16 +1010,34 @@ function showCard(card) {
   addToHistory({ ...card });
 }
 
+function showArchetypeCard(card) {
+  if (!spreadOpened) {
+    openSpreadFace();
+  }
+  revealSpreadPosition(card);
+  renderSpreadCircles();
+}
+
 function showSearchedCard(card) {
   currentCard = { ...card, reversed: false };
   currentSpreadPositionIndex = null;
-  revealCard(currentCard, null);
+
+  if (isArchetypesActive()) {
+    showArchetypeCard(currentCard);
+  } else {
+    revealCard(currentCard, null);
+  }
 }
 
 function showHistoryCard(card) {
   currentCard = { ...card };
   currentSpreadPositionIndex = null;
-  revealCard(currentCard, null);
+
+  if (isArchetypesActive()) {
+    showArchetypeCard(currentCard);
+  } else {
+    revealCard(currentCard, null);
+  }
   closeMenuIfCompact();
 }
 
@@ -1116,9 +1144,9 @@ function resetReading() {
 // ---- Archetype spreads ----
 // The Archetypes deck lays out labeled positions (see ARCHETYPE_SPREADS) as
 // circles inside the card face itself. Tapping an empty circle draws for
-// that position; tapping a filled one reviews it. The Shuffle button keeps
-// its normal job; the history/menu button becomes the spread picker while
-// this deck is active.
+// that position; tapping a filled one reviews it. The Deck/Spread toggle
+// next to the deck picker swaps the spread menu in when this deck is
+// active; the Shuffle and history/menu buttons keep their normal jobs.
 
 let currentSpreadIndex = 0;
 let spreadPositions = [];
@@ -1292,32 +1320,110 @@ spreadCirclesEl.addEventListener("click", (event) => {
   }
 });
 
-function renderMenuPanel() {
-  const spreadMode = isArchetypesActive();
+let selectorMode = "deck";
+
+function updateSelectorToggle() {
+  const active = isArchetypesActive();
+  selectorToggleEl.hidden = !active;
+  if (!active) {
+    selectorMode = "deck";
+  }
+
+  const spreadMode = active && selectorMode === "spread";
+  deckSelectorLabelEl.hidden = spreadMode;
   spreadMenuEl.hidden = !spreadMode;
-  historySectionEl.hidden = spreadMode;
-  menuToggle.setAttribute("aria-label", spreadMode ? "Toggle spread menu" : "Toggle history");
+
+  selectorToggleEl.querySelectorAll(".selector-toggle-btn").forEach((btn) => {
+    btn.classList.toggle("is-active", btn.dataset.mode === selectorMode);
+  });
 
   if (!spreadMode) {
+    closeSpreadInfo();
+  }
+}
+
+function renderMenuPanel() {
+  updateSelectorToggle();
+
+  if (!isArchetypesActive()) {
+    spreadMenuEl.innerHTML = "";
     return;
   }
 
   spreadMenuEl.innerHTML = `<p class="spread-menu-title">Spread</p>` + ARCHETYPE_SPREADS
     .map((spread, index) => `
-      <button type="button" class="spread-menu-option${index === currentSpreadIndex ? " is-active" : ""}" data-spread-index="${index}">
-        ${spread.name}
-        <em ${index === currentSpreadIndex ? "" : "hidden"}>(current)</em>
-      </button>
+      <div class="spread-menu-row">
+        <button type="button" class="spread-menu-option${index === currentSpreadIndex ? " is-active" : ""}" data-spread-index="${index}">
+          ${spread.name}
+          <em ${index === currentSpreadIndex ? "" : "hidden"}>(current)</em>
+        </button>
+        <button type="button" class="spread-info-btn" data-spread-info-index="${index}" aria-label="About ${spread.name}">i</button>
+      </div>
     `)
     .join("");
 }
 
+selectorToggleEl.addEventListener("click", (event) => {
+  const btn = event.target.closest(".selector-toggle-btn");
+  if (btn) {
+    event.stopPropagation();
+    selectorMode = btn.dataset.mode;
+    updateSelectorToggle();
+    if (selectorMode === "spread") {
+      renderMenuPanel();
+    }
+  }
+});
+
+let openSpreadInfoIndex = null;
+
+function closeSpreadInfo() {
+  spreadInfoPopoverEl.hidden = true;
+  openSpreadInfoIndex = null;
+}
+
+function openSpreadInfo(index) {
+  const spread = ARCHETYPE_SPREADS[index];
+  const positionsHtml = spread.positions
+    .map((position) => `<li><strong>${position.role}:</strong> ${position.blurb}</li>`)
+    .join("");
+
+  spreadInfoBodyEl.innerHTML = `
+    <p class="spread-info-title">${spread.name}</p>
+    <p class="spread-info-intro">${spread.intro}</p>
+    <ul class="spread-info-positions">${positionsHtml}</ul>
+  `;
+  spreadInfoPopoverEl.hidden = false;
+  openSpreadInfoIndex = index;
+}
+
+function toggleSpreadInfo(index) {
+  if (openSpreadInfoIndex === index) {
+    closeSpreadInfo();
+  } else {
+    openSpreadInfo(index);
+  }
+}
+
+spreadInfoCloseEl.addEventListener("click", (event) => {
+  event.stopPropagation();
+  closeSpreadInfo();
+});
+
 spreadMenuEl.addEventListener("click", (event) => {
+  const infoBtn = event.target.closest(".spread-info-btn");
+  if (infoBtn) {
+    event.stopPropagation();
+    toggleSpreadInfo(Number(infoBtn.dataset.spreadInfoIndex));
+    return;
+  }
+
   const option = event.target.closest(".spread-menu-option");
   if (option) {
     // Same reasoning as spreadCirclesEl above: startSpread() rebuilds this
     // menu's innerHTML, detaching the clicked button mid-bubble.
     event.stopPropagation();
+    closeSpreadInfo();
     startSpread(Number(option.dataset.spreadIndex));
     closeMenuIfCompact();
   }
@@ -1357,7 +1463,11 @@ document.addEventListener("click", (event) => {
     return;
   }
 
-  if (event.target.closest("#deckSelect")) {
+  if (event.target.closest("#deckSelectorRow")) {
+    return;
+  }
+
+  if (event.target.closest("#spreadInfoPopover")) {
     return;
   }
 
@@ -1378,6 +1488,11 @@ document.addEventListener("click", (event) => {
   }
 
   if (isThemeMenuOpen) {
+    return;
+  }
+
+  if (openSpreadInfoIndex !== null) {
+    closeSpreadInfo();
     return;
   }
 
