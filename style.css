@@ -255,36 +255,32 @@ body {
   display: none;
 }
 
+/* A very quiet call to action: it reads as the plain "Deck" label it
+   replaces, just with a faint dotted underline hinting it's tappable.
+   Clicking it swaps its own text to "Spread" rather than showing a
+   separate control. */
 .selector-toggle {
-  display: inline-flex;
   align-self: flex-start;
-  padding: 3px;
-  border: 1px solid var(--surface-line);
-  border-radius: var(--radius-icon);
-  background: var(--surface);
-  gap: 2px;
-}
-
-.selector-toggle-btn {
-  padding: 5px 12px;
+  margin: 0;
+  padding: 0;
   border: none;
-  border-radius: calc(var(--radius-icon) - 3px);
   background: transparent;
   color: var(--ink-dim);
-  font: 600 0.68rem var(--font-body);
-  letter-spacing: 0.1em;
+  font: inherit;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
   text-transform: var(--label-transform);
+  text-decoration: underline dotted;
+  text-decoration-color: var(--surface-line);
+  text-underline-offset: 3px;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
 }
 
-.selector-toggle-btn:hover {
-  color: var(--ink);
-}
-
-.selector-toggle-btn.is-active {
-  background: var(--gold-dim, rgba(255,255,255,0.1));
+.selector-toggle:hover,
+.selector-toggle:focus-visible {
   color: var(--gold);
+  text-decoration-color: var(--gold-dim);
 }
 
 .deck-selector {

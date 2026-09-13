@@ -805,7 +805,7 @@ const cardNamesListEl = document.getElementById("cardNamesList");
 const spreadMenuEl = document.getElementById("spreadMenu");
 const historySectionEl = document.getElementById("historySection");
 const selectorToggleEl = document.getElementById("selectorToggle");
-const deckSelectorLabelEl = document.getElementById("deckSelectorLabel");
+const deckSelectorStaticLabelEl = document.getElementById("deckSelectorStaticLabel");
 const spreadInfoPopoverEl = document.getElementById("spreadInfoPopover");
 const spreadInfoBodyEl = document.getElementById("spreadInfoBody");
 const spreadInfoCloseEl = document.getElementById("spreadInfoClose");
@@ -1324,18 +1324,18 @@ let selectorMode = "deck";
 
 function updateSelectorToggle() {
   const active = isArchetypesActive();
-  selectorToggleEl.hidden = !active;
   if (!active) {
     selectorMode = "deck";
   }
 
   const spreadMode = active && selectorMode === "spread";
-  deckSelectorLabelEl.hidden = spreadMode;
-  spreadMenuEl.hidden = !spreadMode;
 
-  selectorToggleEl.querySelectorAll(".selector-toggle-btn").forEach((btn) => {
-    btn.classList.toggle("is-active", btn.dataset.mode === selectorMode);
-  });
+  deckSelectorStaticLabelEl.hidden = active;
+  selectorToggleEl.hidden = !active;
+  selectorToggleEl.textContent = selectorMode === "spread" ? "Spread" : "Deck";
+  selectorToggleEl.dataset.mode = selectorMode;
+  deckSelect.hidden = spreadMode;
+  spreadMenuEl.hidden = !spreadMode;
 
   if (!spreadMode) {
     closeSpreadInfo();
@@ -1364,14 +1364,11 @@ function renderMenuPanel() {
 }
 
 selectorToggleEl.addEventListener("click", (event) => {
-  const btn = event.target.closest(".selector-toggle-btn");
-  if (btn) {
-    event.stopPropagation();
-    selectorMode = btn.dataset.mode;
-    updateSelectorToggle();
-    if (selectorMode === "spread") {
-      renderMenuPanel();
-    }
+  event.stopPropagation();
+  selectorMode = selectorMode === "spread" ? "deck" : "spread";
+  updateSelectorToggle();
+  if (selectorMode === "spread") {
+    renderMenuPanel();
   }
 });
 
