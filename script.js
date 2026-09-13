@@ -723,7 +723,7 @@ const ARCHETYPE_SPREADS = [
     ]
   },
   {
-    name: "[In] Common the Divine",
+    name: "Summon the Divine",
     layout: "vertical",
     positions: [
       { role: "Root" },
