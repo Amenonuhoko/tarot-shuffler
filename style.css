@@ -479,20 +479,16 @@ body {
   animation: content-reveal 0.65s ease-out backwards;
 }
 
-.card-front-content.content-cascade > *:nth-child(1) { animation-delay: 0.06s; }
-.card-front-content.content-cascade > *:nth-child(2) { animation-delay: 0.16s; }
-.card-front-content.content-cascade > *:nth-child(3) { animation-delay: 0.28s; }
-.card-front-content.content-cascade > *:nth-child(4) { animation-delay: 0.42s; }
-.card-front-content.content-cascade > *:nth-child(5) { animation-delay: 0.54s; }
+.card-front-content.content-cascade > *:nth-child(1) { animation-delay: 0.05s; }
+.card-front-content.content-cascade > *:nth-child(2) { animation-delay: 0.13s; }
+.card-front-content.content-cascade > *:nth-child(3) { animation-delay: 0.23s; }
+.card-front-content.content-cascade > *:nth-child(4) { animation-delay: 0.35s; }
+.card-front-content.content-cascade > *:nth-child(5) { animation-delay: 0.47s; }
+.card-front-content.content-cascade > *:nth-child(6) { animation-delay: 0.59s; }
 
 @keyframes content-reveal {
   0% { opacity: 0; transform: translateY(6px); filter: blur(4px); }
   100% { opacity: 1; transform: translateY(0); filter: blur(0); }
-}
-
-@keyframes content-reveal {
-  0% { opacity: 0; transform: translateY(8px); }
-  100% { opacity: 1; transform: translateY(0); }
 }
 
 .card-face {
@@ -605,6 +601,19 @@ body {
   text-align: center;
 }
 
+.card-subtitle[hidden] {
+  display: none;
+}
+
+.card-subtitle {
+  margin: -4px 0 0;
+  font-family: var(--font-description);
+  font-style: italic;
+  font-size: 0.78rem;
+  color: var(--ink-dim);
+  text-align: center;
+}
+
 .orientation-row[hidden] {
   display: none;
 }
@@ -671,11 +680,11 @@ body {
   width: 90%;
   min-height: 2.8em;
   max-height: 4.6em;
-  margin: 0;
-  padding: 6px 10px;
+  margin: 4px 0 0;
+  padding: 12px 14px;
   font-family: var(--font-description);
   font-size: 0.9rem;
-  line-height: 1.25;
+  line-height: 1.45;
   border: 1px solid var(--surface-line);
   border-radius: var(--radius-art);
   background: var(--description-bg);
@@ -797,12 +806,24 @@ body {
 .spread-circles--axis .spread-circle:nth-child(4) { grid-area: future; }
 .spread-circles--axis .spread-circle:nth-child(5) { grid-area: self; }
 
+/* Four positions as a square (2x2) rather than a row that wraps
+   awkwardly into an L/T shape at narrow widths. */
+.spread-circles--square {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  justify-items: center;
+  row-gap: 34px;
+  column-gap: 40px;
+  max-width: 220px;
+  margin: 0 auto;
+}
+
 .spread-circles--vertical {
   flex-direction: column-reverse;
   flex-wrap: nowrap;
   align-items: center;
   justify-content: center;
-  gap: 30px;
+  gap: 8px;
   width: 100%;
   margin: 0 auto;
 }
@@ -813,12 +834,16 @@ body {
 }
 
 /* The card needs more room once the circles move inside it; grow it per
-   layout since the cross and vertical shapes need more height than a
-   single row. Dropping the big art box (see .card-art below) claws back
-   most of that space for the description. */
+   layout since the square and cross/vertical shapes need more height
+   than a single row. Dropping the big art box (see .card-art below)
+   claws back most of that space for the description. */
 
 body.is-spread-deck .card-slot {
   aspect-ratio: 3 / 5;
+}
+
+body.spread-layout-square .card-slot {
+  aspect-ratio: 3 / 5.3;
 }
 
 body.spread-layout-axis .card-slot,
@@ -1363,7 +1388,7 @@ body.spread-layout-vertical .card-slot {
   animation-timing-function: linear, ease-out;
   animation-iteration-count: infinite, 1;
   animation-fill-mode: none, backwards;
-  animation-delay: 0s, 0.16s;
+  animation-delay: 0s, 0.13s;
 }
 
 [data-theme="holo"] .arcana-label,
@@ -1513,7 +1538,7 @@ body.spread-layout-vertical .card-slot {
   animation-timing-function: ease, ease-out;
   animation-iteration-count: infinite, 1;
   animation-fill-mode: none, backwards;
-  animation-delay: 0s, 0.16s;
+  animation-delay: 0s, 0.13s;
 }
 
 [data-theme="terminal"] .orientation-label.is-reversed {
@@ -1654,7 +1679,7 @@ body.spread-layout-vertical .card-slot {
   animation-timing-function: linear, ease-out;
   animation-iteration-count: infinite, 1;
   animation-fill-mode: none, backwards;
-  animation-delay: 0s, 0.16s;
+  animation-delay: 0s, 0.13s;
 }
 
 [data-theme="deco"] .deck-selector {
@@ -1777,7 +1802,7 @@ body.spread-layout-vertical .card-slot {
   animation-timing-function: linear, ease-in-out, ease-out;
   animation-iteration-count: infinite, infinite, 1;
   animation-fill-mode: none, none, backwards;
-  animation-delay: 0s, 0s, 0.16s;
+  animation-delay: 0s, 0s, 0.13s;
 }
 
 @keyframes bloodmoon-glint {
@@ -1885,11 +1910,18 @@ body.spread-layout-vertical .card-slot {
   color: var(--gold);
   pointer-events: none;
   z-index: 3;
+  transition: opacity 0.6s ease;
 }
 
 :root:not([data-theme]) .mystic-frame {
   display: block;
   opacity: 0.33;
+}
+
+/* Spreads dissolve the ornate frame away once opened, clearing the way
+   for the circles rather than competing with them. */
+.card-front.is-open .mystic-frame {
+  opacity: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1904,7 +1936,8 @@ body.spread-layout-vertical .card-slot {
   [data-theme="deco"] body::before, [data-theme="deco"] .card-title,
   [data-theme="bloodmoon"] .card-face, [data-theme="bloodmoon"] .card-title, [data-theme="bloodmoon"] .hint::after,
   :root:not([data-theme]) .motif-orbits,
-  :root:not([data-theme]) .card-front {
+  :root:not([data-theme]) .card-front,
+  .mystic-frame {
     animation: none !important;
     transition: none !important;
   }

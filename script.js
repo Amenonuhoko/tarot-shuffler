@@ -603,6 +603,10 @@ function slugify(name) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
+function capitalize(text) {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 function buildDeck() {
   const deck = MAJOR_ARCANA.map(name => ({
     name,
@@ -664,7 +668,7 @@ function buildArchetypesDeck() {
         color: ARCHETYPE_COLORS[type],
         slug: `archetypes-${slugify(name)}-${index}`,
         subtitle,
-        meaning: `${subtitle}. ${light}.`
+        meaning: `${capitalize(light)}.`
       });
     });
   });
@@ -688,7 +692,7 @@ const DECKS = {
 const ARCHETYPE_SPREADS = [
   {
     name: "The Inner Quest",
-    layout: "row",
+    layout: "square",
     positions: [
       { role: "Who", pool: "Selves" },
       { role: "Where", pool: "Places" },
@@ -775,6 +779,7 @@ const cardFrontContentEl = document.getElementById("cardFrontContent");
 const spreadCirclesEl = document.getElementById("spreadCircles");
 const arcanaLabelEl = document.getElementById("arcanaLabel");
 const cardTitleEl = document.getElementById("cardTitle");
+const cardSubtitleEl = document.getElementById("cardSubtitle");
 const orientationRowEl = document.getElementById("orientationRow");
 const orientationLabelEl = document.getElementById("orientationLabel");
 const cardDescriptionEl = document.getElementById("cardDescription");
@@ -912,6 +917,8 @@ function renderCardFace(card, roleOverride) {
 
   arcanaLabelEl.textContent = lastRoleOverride || card.type || card.arcana;
   cardTitleEl.textContent = card.name;
+  cardSubtitleEl.textContent = card.subtitle || "";
+  cardSubtitleEl.hidden = !card.subtitle;
   orientationRowEl.hidden = !activeDeck.allowReversed;
   const [uprightLabel, reversedLabel] = activeDeck.orientationLabels || ["Upright", "Reversed"];
   orientationLabelEl.textContent = card.reversed ? reversedLabel : uprightLabel;
@@ -1081,6 +1088,8 @@ function clearCardDisplay() {
 
   arcanaLabelEl.textContent = "Major Arcana";
   cardTitleEl.textContent = "\u2014";
+  cardSubtitleEl.textContent = "";
+  cardSubtitleEl.hidden = true;
   orientationLabelEl.textContent = "";
   orientationLabelEl.classList.remove("is-reversed");
   cardDescriptionEl.textContent = "";
@@ -1114,6 +1123,7 @@ function resetReading() {
 let currentSpreadIndex = 0;
 let spreadPositions = [];
 let currentSpreadPositionIndex = null;
+let spreadOpened = false;
 
 function isArchetypesActive() {
   return deckSelect.value === "archetypes";
@@ -1171,24 +1181,28 @@ function renderSpreadCircles() {
 function updateBodySpreadClasses() {
   const active = isArchetypesActive();
   document.body.classList.toggle("is-spread-deck", active);
-  document.body.classList.remove("spread-layout-row", "spread-layout-axis", "spread-layout-vertical");
+  document.body.classList.remove("spread-layout-row", "spread-layout-square", "spread-layout-axis", "spread-layout-vertical");
   if (active) {
     document.body.classList.add(`spread-layout-${currentSpread().layout}`);
   }
   cardFrontEl.classList.toggle("has-spread", active);
 }
 
-function showSpreadFace() {
+function prepareSpreadClosed() {
   updateBodySpreadClasses();
+  spreadOpened = false;
 
+  cardFrontEl.classList.remove("is-open");
   cardEl.classList.remove("shuffling", "revealing");
   cardFrontContentEl.classList.remove("content-pending", "content-cascade");
-  arcanaLabelEl.textContent = currentSpread().name;
-  cardTitleEl.textContent = "—";
+  arcanaLabelEl.textContent = "";
+  cardTitleEl.textContent = "";
+  cardSubtitleEl.textContent = "";
+  cardSubtitleEl.hidden = true;
   orientationRowEl.hidden = true;
   orientationLabelEl.textContent = "";
   orientationLabelEl.classList.remove("is-reversed");
-  cardDescriptionEl.textContent = "Tap a circle above to draw a card for that position.";
+  cardDescriptionEl.textContent = "";
   cardArtEl.classList.remove("is-reversed");
   cardFrontContentEl.classList.remove("is-reversed");
   cardArtImgEl.onload = null;
@@ -1201,11 +1215,20 @@ function showSpreadFace() {
   currentSpreadPositionIndex = null;
   lastRoleOverride = null;
 
-  cardEl.classList.add("flipped");
-  isFlipped = true;
+  cardEl.classList.remove("flipped");
+  isFlipped = false;
 
   renderSpreadCircles();
-  hintEl.textContent = "";
+  hintEl.textContent = `Tap to begin ${currentSpread().name}`;
+}
+
+function openSpreadFace() {
+  spreadOpened = true;
+  cardFrontEl.classList.add("is-open");
+  cardEl.classList.add("flipped");
+  isFlipped = true;
+  renderSpreadCircles();
+  hintEl.textContent = "Tap a circle to draw";
 }
 
 function revealSpreadPosition(card, role) {
@@ -1221,6 +1244,10 @@ function revealSpreadPosition(card, role) {
 }
 
 function handleCircleTap(index) {
+  if (!spreadOpened) {
+    return;
+  }
+
   const position = spreadPositions[index];
   if (!position) {
     return;
@@ -1245,7 +1272,7 @@ function handleCircleTap(index) {
 function startSpread(spreadIndex) {
   currentSpreadIndex = spreadIndex;
   resetSpreadPositions();
-  showSpreadFace();
+  prepareSpreadClosed();
   reseedRandom();
   renderMenuPanel();
 }
@@ -1253,6 +1280,11 @@ function startSpread(spreadIndex) {
 spreadCirclesEl.addEventListener("click", (event) => {
   const circle = event.target.closest(".spread-circle");
   if (circle) {
+    // Stop here rather than relying on the document handler's
+    // #spreadCircles exclusion: handleCircleTap() re-renders this
+    // container's innerHTML, which detaches the clicked button
+    // mid-bubble and would make a later closest() check on it fail.
+    event.stopPropagation();
     handleCircleTap(Number(circle.dataset.positionIndex));
   }
 });
@@ -1280,6 +1312,9 @@ function renderMenuPanel() {
 spreadMenuEl.addEventListener("click", (event) => {
   const option = event.target.closest(".spread-menu-option");
   if (option) {
+    // Same reasoning as spreadCirclesEl above: startSpread() rebuilds this
+    // menu's innerHTML, detaching the clicked button mid-bubble.
+    event.stopPropagation();
     startSpread(Number(option.dataset.spreadIndex));
     closeMenuIfCompact();
   }
@@ -1344,6 +1379,9 @@ document.addEventListener("click", (event) => {
   }
 
   if (isArchetypesActive()) {
+    if (!spreadOpened) {
+      openSpreadFace();
+    }
     return;
   }
 
@@ -1360,21 +1398,16 @@ function startShuffleShake() {
 }
 
 shuffleBtn.addEventListener("click", () => {
-  if (isArchetypesActive()) {
-    // The card face stays flipped (showing the spread circles) the whole
-    // time in this mode, so there's no unflip transition to wait for -
-    // reset straight to an empty spread and shake immediately.
-    resetSpreadPositions();
-    showSpreadFace();
-    reseedRandom();
-    startShuffleShake();
-    return;
-  }
-
   const wasFlipped = isFlipped;
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  clearCardDisplay();
+  if (isArchetypesActive()) {
+    resetSpreadPositions();
+    prepareSpreadClosed();
+  } else {
+    clearCardDisplay();
+  }
+
   reseedRandom();
 
   if (wasFlipped && !prefersReducedMotion) {
