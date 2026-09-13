@@ -691,6 +691,101 @@ body {
   text-align: center;
 }
 
+/* -- Spread rail: shows the current spread's labeled positions for the
+   Archetypes deck. Layout shape (row / cross / vertical stack) mirrors
+   how each spread is diagrammed in the guidebook. -- */
+
+.spread-rail {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.spread-rail[hidden] {
+  display: none;
+}
+
+.spread-slot {
+  flex: 1 1 auto;
+  min-width: 62px;
+  max-width: 120px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--radius-art);
+  background: var(--surface);
+  color: var(--ink-dim);
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.spread-slot:hover,
+.spread-slot:focus-visible {
+  border-color: var(--gold);
+}
+
+.spread-slot:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.spread-slot-role {
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.spread-slot-name {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--ink-dim);
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.spread-slot.is-filled {
+  border-color: var(--slot-color, var(--gold));
+}
+
+.spread-slot.is-filled .spread-slot-name {
+  color: var(--ink);
+}
+
+.spread-rail--axis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(62px, 1fr));
+  grid-template-areas:
+    ".    heaven     ."
+    "past self       future"
+    ".    underworld .";
+  max-width: 320px;
+}
+
+.spread-rail--axis .spread-slot:nth-child(1) { grid-area: underworld; }
+.spread-rail--axis .spread-slot:nth-child(2) { grid-area: past; }
+.spread-rail--axis .spread-slot:nth-child(3) { grid-area: heaven; }
+.spread-rail--axis .spread-slot:nth-child(4) { grid-area: future; }
+.spread-rail--axis .spread-slot:nth-child(5) { grid-area: self; }
+
+.spread-rail--vertical {
+  flex-direction: column-reverse;
+  align-items: center;
+}
+
+.spread-rail--vertical .spread-slot {
+  width: 100%;
+  max-width: 170px;
+}
+
 .controls {
   display: flex;
   align-items: center;

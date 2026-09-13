@@ -98,27 +98,35 @@ const CUSTOM_TYPE_SYMBOLS = {
 };
 
 const ARCHETYPE_SELVES = [
-  "The Innocent", "The Orphan", "The Warrior", "The Caregiver",
-  "The Seeker", "The Lover", "The Destroyer", "The Creator",
-  "The Ruler", "The Sage", "The Trickster", "The Shadow"
+  "The Creator", "The Destroyer", "The Healer", "The Comic",
+  "The Unseen", "The Shadow", "The Self", "The One",
+  "The Mother", "The Father", "The Starborn", "The Eternal Child",
+  "The Orphan", "The Mentor", "The Poet", "The Maiden",
+  "The Hunter", "The Warrior", "The Queen", "The King",
+  "The Shapeshifter", "The Crone", "The Shaman", "The Judge",
+  "The Lover", "The Siren", "The Animal", "The Pilgrim",
+  "The Mystic", "The Sustainer"
 ];
 
 const ARCHETYPE_PLACES = [
-  "The Threshold", "The Forest", "The Underworld", "The Mountain Peak",
-  "The Crossroads", "The Garden", "The Labyrinth", "The Spire",
-  "The Hearth", "The Wasteland", "The Shore", "The Sanctuary"
+  "The Womb", "The Storm", "The Faultline", "The Bardo",
+  "The Mountain", "The Cave", "The Heart", "The Village",
+  "The Dead End", "The Empty Room", "The Temple", "The Bridge",
+  "The Desert", "The Forest", "The River", "The Ocean",
+  "The Castle", "The Box", "The Threshold", "The Underworld"
 ];
 
 const ARCHETYPE_TOOLS = [
-  "The Sword", "The Cup", "The Key", "The Ledger",
-  "The Torch", "The Compass", "The Mask", "The Scroll",
-  "The Anchor", "The Thread", "The Lantern", "The Shield"
+  "The Prayer", "The Offering", "The Mirror", "The Vessel",
+  "The Thread", "The Venom", "The Mask", "The Sword",
+  "The Seed", "The Kiss", "The Medallion", "The Stone",
+  "The Flame", "The Tear", "The Riddle", "The Vow",
+  "The Vision", "The Gem", "The Ring", "The Nectar"
 ];
 
 const ARCHETYPE_INITIATIONS = [
-  "The Call", "The Trial", "The Descent", "The Death",
-  "The Rebirth", "The Return", "The Vow", "The Sacrifice",
-  "The Awakening", "The Union", "The Revelation", "The Ordeal"
+  "Anima Mundi", "Apocolypsis", "Agape", "Eros",
+  "Gnosis", "Kairos", "Thanatos", "Aletheia"
 ];
 
 const ARCHETYPE_COLORS = {
@@ -505,55 +513,90 @@ const CUSTOM_MEANINGS = {
   "The Apocalypse": "A revelation or unveiling; in eschatology, a cataclysmic event marking the end of an age and the disclosure of hidden truth."
 };
 
-const ARCHETYPE_MEANINGS = {
-  "The Innocent": "A nature that meets the world with trust and hope, not yet hardened by disappointment.",
-  "The Orphan": "A self shaped by early loss, resourceful and wary, unwilling to depend on being rescued.",
-  "The Warrior": "A will that meets conflict head-on, guided by discipline rather than rage.",
-  "The Caregiver": "A devotion to nurturing others, sometimes at the cost of one's own needs.",
-  "The Seeker": "A restlessness that can't settle for the familiar, always reaching for something more.",
-  "The Lover": "A drive toward connection, passion, and the risk of being truly known.",
-  "The Destroyer": "The part of the self willing to tear down what no longer serves, to clear the ground.",
-  "The Creator": "An impulse to make something from nothing, to give shape to the unformed.",
-  "The Ruler": "A need to bring order to chaos, to take responsibility for what one commands.",
-  "The Sage": "A patient pursuit of understanding, valuing truth over comfort.",
-  "The Trickster": "A delight in mischief and disruption, breaking rules to reveal what they hide.",
-  "The Shadow": "The self's disowned parts, kept from view yet shaping behavior from beneath.",
-  "The Threshold": "The boundary between what was and what is becoming, crossed but not yet settled.",
-  "The Forest": "A wild unknown where the familiar paths mean nothing and instinct must lead.",
-  "The Underworld": "The depths one must descend into to face what has been buried or denied.",
-  "The Mountain Peak": "A hard-won clarity, reached only through isolation and sustained effort.",
-  "The Crossroads": "A point of decision, and the quiet weight of every road not taken.",
-  "The Garden": "A cultivated space of growth, tended with patience and care.",
-  "The Labyrinth": "A winding trial where the way forward is indistinguishable from the way back.",
-  "The Spire": "Ambition built high and alone, isolated from the ground that once held it.",
-  "The Hearth": "Home, warmth, and the return to comfort after distance or hardship.",
-  "The Wasteland": "A barren stretch left behind by neglect, waiting on renewal.",
-  "The Shore": "The edge between two worlds, neither fully one nor the other.",
-  "The Sanctuary": "A place of shelter, set apart from harm, where one may finally rest.",
-  "The Sword": "Decisive action; the will to cut away what no longer belongs.",
-  "The Cup": "The vessel that holds what is felt, offered or kept close.",
-  "The Key": "Access; the means to open what has been sealed or hidden.",
-  "The Ledger": "A record of debts and dues, the tally that eventually comes due.",
-  "The Torch": "Guidance carried into the dark, illuminating only what is near.",
-  "The Compass": "A sense of direction when the way forward isn't obvious.",
-  "The Mask": "A concealment or performed identity, worn to protect or to deceive.",
-  "The Scroll": "Recorded knowledge, inherited wisdom passed down from those before.",
-  "The Anchor": "Stability; that which holds one fast against the pull of the tide.",
-  "The Thread": "A fragile connection, the line that can be followed back home.",
-  "The Lantern": "Hope carried forward, small but enough to see the next step.",
-  "The Shield": "Defense; the readiness to protect what matters most.",
-  "The Call": "The summons to begin, the first disruption of an ordinary life.",
-  "The Trial": "A test that demands proof of readiness before the way opens.",
-  "The Descent": "A willing or unwilling fall into depths that must be faced.",
-  "The Death": "An ending necessary before anything new can take its place.",
-  "The Rebirth": "Emergence, transformed by what was survived below.",
-  "The Return": "Carrying what was learned back to the life that was left behind.",
-  "The Vow": "A binding commitment made with full knowledge of its cost.",
-  "The Sacrifice": "Giving up something valued so that something greater may follow.",
-  "The Awakening": "A sudden clarity that cannot be unseen once it arrives.",
-  "The Union": "A coming together, the integration of what was once divided.",
-  "The Revelation": "A hidden truth made known, changing everything that follows.",
-  "The Ordeal": "The darkest test faced before the way forward finally opens."
+// [subtitle, when-light meaning, when-dark meaning] per card, transcribed from the
+// Archetype Deck guidebook.
+const ARCHETYPE_DATA = {
+  "Anima Mundi": ["The Soul of the World, All That Is", "tending to the sacred details of life", "overwhelmed by the bigness of existence"],
+  "Apocolypsis": ["Removing the Veil of Deception", "the unknown becomes known and guides the way", "nihilism, fatalism, hopelessness"],
+  "Agape": ["Devotion, Unconditional Love", "service, reverence, honor, joy", "spiritual bypassing, righteousness"],
+  "Eros": ["Love as Desire, Eroticism, Sensuality", "passion, playfulness, sexual health", "madness, projection, obsession"],
+  "Gnosis": ["Innermost Knowing, Mystic Truths", "contemplating the mystery, unanswerable questions", "overintellectualizing and literalizing, asking others"],
+  "Kairos": ["Mythic Time, Synchronicity", "alignment, ease in decisions and action", "fighting against time"],
+  "Thanatos": ["Death", "grieving, mourning, bearing witness to all that is", "fear or insensitivity to old age, illness, the dying"],
+  "Aletheia": ["Truth", "clarity, revelation, disclosure", "distortions, gaslighting, excuses"],
+
+  "The Prayer": ["The Worship, The Reverence, The Homage", "offering to be of service, asking for guidance", "expecting results, self-aggrandizement"],
+  "The Offering": ["The Gift, The Present, The Sacrifice", "generosity, donation, volunteering", "giving with expectations, keeping track"],
+  "The Mirror": ["The Reflection, The Illusion, The Looking Glass", "witnessing the deeper self, pure awareness", "narcissism, comparison, harsh edges"],
+  "The Vessel": ["The Body, The Container, The Cup", "stable, strong, graceful", "trapped, being in a bubble"],
+  "The Thread": ["The Path, The Vein, The Circuit", "the circuit of meaning within chaos", "binding, frustrating, taut"],
+  "The Venom": ["The Poison, The Curse, The Toxin", "self-realization through suffering", "unwillingness to find a solution or forgive"],
+  "The Mask": ["The Persona, The Performance, The Reveal", "reveals what has been suppressed", "further conceals what is rejected"],
+  "The Sword": ["The Knife, The Blade, The Weapon", "cutting through to what is essential", "hasty, backstabbing, a dull and painful blade"],
+  "The Seed": ["The Beginning, The Origin, The Pearl", "generative, fertile, germinating, building", "festering, stewing, dormant"],
+  "The Kiss": ["The Touch, The Chemistry, The Sex", "sensual expressiveness, merging, inviting", "neediness, pressure, dominance, disrespect"],
+  "The Medallion": ["The Amulet, The Talisman, The Heirloom", "upholding tradition, protecting, honoring", "burdensome inheritance, habituation"],
+  "The Stone": ["The Eternal, The Anchor, The Rock", "steadfast, loyal, committed, present", "weighted down, holding back, cold"],
+  "The Flame": ["The Fire, The Spark, The Glimmer", "health, mental clarity, good digestion", "excess heat and anger, complete darkness"],
+  "The Tear": ["The Mourning, The Release, The Rain", "melody, melancholy, flowing through", "drowning, drama, murkiness"],
+  "The Riddle": ["The Puzzle, The Question, The Mystery", "a great awakening or “aha” moment", "manipulation, deceit, trickery"],
+  "The Vow": ["The Promise, The Oath, The Contract", "bearing witness to the shift toward destiny", "unconscious vows, unkept promises, messy karma"],
+  "The Vision": ["The Dream, The Imagined, The Revealed", "potent imagination, synchronicity, trust", "disconnected from art and dreams, listless, aimless"],
+  "The Gem": ["The Diamond, The Gold, The Inner Treasure", "unique, shining, generative, irreplaceable", "envy, greed, grasping"],
+  "The Ring": ["The Infinite, The Wheel, The Connection", "connectedness, humility, sacred cycles", "unconscious repetition, starving for connection"],
+  "The Nectar": ["The Medicine, The Elixir, The Garden", "glowing, relaxed, subtle illumination", "fixation on fixing, aggressive approach to healing"],
+
+  "The Womb": ["The Nest, The Belly, The Origin", "nourishment, harmony, warmth, love", "stricken, ecological crisis, infertility, imbalance"],
+  "The Storm": ["The Chaos, The Whirlwind, The Disorder", "meaningful obliteration and annihilation", "meaningless disorder and dysfunction"],
+  "The Faultline": ["The Fissure, The Crack, The Weak Line", "redefining reality, breaking open", "precariousness, pretending, delusion"],
+  "The Bardo": ["The Liminal, The In-Between, The Transition", "healing insight found in the space between", "haunted by what refuses to resolve"],
+  "The Mountain": ["The Ascent, The Peak, The Insurmountable", "grounded in the eternal, steadfast, uplifting", "ominous, daunting, isolating, frigid"],
+  "The Cave": ["The Dark, The Portal, The Interior", "the sacred center within", "withdrawal, isolation, hiding"],
+  "The Heart": ["The Home, The Center, The Throne", "expansive, knowing, gentle clarity", "fraught, tangled, betrayal"],
+  "The Village": ["The Hometown, The Family, The Tribe", "intimate, rooted, intergenerational, communal", "small-minded, gossipy, trapped, restricted"],
+  "The Dead End": ["The Closed Door, The Final Chapter, The Impasse", "acceptance, humility, relief, reverence for change", "inertia, stuckness, tension, unconscious gripping"],
+  "The Empty Room": ["The Vortex, The Abyss, The Nothing", "spaciousness, potential, possibility", "addiction, insatiability, more for more's sake"],
+  "The Temple": ["The Sanctuary, The Shrine, The Altar", "reverence for all, life as sanctuary", "idolatry, cults, strict spirituality"],
+  "The Bridge": ["The Connection, The Link, The Gate", "acceptance, magic, communication", "lacking boundaries, forcing connection"],
+  "The Desert": ["The Drought, The Wasteland, The Badlands", "surreal, strange, unexpected visions, silence", "drying, deadening, disorienting, isolating"],
+  "The Forest": ["The Woods, The Thicket, The Jungle", "magic abounds, childlike wonder, adventure", "concealment, density, savagery"],
+  "The River": ["The Stream, The Flow, The Current", "acceptance, grace, reflection, forgiveness", "torment of emotions, flooding, overwhelm"],
+  "The Ocean": ["The Unconscious, The Depths, The Incomprehensible", "deeper than deep, big dreams, discovery", "subsumed, drowned, polluted, unpredictable"],
+  "The Castle": ["The Palace, The Penthouse, The Fortress", "visiting your throne of power", "stuckness, depression, spells, walls"],
+  "The Box": ["The Cage, The Rules, The Norm", "structure, order, coherence, logic", "limitation, rigidity, judgment, fear"],
+  "The Threshold": ["The Door, The Gate, The Initiation", "growth, individuation, ease in the liminal", "resisting, refusal to grow, barriers, boundaries"],
+  "The Underworld": ["The Nightmare, The Ordeal, The Bottom", "bravery, depth, facing of deepest fears", "denial, suppression, evil, unconsciousness"],
+
+  "The Creator": ["The Artist, The Alchemist, The Innovator", "curious, playful, open, surprising", "loses spark, feels burdened"],
+  "The Destroyer": ["The Savage, The Unexpected, The Rejected", "swift and precise blows that redirect our life", "self-destruction, negativity, unwillingness to rebuild"],
+  "The Healer": ["The Lightworker, The Gifted, The Old Soul", "self-contained, grateful, awake", "tired, needy, forgetting its own practice"],
+  "The Comic": ["The Joker, The Clown, The Fool", "hilarious, ingenious, spirited, easygoing", "sarcastic, harsh, brooding, drunk"],
+  "The Unseen": ["The Spirit, The Ancestor, The Eternal", "clairvoyant guidance, whispers of wisdom", "dark looming energy, unwillingness to forgive"],
+  "The Shadow": ["The Unspeakable, The Unwelcome, The Denied", "revealing unconscious aspects of The Self and world", "denying unconscious aspects of The Self and world"],
+  "The Self": ["The Soul, The Witness, The Watcher", "witnessing, accepting new aspects of self", "disjointed, fatigued, diffused energy and purpose"],
+  "The One": ["Nonduality, One Love, Unus Mundus", "serves, loves, accepts, resonates", "ignores, omits, excludes"],
+  "The Mother": ["The Great Mother, The Feminine, The Source", "glowing, generative, creative, nurturing", "dim, exhausted, controlling, limiting"],
+  "The Father": ["The Great Father, The Masculine, The Protector", "supportive, strategic, regal, kind authority", "disappearing, disappointing, devastated by failures"],
+  "The Starborn": ["The Divine Child, The Starchild, The Destined", "alight, trusting, vibrant, aimed", "feeling of misalignment, loss of longing"],
+  "The Eternal Child": ["The Inner Child, The Child of Joy", "joyful, playful, accepts all, magic", "addicted, selfish, adrift, burns out"],
+  "The Orphan": ["The Wounded Child, The Abandoned, The Beggar", "deep solace, deep acceptance, deep love", "distanced, “hates” and avoids, controlling, limiting"],
+  "The Mentor": ["The Teacher, The Sage, The Guru", "focused, clear, bright, remains a student", "self-serving, envious of youth, righteous, rigid"],
+  "The Poet": ["The Artist, The Witness, The Truth-Teller", "clairvoyant, wise, timeless", "harmful words, sharp tongue, thwarted creativity"],
+  "The Maiden": ["The Virgin, The Princess, The Innocent", "curious, enchanting, sensual, full of vitality", "pretends, projects, denies, fantasizes"],
+  "The Hunter": ["The Seeker, The Pursuer, The Predator", "focused, energized, respectful, seasoned", "irresponsible, violates, violent, poaching"],
+  "The Warrior": ["The Samurai, The Soldier, The Advocate", "fierce clarity, purposeful action, resolve, resilience", "threats, savagery, abandoning mission and values"],
+  "The Queen": ["The Empress, The Mother Queen, The Sovereign", "the embodiment of grace, courage, resolve, stillness", "vain, wrathful, self-righteous, demanding"],
+  "The King": ["The Ruler, The Commander, The Emperor", "benevolence, divine leadership, service, nobility", "oppression, misuse of power, corruption"],
+  "The Shapeshifter": ["The Trickster, The Elusive, The Formless", "vibrant, adaptive, humorous", "charlatan, people pleasing, trickery"],
+  "The Crone": ["The Witch, The Old Woman, The Sage", "magic, clairvoyant, psychic, intuitive, wise", "vindictive, bitter, isolated, ostracized"],
+  "The Shaman": ["The Magi, The Sorcerer, The Medicine Woman", "fearless student and practitioner", "overpromises, blames, hurts self and others"],
+  "The Judge": ["The Critic, The Diplomat, The Advocate", "discernment, advocacy, right action, compassion", "critical, punishing, unforgiving, wall building"],
+  "The Lover": ["The Heart, The Beloved, The Devoted", "connection, expansion, devotion, awe", "indulgence, attachment, obsession"],
+  "The Siren": ["The Temptress, The Seducer, The Femme Fatale", "awakened sensuality, absorption, arousal", "wickedness, adultery, wreckage, betrayal, insatiability"],
+  "The Animal": ["The Beast, The Wild One, The She-Wolf", "vital, elemental, alive, dances", "savagery, pent-up emotion, lashing out"],
+  "The Pilgrim": ["The Wanderer, The Traveler, The Apprentice", "learns, grows, adapts, studies", "aloof, noncommittal, flaky"],
+  "The Mystic": ["The Seeker, The Lightworker, The Dreamer", "remover of darkness, visionary, ageless", "expects results, seeks attention and recognition"],
+  "The Sustainer": ["The Peacemaker, The Upholder, The Preserver", "abundant, generous, supportive, reliable", "overworked, resentful, trapped, tired"]
 };
 
 function slugify(name) {
@@ -613,13 +656,15 @@ function buildArchetypesDeck() {
   const cards = [];
   groups.forEach(({ type, names }) => {
     names.forEach((name, index) => {
+      const [subtitle, light, dark] = ARCHETYPE_DATA[name];
       cards.push({
         name,
         arcana: "Archetypes",
         type,
         color: ARCHETYPE_COLORS[type],
         slug: `archetypes-${slugify(name)}-${index}`,
-        meaning: ARCHETYPE_MEANINGS[name]
+        subtitle,
+        meanings: [`${subtitle}. When light: ${light}.`, `${subtitle}. When dark: ${dark}.`]
       });
     });
   });
@@ -630,8 +675,60 @@ function buildArchetypesDeck() {
 const DECKS = {
   classical: { name: "Tarot of the Divine", cards: CLASSICAL_DECK, allowReversed: true },
   custom: { name: "Oracle of the Divine", cards: buildCustomDeck(), allowReversed: false },
-  archetypes: { name: "Archetypes", cards: buildArchetypesDeck(), allowReversed: false }
+  archetypes: {
+    name: "Archetypes",
+    cards: buildArchetypesDeck(),
+    allowReversed: true,
+    orientationLabels: ["Light", "Dark"]
+  }
 };
+
+// Spreads from the Archetype Deck guidebook. "pool" restricts a position to
+// one of the deck's four types (Selves/Places/Tools/Initiations); omitting it
+// draws from the whole 78-card deck. "layout" selects the CSS arrangement.
+const ARCHETYPE_SPREADS = [
+  {
+    name: "The Inner Quest",
+    layout: "row",
+    positions: [
+      { role: "Who", pool: "Selves" },
+      { role: "Where", pool: "Places" },
+      { role: "With What", pool: "Tools" },
+      { role: "Why", pool: "Initiations" }
+    ]
+  },
+  {
+    name: "The Heroine's Journey",
+    layout: "row",
+    positions: [
+      { role: "The Call" },
+      { role: "The Threshold" },
+      { role: "The Ordeal" },
+      { role: "The Boon" },
+      { role: "The Return" }
+    ]
+  },
+  {
+    name: "The Axis Mundi",
+    layout: "axis",
+    positions: [
+      { role: "Underworld" },
+      { role: "Past" },
+      { role: "Heaven" },
+      { role: "Future" },
+      { role: "Self" }
+    ]
+  },
+  {
+    name: "[In] Common the Divine",
+    layout: "vertical",
+    positions: [
+      { role: "Root" },
+      { role: "Heart" },
+      { role: "Crown" }
+    ]
+  }
+];
 
 const DECK_STORAGE_KEY = "tarotPullDeck";
 
@@ -694,6 +791,7 @@ const flipBtn = document.getElementById("flipBtn");
 const cardSearchInputEl = document.getElementById("cardSearchInput");
 const cardSearchBtn = document.getElementById("cardSearchBtn");
 const cardNamesListEl = document.getElementById("cardNamesList");
+const spreadRailEl = document.getElementById("spreadRail");
 const wideLayoutQuery = window.matchMedia(
   "(orientation: landscape) and (min-width: 700px) and (min-height: 560px)"
 );
@@ -803,11 +901,18 @@ function animateCardPull() {
   cardSlotEl.classList.add("pulling");
 }
 
-function renderCardFace(card) {
-  arcanaLabelEl.textContent = card.type || card.arcana;
+let lastRoleOverride = null;
+
+function renderCardFace(card, roleOverride) {
+  if (roleOverride !== undefined) {
+    lastRoleOverride = roleOverride;
+  }
+
+  arcanaLabelEl.textContent = lastRoleOverride || card.type || card.arcana;
   cardTitleEl.textContent = card.name;
   orientationRowEl.hidden = !activeDeck.allowReversed;
-  orientationLabelEl.textContent = card.reversed ? "Reversed" : "Upright";
+  const [uprightLabel, reversedLabel] = activeDeck.orientationLabels || ["Upright", "Reversed"];
+  orientationLabelEl.textContent = card.reversed ? reversedLabel : uprightLabel;
   orientationLabelEl.classList.toggle("is-reversed", card.reversed);
   cardDescriptionEl.textContent = card.meanings
     ? card.meanings[card.reversed ? 1 : 0]
@@ -839,15 +944,20 @@ function triggerRevealFanfare() {
   cardFrontContentEl.classList.add("content-cascade");
 }
 
-function openCard(card) {
+function openCard(card, roleOverride) {
   cardFrontContentEl.classList.remove("content-cascade");
   cardFrontContentEl.classList.add("content-pending");
-  renderCardFace(card);
+  renderCardFace(card, roleOverride);
   animateCardPull();
   flipBtn.hidden = !activeDeck.allowReversed;
   cardEl.classList.add("flipped");
   isFlipped = true;
-  hintEl.textContent = "Tap anywhere to draw again";
+
+  if (isArchetypesActive()) {
+    updateHintForSpread();
+  } else {
+    hintEl.textContent = "Tap anywhere to draw again";
+  }
 
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (prefersReducedMotion) {
@@ -857,9 +967,9 @@ function openCard(card) {
   }
 }
 
-function revealCard(card) {
+function revealCard(card, roleOverride) {
   if (!isFlipped) {
-    openCard(card);
+    openCard(card, roleOverride);
     return;
   }
 
@@ -868,26 +978,29 @@ function revealCard(card) {
   isFlipped = false;
 
   if (prefersReducedMotion) {
-    openCard(card);
+    openCard(card, roleOverride);
   } else {
-    onCardFlipTransitionEnd(() => openCard(card));
+    onCardFlipTransitionEnd(() => openCard(card, roleOverride));
   }
 }
 
 function showCard(card) {
   currentCard = { ...card };
-  revealCard(currentCard);
+  currentSpreadPositionIndex = null;
+  revealCard(currentCard, null);
   addToHistory({ ...card });
 }
 
 function showSearchedCard(card) {
   currentCard = { ...card, reversed: false };
-  revealCard(currentCard);
+  currentSpreadPositionIndex = null;
+  revealCard(currentCard, null);
 }
 
 function showHistoryCard(card) {
   currentCard = { ...card };
-  revealCard(currentCard);
+  currentSpreadPositionIndex = null;
+  revealCard(currentCard, null);
   closeMenuIfCompact();
 }
 
@@ -989,6 +1102,121 @@ function resetReading() {
   reseedRandom();
 }
 
+// ---- Archetype spreads ----
+// The Archetypes deck replaces plain shuffling with cycling between named
+// spreads (see ARCHETYPE_SPREADS); drawing fills one labeled position at a
+// time instead of pulling a single anonymous card.
+
+let currentSpreadIndex = 0;
+let spreadPositions = [];
+let currentSpreadPositionIndex = null;
+
+function isArchetypesActive() {
+  return deckSelect.value === "archetypes";
+}
+
+function currentSpread() {
+  return ARCHETYPE_SPREADS[currentSpreadIndex];
+}
+
+function resetSpreadPositions() {
+  spreadPositions = currentSpread().positions.map((position) => ({ ...position, card: null }));
+  currentSpreadPositionIndex = null;
+}
+
+function pickCardForPosition(position) {
+  const pool = position.pool
+    ? activeDeck.cards.filter((card) => card.type === position.pool)
+    : activeDeck.cards;
+  const usedNames = new Set(spreadPositions.filter((p) => p.card).map((p) => p.card.name));
+  const available = pool.filter((card) => !usedNames.has(card.name));
+  const candidates = available.length > 0 ? available : pool;
+  const card = candidates[Math.floor(random() * candidates.length)];
+  const reversed = activeDeck.allowReversed && random() < 0.5;
+  return { ...card, reversed };
+}
+
+function renderSpreadRail() {
+  if (!isArchetypesActive()) {
+    spreadRailEl.hidden = true;
+    spreadRailEl.innerHTML = "";
+    return;
+  }
+
+  spreadRailEl.hidden = false;
+  spreadRailEl.className = `spread-rail spread-rail--${currentSpread().layout}`;
+  spreadRailEl.innerHTML = spreadPositions
+    .map((position, index) => {
+      const filled = Boolean(position.card);
+      const color = filled ? position.card.color : "var(--surface-line)";
+      return `
+      <button type="button" class="spread-slot${filled ? " is-filled" : ""}" data-position-index="${index}" style="--slot-color:${color}" aria-label="${position.role}${filled ? `: ${position.card.name}` : ""}">
+        <span class="spread-slot-role">${position.role}</span>
+        <span class="spread-slot-name">${filled ? position.card.name : "—"}</span>
+      </button>
+    `;
+    })
+    .join("");
+}
+
+function updateShuffleButtonLabel() {
+  shuffleBtn.textContent = isArchetypesActive() ? currentSpread().name : "Shuffle";
+}
+
+function updateHintForSpread() {
+  const next = spreadPositions.find((position) => !position.card);
+  hintEl.textContent = next ? `Tap to draw ${next.role}` : "Tap to start a new spread";
+}
+
+function drawSpreadStep() {
+  const nextIndex = spreadPositions.findIndex((position) => !position.card);
+
+  if (nextIndex === -1) {
+    resetSpreadPositions();
+    renderSpreadRail();
+    clearCardDisplay();
+    updateHintForSpread();
+    return;
+  }
+
+  const position = spreadPositions[nextIndex];
+  const card = pickCardForPosition(position);
+  position.card = card;
+  currentSpreadPositionIndex = nextIndex;
+  currentCard = { ...card };
+  revealCard(currentCard, position.role);
+  addToHistory({ ...card });
+  renderSpreadRail();
+}
+
+function reviewSpreadPosition(index) {
+  const position = spreadPositions[index];
+  if (!position || !position.card) {
+    return;
+  }
+
+  currentSpreadPositionIndex = index;
+  currentCard = { ...position.card };
+  revealCard(currentCard, position.role);
+}
+
+function startSpread(spreadIndex) {
+  currentSpreadIndex = spreadIndex;
+  resetSpreadPositions();
+  renderSpreadRail();
+  updateShuffleButtonLabel();
+  clearCardDisplay();
+  updateHintForSpread();
+  reseedRandom();
+}
+
+spreadRailEl.addEventListener("click", (event) => {
+  const slot = event.target.closest(".spread-slot");
+  if (slot) {
+    reviewSpreadPosition(Number(slot.dataset.positionIndex));
+  }
+});
+
 menuToggle.addEventListener("click", (event) => {
   event.stopPropagation();
   toggleMenu();
@@ -998,6 +1226,14 @@ deckSelect.addEventListener("change", () => {
   activeDeck = DECKS[deckSelect.value];
   saveDeckKey(deckSelect.value);
   resetReading();
+
+  if (isArchetypesActive()) {
+    startSpread(0);
+  } else {
+    renderSpreadRail();
+    updateShuffleButtonLabel();
+  }
+
   closeMenuIfCompact();
 });
 
@@ -1030,12 +1266,20 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  if (event.target.closest("#spreadRail")) {
+    return;
+  }
+
   if (isThemeMenuOpen) {
     return;
   }
 
-  const card = pullCard();
-  showCard(card);
+  if (isArchetypesActive()) {
+    drawSpreadStep();
+  } else {
+    const card = pullCard();
+    showCard(card);
+  }
 });
 
 function startShuffleShake() {
@@ -1047,6 +1291,11 @@ function startShuffleShake() {
 }
 
 shuffleBtn.addEventListener("click", () => {
+  if (isArchetypesActive()) {
+    startSpread((currentSpreadIndex + 1) % ARCHETYPE_SPREADS.length);
+    return;
+  }
+
   const wasFlipped = isFlipped;
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -1084,6 +1333,13 @@ flipBtn.addEventListener("click", (event) => {
 
   currentCard.reversed = !currentCard.reversed;
   renderCardFace(currentCard);
+
+  if (currentSpreadPositionIndex !== null) {
+    const position = spreadPositions[currentSpreadPositionIndex];
+    if (position && position.card) {
+      position.card.reversed = currentCard.reversed;
+    }
+  }
 });
 
 cardEl.addEventListener("animationend", (event) => {
@@ -1104,6 +1360,12 @@ cardSlotEl.addEventListener("animationend", (event) => {
 
 deckSelect.value = initialDeckKey;
 populateCardNames();
+if (isArchetypesActive()) {
+  startSpread(0);
+} else {
+  renderSpreadRail();
+  updateShuffleButtonLabel();
+}
 setMenuOpen(wideLayoutQuery.matches);
 
 wideLayoutQuery.addEventListener("change", (event) => {
