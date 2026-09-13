@@ -771,7 +771,9 @@ function pullCard() {
 
 const cardSlotEl = document.getElementById("cardSlot");
 const cardEl = document.getElementById("card");
+const cardFrontEl = document.getElementById("cardFront");
 const cardFrontContentEl = document.getElementById("cardFrontContent");
+const spreadCirclesEl = document.getElementById("spreadCircles");
 const arcanaLabelEl = document.getElementById("arcanaLabel");
 const cardTitleEl = document.getElementById("cardTitle");
 const orientationRowEl = document.getElementById("orientationRow");
@@ -791,7 +793,8 @@ const flipBtn = document.getElementById("flipBtn");
 const cardSearchInputEl = document.getElementById("cardSearchInput");
 const cardSearchBtn = document.getElementById("cardSearchBtn");
 const cardNamesListEl = document.getElementById("cardNamesList");
-const spreadRailEl = document.getElementById("spreadRail");
+const spreadMenuEl = document.getElementById("spreadMenu");
+const historySectionEl = document.getElementById("historySection");
 const wideLayoutQuery = window.matchMedia(
   "(orientation: landscape) and (min-width: 700px) and (min-height: 560px)"
 );
@@ -954,7 +957,7 @@ function openCard(card, roleOverride) {
   isFlipped = true;
 
   if (isArchetypesActive()) {
-    updateHintForSpread();
+    hintEl.textContent = "";
   } else {
     hintEl.textContent = "Tap anywhere to draw again";
   }
@@ -1103,9 +1106,11 @@ function resetReading() {
 }
 
 // ---- Archetype spreads ----
-// The Archetypes deck replaces plain shuffling with cycling between named
-// spreads (see ARCHETYPE_SPREADS); drawing fills one labeled position at a
-// time instead of pulling a single anonymous card.
+// The Archetypes deck lays out labeled positions (see ARCHETYPE_SPREADS) as
+// circles inside the card face itself. Tapping an empty circle draws for
+// that position; tapping a filled one reviews it. The Shuffle button keeps
+// its normal job; the history/menu button becomes the spread picker while
+// this deck is active.
 
 let currentSpreadIndex = 0;
 let spreadPositions = [];
@@ -1136,84 +1141,147 @@ function pickCardForPosition(position) {
   return { ...card, reversed };
 }
 
-function renderSpreadRail() {
+function renderSpreadCircles() {
   if (!isArchetypesActive()) {
-    spreadRailEl.hidden = true;
-    spreadRailEl.innerHTML = "";
+    spreadCirclesEl.hidden = true;
+    spreadCirclesEl.innerHTML = "";
     return;
   }
 
-  spreadRailEl.hidden = false;
-  spreadRailEl.className = `spread-rail spread-rail--${currentSpread().layout}`;
-  spreadRailEl.innerHTML = spreadPositions
+  spreadCirclesEl.hidden = false;
+  spreadCirclesEl.className = `spread-circles spread-circles--${currentSpread().layout}`;
+  spreadCirclesEl.innerHTML = spreadPositions
     .map((position, index) => {
       const filled = Boolean(position.card);
+      const focused = index === currentSpreadPositionIndex;
       const color = filled ? position.card.color : "var(--surface-line)";
+      const label = position.role + (filled ? `: ${position.card.name}` : " (undrawn)");
+      const classes = ["spread-circle", filled && "is-filled", focused && "is-focused"]
+        .filter(Boolean)
+        .join(" ");
       return `
-      <button type="button" class="spread-slot${filled ? " is-filled" : ""}" data-position-index="${index}" style="--slot-color:${color}" aria-label="${position.role}${filled ? `: ${position.card.name}` : ""}">
-        <span class="spread-slot-role">${position.role}</span>
-        <span class="spread-slot-name">${filled ? position.card.name : "—"}</span>
+      <button type="button" class="${classes}" data-position-index="${index}" style="--slot-color:${color}" aria-label="${label}">
+        <span class="spread-circle-role">${position.role}</span>
       </button>
     `;
     })
     .join("");
 }
 
-function updateShuffleButtonLabel() {
-  shuffleBtn.textContent = isArchetypesActive() ? currentSpread().name : "Shuffle";
+function updateBodySpreadClasses() {
+  const active = isArchetypesActive();
+  document.body.classList.toggle("is-spread-deck", active);
+  document.body.classList.remove("spread-layout-row", "spread-layout-axis", "spread-layout-vertical");
+  if (active) {
+    document.body.classList.add(`spread-layout-${currentSpread().layout}`);
+  }
+  cardFrontEl.classList.toggle("has-spread", active);
 }
 
-function updateHintForSpread() {
-  const next = spreadPositions.find((position) => !position.card);
-  hintEl.textContent = next ? `Tap to draw ${next.role}` : "Tap to start a new spread";
+function showSpreadFace() {
+  updateBodySpreadClasses();
+
+  cardEl.classList.remove("shuffling", "revealing");
+  cardFrontContentEl.classList.remove("content-pending", "content-cascade");
+  arcanaLabelEl.textContent = currentSpread().name;
+  cardTitleEl.textContent = "—";
+  orientationRowEl.hidden = true;
+  orientationLabelEl.textContent = "";
+  orientationLabelEl.classList.remove("is-reversed");
+  cardDescriptionEl.textContent = "Tap a circle above to draw a card for that position.";
+  cardArtEl.classList.remove("is-reversed");
+  cardFrontContentEl.classList.remove("is-reversed");
+  cardArtImgEl.onload = null;
+  cardArtImgEl.onerror = null;
+  cardArtImgEl.removeAttribute("src");
+  cardArtImgEl.classList.remove("loaded");
+  cardArtFallbackEl.classList.remove("hidden");
+  flipBtn.hidden = true;
+  currentCard = null;
+  currentSpreadPositionIndex = null;
+  lastRoleOverride = null;
+
+  cardEl.classList.add("flipped");
+  isFlipped = true;
+
+  renderSpreadCircles();
+  hintEl.textContent = "";
 }
 
-function drawSpreadStep() {
-  const nextIndex = spreadPositions.findIndex((position) => !position.card);
+function revealSpreadPosition(card, role) {
+  // Unlike revealCard(), the card never unflips here - it stays flipped the
+  // whole time a spread is on screen (that's what keeps the circles
+  // visible). Re-render straight into the reveal fanfare instead of
+  // waiting on a flip-transition that would never fire.
+  cardFrontContentEl.classList.remove("content-cascade");
+  cardFrontContentEl.classList.add("content-pending");
+  renderCardFace(card, role);
+  flipBtn.hidden = !activeDeck.allowReversed;
+  triggerRevealFanfare();
+}
 
-  if (nextIndex === -1) {
-    resetSpreadPositions();
-    renderSpreadRail();
-    clearCardDisplay();
-    updateHintForSpread();
+function handleCircleTap(index) {
+  const position = spreadPositions[index];
+  if (!position) {
     return;
   }
 
-  const position = spreadPositions[nextIndex];
-  const card = pickCardForPosition(position);
-  position.card = card;
-  currentSpreadPositionIndex = nextIndex;
-  currentCard = { ...card };
-  revealCard(currentCard, position.role);
-  addToHistory({ ...card });
-  renderSpreadRail();
-}
-
-function reviewSpreadPosition(index) {
-  const position = spreadPositions[index];
-  if (!position || !position.card) {
-    return;
+  const isNewDraw = !position.card;
+  if (isNewDraw) {
+    position.card = pickCardForPosition(position);
   }
 
   currentSpreadPositionIndex = index;
   currentCard = { ...position.card };
-  revealCard(currentCard, position.role);
+  revealSpreadPosition(currentCard, position.role);
+
+  if (isNewDraw) {
+    addToHistory({ ...position.card });
+  }
+
+  renderSpreadCircles();
 }
 
 function startSpread(spreadIndex) {
   currentSpreadIndex = spreadIndex;
   resetSpreadPositions();
-  renderSpreadRail();
-  updateShuffleButtonLabel();
-  clearCardDisplay();
-  updateHintForSpread();
+  showSpreadFace();
   reseedRandom();
+  renderMenuPanel();
 }
 
-spreadRailEl.addEventListener("click", (event) => {
-  const slot = event.target.closest(".spread-slot");
-  if (slot) {
-    reviewSpreadPosition(Number(slot.dataset.positionIndex));
+spreadCirclesEl.addEventListener("click", (event) => {
+  const circle = event.target.closest(".spread-circle");
+  if (circle) {
+    handleCircleTap(Number(circle.dataset.positionIndex));
+  }
+});
+
+function renderMenuPanel() {
+  const spreadMode = isArchetypesActive();
+  spreadMenuEl.hidden = !spreadMode;
+  historySectionEl.hidden = spreadMode;
+  menuToggle.setAttribute("aria-label", spreadMode ? "Toggle spread menu" : "Toggle history");
+
+  if (!spreadMode) {
+    return;
+  }
+
+  spreadMenuEl.innerHTML = `<p class="spread-menu-title">Spread</p>` + ARCHETYPE_SPREADS
+    .map((spread, index) => `
+      <button type="button" class="spread-menu-option${index === currentSpreadIndex ? " is-active" : ""}" data-spread-index="${index}">
+        ${spread.name}
+        <em ${index === currentSpreadIndex ? "" : "hidden"}>(current)</em>
+      </button>
+    `)
+    .join("");
+}
+
+spreadMenuEl.addEventListener("click", (event) => {
+  const option = event.target.closest(".spread-menu-option");
+  if (option) {
+    startSpread(Number(option.dataset.spreadIndex));
+    closeMenuIfCompact();
   }
 });
 
@@ -1230,10 +1298,11 @@ deckSelect.addEventListener("change", () => {
   if (isArchetypesActive()) {
     startSpread(0);
   } else {
-    renderSpreadRail();
-    updateShuffleButtonLabel();
+    updateBodySpreadClasses();
+    renderSpreadCircles();
   }
 
+  renderMenuPanel();
   closeMenuIfCompact();
 });
 
@@ -1266,7 +1335,7 @@ document.addEventListener("click", (event) => {
     return;
   }
 
-  if (event.target.closest("#spreadRail")) {
+  if (event.target.closest("#spreadCircles")) {
     return;
   }
 
@@ -1275,11 +1344,11 @@ document.addEventListener("click", (event) => {
   }
 
   if (isArchetypesActive()) {
-    drawSpreadStep();
-  } else {
-    const card = pullCard();
-    showCard(card);
+    return;
   }
+
+  const card = pullCard();
+  showCard(card);
 });
 
 function startShuffleShake() {
@@ -1292,7 +1361,13 @@ function startShuffleShake() {
 
 shuffleBtn.addEventListener("click", () => {
   if (isArchetypesActive()) {
-    startSpread((currentSpreadIndex + 1) % ARCHETYPE_SPREADS.length);
+    // The card face stays flipped (showing the spread circles) the whole
+    // time in this mode, so there's no unflip transition to wait for -
+    // reset straight to an empty spread and shake immediately.
+    resetSpreadPositions();
+    showSpreadFace();
+    reseedRandom();
+    startShuffleShake();
     return;
   }
 
@@ -1363,9 +1438,9 @@ populateCardNames();
 if (isArchetypesActive()) {
   startSpread(0);
 } else {
-  renderSpreadRail();
-  updateShuffleButtonLabel();
+  updateBodySpreadClasses();
 }
+renderMenuPanel();
 setMenuOpen(wideLayoutQuery.matches);
 
 wideLayoutQuery.addEventListener("change", (event) => {
