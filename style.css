@@ -745,9 +745,12 @@ body {
   outline-offset: 2px;
 }
 
-.spread-circle-symbol {
-  font-size: 1.2rem;
-  line-height: 1;
+.spread-circle-placeholder {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.55;
 }
 
 .spread-circle-role {
@@ -796,10 +799,17 @@ body {
 
 .spread-circles--vertical {
   flex-direction: column-reverse;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: center;
   gap: 30px;
   width: 100%;
+  margin: 0 auto;
+}
+
+.spread-circles--vertical .spread-circle {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* The card needs more room once the circles move inside it; grow it per

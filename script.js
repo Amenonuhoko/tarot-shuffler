@@ -656,7 +656,7 @@ function buildArchetypesDeck() {
   const cards = [];
   groups.forEach(({ type, names }) => {
     names.forEach((name, index) => {
-      const [subtitle, light, dark] = ARCHETYPE_DATA[name];
+      const [subtitle, light] = ARCHETYPE_DATA[name];
       cards.push({
         name,
         arcana: "Archetypes",
@@ -664,7 +664,7 @@ function buildArchetypesDeck() {
         color: ARCHETYPE_COLORS[type],
         slug: `archetypes-${slugify(name)}-${index}`,
         subtitle,
-        meanings: [`${subtitle}. When light: ${light}.`, `${subtitle}. When dark: ${dark}.`]
+        meaning: `${subtitle}. ${light}.`
       });
     });
   });
@@ -678,8 +678,7 @@ const DECKS = {
   archetypes: {
     name: "Archetypes",
     cards: buildArchetypesDeck(),
-    allowReversed: true,
-    orientationLabels: ["Light", "Dark"]
+    allowReversed: false
   }
 };
 
@@ -1155,14 +1154,13 @@ function renderSpreadCircles() {
       const filled = Boolean(position.card);
       const focused = index === currentSpreadPositionIndex;
       const color = filled ? position.card.color : "var(--surface-line)";
-      const symbol = filled ? getCardTypeSymbol(position.card).symbol : "";
       const label = position.role + (filled ? `: ${position.card.name}` : " (undrawn)");
       const classes = ["spread-circle", filled && "is-filled", focused && "is-focused"]
         .filter(Boolean)
         .join(" ");
       return `
       <button type="button" class="${classes}" data-position-index="${index}" style="--slot-color:${color}" aria-label="${label}">
-        ${symbol ? `<span class="spread-circle-symbol">${symbol}</span>` : ""}
+        ${filled ? `<span class="spread-circle-placeholder"></span>` : ""}
         <span class="spread-circle-role">${position.role}</span>
       </button>
     `;
