@@ -1,4 +1,4 @@
-const CACHE_NAME = "tarot-pull-v4";
+const CACHE_NAME = "tarot-pull-v5";
 
 const ASSETS = [
   "./",
@@ -29,17 +29,17 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
+  // Network-first: always serve the latest deployed files when online, so
+  // a new version reaches users on their next reload without needing a
+  // manual cache-name bump every time. The cache only kicks in when the
+  // network request fails (offline support).
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(response => {
-        // Only cache successful same-origin responses
-        if (response.ok && event.request.url.startsWith(self.location.origin)) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-        }
-        return response;
-      }).catch(() => cached);
-    })
+    fetch(event.request).then(response => {
+      if (response.ok && event.request.url.startsWith(self.location.origin)) {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+      }
+      return response;
+    }).catch(() => caches.match(event.request))
   );
 });
