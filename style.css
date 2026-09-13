@@ -1648,12 +1648,19 @@ body {
 }
 
 :root:not([data-theme]) .card-front {
+  /* filter, not box-shadow: this element is backface-hidden inside
+     a 3D-rotated card, and an animated box-shadow forces a geometry
+     repaint every frame that some mobile GPUs occasionally
+     mis-rasterize mid-flip, showing up as the dashed frame
+     momentarily jumping. filter is a pure compositor effect and
+     doesn't have that failure mode. */
   animation: mystic-card-glow 7s ease-in-out infinite;
+  will-change: filter;
 }
 
 @keyframes mystic-card-glow {
-  0%, 100% { box-shadow: 0 0 30px -6px rgba(216, 183, 106, 0.35); }
-  50% { box-shadow: 0 0 36px -6px rgba(216, 183, 106, 0.5); }
+  0%, 100% { filter: drop-shadow(0 0 18px rgba(216, 183, 106, 0.35)); }
+  50% { filter: drop-shadow(0 0 22px rgba(216, 183, 106, 0.5)); }
 }
 
 .mystic-frame {
