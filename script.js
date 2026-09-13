@@ -1231,14 +1231,17 @@ function openSpreadFace() {
   hintEl.textContent = "Tap a circle to draw";
 }
 
-function revealSpreadPosition(card, role) {
+function revealSpreadPosition(card) {
   // Unlike revealCard(), the card never unflips here - it stays flipped the
   // whole time a spread is on screen (that's what keeps the circles
   // visible). Re-render straight into the reveal fanfare instead of
   // waiting on a flip-transition that would never fire.
   cardFrontContentEl.classList.remove("content-cascade");
   cardFrontContentEl.classList.add("content-pending");
-  renderCardFace(card, role);
+  // The role (Who/Where/Crown/...) is already shown on the spread circle
+  // itself, so don't repeat it on the card face - let the label fall back
+  // to the card's own type (Selves/Places/Tools/Initiations).
+  renderCardFace(card, null);
   flipBtn.hidden = !activeDeck.allowReversed;
   triggerRevealFanfare();
 }
@@ -1260,7 +1263,7 @@ function handleCircleTap(index) {
 
   currentSpreadPositionIndex = index;
   currentCard = { ...position.card };
-  revealSpreadPosition(currentCard, position.role);
+  revealSpreadPosition(currentCard);
 
   if (isNewDraw) {
     addToHistory({ ...position.card });
