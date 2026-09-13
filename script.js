@@ -1363,12 +1363,28 @@ function renderMenuPanel() {
     .join("");
 }
 
-selectorToggleEl.addEventListener("click", (event) => {
-  event.stopPropagation();
+function toggleSelectorMode() {
   selectorMode = selectorMode === "spread" ? "deck" : "spread";
   updateSelectorToggle();
   if (selectorMode === "spread") {
     renderMenuPanel();
+  }
+}
+
+selectorToggleEl.addEventListener("click", (event) => {
+  event.stopPropagation();
+  toggleSelectorMode();
+});
+
+// It's a <span role="button"> (not a real <button>) so it can share the
+// static label's element type and inherit identical typography with zero
+// risk of drifting from the other deck pages' look; that means it needs
+// its own Enter/Space handling for keyboard activation.
+selectorToggleEl.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    event.stopPropagation();
+    toggleSelectorMode();
   }
 });
 

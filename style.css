@@ -255,21 +255,14 @@ body {
   display: none;
 }
 
-/* A very quiet call to action: it reads as the plain "Deck" label it
-   replaces, just with a faint dotted underline hinting it's tappable.
+/* A very quiet call to action: same element type and class as the
+   plain "Deck" label it replaces (.deck-selector-static-label), so
+   typography inherits identically and nothing about it can drift
+   from the look of the other deck pages. Only the interactive bits -
+   a faint dotted underline and a pointer cursor - are added here.
    Clicking it swaps its own text to "Spread" rather than showing a
    separate control. */
 .selector-toggle {
-  align-self: flex-start;
-  margin: 0;
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: var(--ink-dim);
-  font: inherit;
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
-  text-transform: var(--label-transform);
   text-decoration: underline dotted;
   text-decoration-color: var(--surface-line);
   text-underline-offset: 3px;
