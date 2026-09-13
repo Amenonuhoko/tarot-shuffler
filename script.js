@@ -1155,12 +1155,14 @@ function renderSpreadCircles() {
       const filled = Boolean(position.card);
       const focused = index === currentSpreadPositionIndex;
       const color = filled ? position.card.color : "var(--surface-line)";
+      const symbol = filled ? getCardTypeSymbol(position.card).symbol : "";
       const label = position.role + (filled ? `: ${position.card.name}` : " (undrawn)");
       const classes = ["spread-circle", filled && "is-filled", focused && "is-focused"]
         .filter(Boolean)
         .join(" ");
       return `
       <button type="button" class="${classes}" data-position-index="${index}" style="--slot-color:${color}" aria-label="${label}">
+        ${symbol ? `<span class="spread-circle-symbol">${symbol}</span>` : ""}
         <span class="spread-circle-role">${position.role}</span>
       </button>
     `;
