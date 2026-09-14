@@ -255,25 +255,38 @@ body {
   display: none;
 }
 
-/* A very quiet call to action: same element type and class as the
-   plain "Deck" label it replaces (.deck-selector-static-label), so
-   typography inherits identically and nothing about it can drift
-   from the look of the other deck pages. Only the interactive bits -
-   a faint dotted underline and a pointer cursor - are added here.
-   Clicking it swaps its own text to "Spread" rather than showing a
-   separate control. */
+/* Same element type and class as the plain "Deck" label it replaces
+   (.deck-selector-static-label), so typography inherits identically
+   and can't drift from the look of the other deck pages. It reads as
+   a deliberate call to action rather than plain text via a solid gold
+   underline and a small gold dot - echoing the dot motifs used
+   elsewhere in the app (the card back, the spread-circle placeholder)
+   - not merely a hover-only affordance. Clicking it swaps its own
+   text to "Spread" rather than showing a separate control. */
 .selector-toggle {
-  text-decoration: underline dotted;
-  text-decoration-color: var(--surface-line);
-  text-underline-offset: 3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--gold-dim);
+  border-bottom: 1px solid var(--gold-dim);
+  padding-bottom: 2px;
   cursor: pointer;
-  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.selector-toggle::after {
+  content: "";
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: 0 0 auto;
 }
 
 .selector-toggle:hover,
 .selector-toggle:focus-visible {
   color: var(--gold);
-  text-decoration-color: var(--gold-dim);
+  border-color: var(--gold);
 }
 
 .deck-selector {
@@ -869,23 +882,11 @@ body {
   margin-right: auto;
 }
 
-/* The card needs more room once the circles move inside it; grow it per
-   layout since the square and cross/vertical shapes need more height
-   than a single row. Dropping the big art box (see .card-art below)
-   claws back most of that space for the description. */
-
-body.is-spread-deck .card-slot {
-  aspect-ratio: 3 / 5;
-}
-
-body.spread-layout-square .card-slot {
-  aspect-ratio: 3 / 5.3;
-}
-
-body.spread-layout-axis .card-slot,
-body.spread-layout-vertical .card-slot {
-  aspect-ratio: 3 / 5.6;
-}
+/* The card stays the same 3:5 size across every deck and every spread -
+   changing size between decks reads as broken, not adaptive. Dropping
+   the big art box (see .card-art below) claws back the room the
+   circles need; the description's capped height (below) absorbs the
+   rest by scrolling instead of growing the card. */
 
 .card-front.has-spread {
   justify-content: flex-start;
@@ -906,7 +907,6 @@ body.spread-layout-vertical .card-slot {
 
 .card-front.has-spread .card-description {
   flex: 1 1 auto;
-  max-height: none;
 }
 
 .controls {
