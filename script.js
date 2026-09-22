@@ -821,7 +821,7 @@ const wideLayoutQuery = window.matchMedia(
 // it's revealed, and its face burns away to reveal a gold message
 // underneath. Add more entries to surface the feature on other cards.
 const CARD_SECRET_MESSAGES = {
-  "The Magician": "To the Magician in our lives:\ndream it, and it will be real."
+  "The Magician": "To the magician in our lives:\n\nDream it,\nand it will be real"
 };
 
 const IMAGE_EXTENSIONS = ["png", "jpg", "jpeg", "webp"];
