@@ -504,14 +504,16 @@ body {
   100% { box-shadow: 0 0 0 0 transparent; }
 }
 
-/* -- Magician birthday easter egg: hold down on The Magician and its
-   face burns away (a growing hole eats the normal content, driven by
-   JS setting mask-image frame by frame) to reveal this gold message
-   sitting behind it the whole time. .burn-glow sells the heat at the
-   edge of the hole; the flicker on .card-front sells the card itself
-   catching. See playMagicianBurn() in script.js. -- */
+/* -- Secret card reveal: hold down on a card wired up in
+   CARD_SECRET_MESSAGES (script.js) and its face burns away (a growing
+   hole eats the normal content, driven by JS setting mask-image frame
+   by frame) to reveal this gold message sitting behind it the whole
+   time. .burn-glow is a ring of light that JS keeps synced to the
+   growing hole's edge; .burn-embers spawns rising sparks along that
+   same edge; the flicker on .card-front sells the card itself catching.
+   See playCardSecretBurn() in script.js. -- */
 
-.magician-secret {
+.card-secret {
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -523,7 +525,7 @@ body {
   pointer-events: none;
 }
 
-.magician-secret-text {
+.card-secret-text {
   margin: 0;
   font-family: var(--font-display);
   font-size: clamp(1.05rem, 5.2vw, 1.35rem);
@@ -537,11 +539,11 @@ body {
     0 0 26px color-mix(in srgb, var(--gold) 45%, transparent);
 }
 
-.magician-secret.is-revealed .magician-secret-text {
-  animation: magician-message-bloom 1.4s ease-out forwards;
+.card-secret.is-revealed .card-secret-text {
+  animation: card-secret-bloom 1.4s ease-out forwards;
 }
 
-@keyframes magician-message-bloom {
+@keyframes card-secret-bloom {
   0% { opacity: 0; transform: scale(0.92); filter: blur(3px); }
   60% { opacity: 1; transform: scale(1.03); filter: blur(0); }
   100% { opacity: 1; transform: scale(1); }
@@ -551,29 +553,44 @@ body {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(circle at 50% 42%, rgba(255, 150, 60, 0.55) 0%, rgba(255, 90, 20, 0.28) 35%, transparent 70%);
   opacity: 0;
   pointer-events: none;
   z-index: 3;
   mix-blend-mode: screen;
 }
 
-.card-front.magician-burning .burn-glow {
-  animation: magician-burn-glow 1.6s ease-out;
+.burn-embers {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
 }
 
-@keyframes magician-burn-glow {
-  0% { opacity: 0; }
-  20% { opacity: 1; }
-  80% { opacity: 0.7; }
-  100% { opacity: 0; }
+.ember {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  margin: -1.5px 0 0 -1.5px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffe4b0 0%, #ff9a3c 55%, transparent 100%);
+  box-shadow: 0 0 6px 2px rgba(255, 140, 40, 0.75);
+  opacity: 0;
+  animation: ember-rise var(--dur, 1s) ease-out forwards;
 }
 
-.card-front.magician-burning {
-  animation: magician-flicker 1.6s ease-in-out;
+@keyframes ember-rise {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.6); }
+  18% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--dx, 0px), -46px) scale(0.15); }
 }
 
-@keyframes magician-flicker {
+.card-front.card-secret-burning {
+  animation: card-secret-flicker 1.6s ease-in-out;
+}
+
+@keyframes card-secret-flicker {
   0%, 100% { filter: brightness(1); }
   12% { filter: brightness(1.1); }
   26% { filter: brightness(0.9); }
@@ -2159,13 +2176,14 @@ body {
   :root:not([data-theme]) .motif-orbits,
   :root:not([data-theme]) .card-front,
   .mystic-frame,
-  .card-front.magician-burning, .card-front.magician-burning .burn-glow,
-  .magician-secret.is-revealed .magician-secret-text {
+  .card-front.card-secret-burning,
+  .card-secret.is-revealed .card-secret-text,
+  .ember {
     animation: none !important;
     transition: none !important;
   }
 
-  .magician-secret.is-revealed .magician-secret-text {
+  .card-secret.is-revealed .card-secret-text {
     opacity: 1 !important;
     transform: none !important;
     filter: none !important;
