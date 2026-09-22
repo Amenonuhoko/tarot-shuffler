@@ -955,15 +955,31 @@ function renderCardFace(card, roleOverride) {
   loadCardArt(card);
 }
 
-function onCardFlipTransitionEnd(callback) {
-  function handler(event) {
-    if (event.target !== cardEl || event.propertyName !== "transform") {
-      return;
-    }
-    cardEl.removeEventListener("transitionend", handler);
-    callback();
+// Only the most recently requested flip callback may ever be pending -
+// registering a new one replaces it rather than stacking another DOM
+// listener. A rapid click interrupts whatever flip transition is currently
+// running (isFlipped flips synchronously the instant a class changes, well
+// before the CSS transition visually finishes), and with one listener per
+// call, several stale callbacks used to end up attached at once and could
+// fire out of order off a single settling transition - showing a stale
+// card on top of a newer one, or leaving the reveal stuck mid-flip.
+let pendingFlipTransitionCallback = null;
+
+cardEl.addEventListener("transitionend", (event) => {
+  if (event.target !== cardEl || event.propertyName !== "transform" || !pendingFlipTransitionCallback) {
+    return;
   }
-  cardEl.addEventListener("transitionend", handler);
+  const callback = pendingFlipTransitionCallback;
+  pendingFlipTransitionCallback = null;
+  callback();
+});
+
+function onCardFlipTransitionEnd(callback) {
+  pendingFlipTransitionCallback = callback;
+}
+
+function cancelPendingReveal() {
+  pendingFlipTransitionCallback = null;
 }
 
 function triggerRevealFanfare() {
@@ -1125,6 +1141,7 @@ function closeMenuIfCompact() {
 
 function clearCardDisplay() {
   resetCardSecretBurn();
+  cancelPendingReveal();
 
   cardEl.classList.remove("flipped");
   isFlipped = false;
@@ -1402,6 +1419,7 @@ function updateBodySpreadClasses() {
 }
 
 function prepareSpreadClosed() {
+  cancelPendingReveal();
   updateBodySpreadClasses();
   spreadOpened = false;
 

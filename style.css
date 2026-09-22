@@ -579,32 +579,6 @@ body {
   65%, 100% { background-position: -60% 0; }
 }
 
-.card-secret-sparkle {
-  position: absolute;
-  font-size: 0.85rem;
-  color: #fff3cf;
-  opacity: 0;
-  text-shadow:
-    0 0 6px color-mix(in srgb, var(--gold) 85%, transparent),
-    0 0 14px color-mix(in srgb, var(--gold) 55%, transparent);
-}
-
-.card-secret-sparkle-a { top: 21%; left: 19%; }
-.card-secret-sparkle-b { bottom: 19%; right: 18%; font-size: 0.65rem; }
-
-.card-secret.is-revealed .card-secret-sparkle-a {
-  animation: card-secret-twinkle 2.6s ease-in-out 1.5s infinite;
-}
-
-.card-secret.is-revealed .card-secret-sparkle-b {
-  animation: card-secret-twinkle 3.1s ease-in-out 2.1s infinite;
-}
-
-@keyframes card-secret-twinkle {
-  0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
-  50% { opacity: 1; transform: scale(1) rotate(18deg); }
-}
-
 .burn-glow {
   position: absolute;
   inset: 0;
@@ -2234,7 +2208,6 @@ body {
   .mystic-frame,
   .card-front.card-secret-burning,
   .card-secret.is-revealed .card-secret-text,
-  .card-secret-sparkle-a, .card-secret-sparkle-b,
   .ember {
     animation: none !important;
     transition: none !important;
