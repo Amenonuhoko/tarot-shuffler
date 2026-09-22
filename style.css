@@ -504,6 +504,85 @@ body {
   100% { box-shadow: 0 0 0 0 transparent; }
 }
 
+/* -- Magician birthday easter egg: hold down on The Magician and its
+   face burns away (a growing hole eats the normal content, driven by
+   JS setting mask-image frame by frame) to reveal this gold message
+   sitting behind it the whole time. .burn-glow sells the heat at the
+   edge of the hole; the flicker on .card-front sells the card itself
+   catching. See playMagicianBurn() in script.js. -- */
+
+.magician-secret {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15% 12%;
+  text-align: center;
+  pointer-events: none;
+}
+
+.magician-secret-text {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 5.2vw, 1.35rem);
+  line-height: 1.55;
+  letter-spacing: 0.02em;
+  color: var(--gold);
+  white-space: pre-line;
+  opacity: 0;
+  text-shadow:
+    0 0 10px color-mix(in srgb, var(--gold) 70%, transparent),
+    0 0 26px color-mix(in srgb, var(--gold) 45%, transparent);
+}
+
+.magician-secret.is-revealed .magician-secret-text {
+  animation: magician-message-bloom 1.4s ease-out forwards;
+}
+
+@keyframes magician-message-bloom {
+  0% { opacity: 0; transform: scale(0.92); filter: blur(3px); }
+  60% { opacity: 1; transform: scale(1.03); filter: blur(0); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.burn-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 50% 42%, rgba(255, 150, 60, 0.55) 0%, rgba(255, 90, 20, 0.28) 35%, transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+  mix-blend-mode: screen;
+}
+
+.card-front.magician-burning .burn-glow {
+  animation: magician-burn-glow 1.6s ease-out;
+}
+
+@keyframes magician-burn-glow {
+  0% { opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 0.7; }
+  100% { opacity: 0; }
+}
+
+.card-front.magician-burning {
+  animation: magician-flicker 1.6s ease-in-out;
+}
+
+@keyframes magician-flicker {
+  0%, 100% { filter: brightness(1); }
+  12% { filter: brightness(1.1); }
+  26% { filter: brightness(0.9); }
+  40% { filter: brightness(1.14); }
+  55% { filter: brightness(0.93); }
+  70% { filter: brightness(1.07); }
+  85% { filter: brightness(0.96); }
+}
+
 /* -- Reveal cascade: the card's own content materializes out of a
    soft mist piece by piece (label, title, art, orientation,
    description) instead of appearing all at once. Content must be
@@ -572,6 +651,8 @@ body {
 }
 
 .card-front-content {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2077,9 +2158,17 @@ body {
   [data-theme="bloodmoon"] .card-face, [data-theme="bloodmoon"] .card-title, [data-theme="bloodmoon"] .hint::after,
   :root:not([data-theme]) .motif-orbits,
   :root:not([data-theme]) .card-front,
-  .mystic-frame {
+  .mystic-frame,
+  .card-front.magician-burning, .card-front.magician-burning .burn-glow,
+  .magician-secret.is-revealed .magician-secret-text {
     animation: none !important;
     transition: none !important;
+  }
+
+  .magician-secret.is-revealed .magician-secret-text {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
   }
 
   .card-front-content.content-pending > * {

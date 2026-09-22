@@ -809,9 +809,17 @@ const deckSelectorStaticLabelEl = document.getElementById("deckSelectorStaticLab
 const spreadInfoPopoverEl = document.getElementById("spreadInfoPopover");
 const spreadInfoBodyEl = document.getElementById("spreadInfoBody");
 const spreadInfoCloseEl = document.getElementById("spreadInfoClose");
+const magicianSecretEl = document.getElementById("magicianSecret");
+const magicianSecretTextEl = document.getElementById("magicianSecretText");
+const burnGlowEl = document.getElementById("burnGlow");
 const wideLayoutQuery = window.matchMedia(
   "(orientation: landscape) and (min-width: 700px) and (min-height: 560px)"
 );
+
+// Birthday easter egg: hold down on The Magician for a couple seconds and
+// its face burns away to reveal a gold message underneath. Placeholder
+// copy for now - swap this out for the real message before shipping.
+const MAGICIAN_SECRET_MESSAGE = "Happy Birthday.\n\n(placeholder message - tell me what you want this to actually say)";
 
 const IMAGE_EXTENSIONS = ["png", "jpg", "jpeg", "webp"];
 
@@ -921,6 +929,8 @@ function animateCardPull() {
 let lastRoleOverride = null;
 
 function renderCardFace(card, roleOverride) {
+  resetMagicianBurn();
+
   if (roleOverride !== undefined) {
     lastRoleOverride = roleOverride;
   }
@@ -1111,6 +1121,8 @@ function closeMenuIfCompact() {
 }
 
 function clearCardDisplay() {
+  resetMagicianBurn();
+
   cardEl.classList.remove("flipped");
   isFlipped = false;
 
@@ -1140,6 +1152,123 @@ function resetReading() {
   populateCardNames();
   reseedRandom();
 }
+
+// ---- Magician birthday easter egg ----
+// Hold down on The Magician once it's revealed and its face burns away
+// (a growing hole eats the normal content via a CSS mask) to show a gold
+// message sitting behind it. Resets whenever the card display changes -
+// via renderCardFace()/clearCardDisplay() above - so it never lingers on
+// the wrong card or survives a shuffle.
+
+const MAGICIAN_HOLD_MS = 1600;
+const MAGICIAN_HOLD_MOVE_TOLERANCE = 12;
+
+let magicianBurning = false;
+let magicianBurnt = false;
+let magicianHoldTimer = null;
+let magicianHoldStartX = 0;
+let magicianHoldStartY = 0;
+let magicianBurnFrame = null;
+let magicianJustBurned = false;
+
+function isMagicianRevealed() {
+  return Boolean(
+    isFlipped && !isArchetypesActive() && currentCard && currentCard.name === "The Magician"
+  );
+}
+
+function clearMagicianHoldTimer() {
+  if (magicianHoldTimer !== null) {
+    clearTimeout(magicianHoldTimer);
+    magicianHoldTimer = null;
+  }
+}
+
+function resetMagicianBurn() {
+  magicianBurning = false;
+  magicianBurnt = false;
+  clearMagicianHoldTimer();
+
+  if (magicianBurnFrame !== null) {
+    cancelAnimationFrame(magicianBurnFrame);
+    magicianBurnFrame = null;
+  }
+
+  cardFrontEl.classList.remove("magician-burning");
+  magicianSecretEl.classList.remove("is-revealed");
+  cardFrontContentEl.style.maskImage = "";
+  cardFrontContentEl.style.webkitMaskImage = "";
+}
+
+function playMagicianBurn() {
+  if (magicianBurning || magicianBurnt) {
+    return;
+  }
+
+  magicianBurning = true;
+  magicianSecretTextEl.textContent = MAGICIAN_SECRET_MESSAGE;
+  cardFrontEl.classList.add("magician-burning");
+
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const duration = prefersReducedMotion ? 1 : 1600;
+  const startTime = performance.now();
+  // Slightly above center, roughly where a thumb would rest on the card.
+  const originX = 50;
+  const originY = 42;
+
+  function step(now) {
+    const t = Math.min(1, (now - startTime) / duration);
+    const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    const radius = eased * 145;
+    const mask = `radial-gradient(circle at ${originX}% ${originY}%, transparent 0%, transparent ${radius}%, black ${Math.min(100, radius + 9)}%)`;
+    cardFrontContentEl.style.maskImage = mask;
+    cardFrontContentEl.style.webkitMaskImage = mask;
+
+    if (t < 1) {
+      magicianBurnFrame = requestAnimationFrame(step);
+    } else {
+      magicianBurnFrame = null;
+      magicianBurning = false;
+      magicianBurnt = true;
+      magicianSecretEl.classList.add("is-revealed");
+    }
+  }
+
+  magicianBurnFrame = requestAnimationFrame(step);
+}
+
+cardEl.addEventListener("pointerdown", (event) => {
+  if (event.pointerType === "mouse" && event.button !== 0) {
+    return;
+  }
+  if (!isMagicianRevealed() || magicianBurning || magicianBurnt) {
+    return;
+  }
+
+  magicianHoldStartX = event.clientX;
+  magicianHoldStartY = event.clientY;
+  clearMagicianHoldTimer();
+  magicianHoldTimer = setTimeout(() => {
+    magicianHoldTimer = null;
+    magicianJustBurned = true;
+    playMagicianBurn();
+  }, MAGICIAN_HOLD_MS);
+});
+
+cardEl.addEventListener("pointermove", (event) => {
+  if (magicianHoldTimer === null) {
+    return;
+  }
+  const dx = event.clientX - magicianHoldStartX;
+  const dy = event.clientY - magicianHoldStartY;
+  if (Math.hypot(dx, dy) > MAGICIAN_HOLD_MOVE_TOLERANCE) {
+    clearMagicianHoldTimer();
+  }
+});
+
+["pointerup", "pointercancel", "pointerleave"].forEach((eventName) => {
+  cardEl.addEventListener(eventName, clearMagicianHoldTimer);
+});
 
 // ---- Archetype spreads ----
 // The Archetypes deck lays out labeled positions (see ARCHETYPE_SPREADS) as
@@ -1464,6 +1593,16 @@ deckSelect.addEventListener("change", () => {
 });
 
 document.addEventListener("click", (event) => {
+  // A held tap that just triggered the Magician burn also fires a click
+  // on release - swallow that one click so it doesn't also pull a new
+  // card out from under the reveal.
+  if (magicianJustBurned) {
+    magicianJustBurned = false;
+    event.preventDefault();
+    event.stopPropagation();
+    return;
+  }
+
   if (event.target.closest("#shuffleBtn")) {
     return;
   }
