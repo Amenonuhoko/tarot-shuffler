@@ -858,7 +858,7 @@ body {
   min-height: 2.8em;
   max-height: 4.6em;
   margin: 4px 0 0;
-  padding: 12px 14px;
+  padding: 0 14px;
   font-family: var(--font-description);
   font-size: 0.9rem;
   line-height: 1.45;
@@ -867,6 +867,55 @@ body {
   background: var(--description-bg);
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+
+/* When a meaning runs past the box, the cut-off edge becomes a veil:
+   the last visible line dissolves into the box's own surface beneath a
+   small pulsing star, and the veil lifts once the reader scrolls to the
+   end. The star rides the bottom of the scrollport as a sticky ::after.
+   The box's vertical padding lives in the two pseudo-elements rather
+   than on the box (::before is the top 12px; ::after's net height after
+   its negative margin is the bottom 12px), because browsers anchor a
+   sticky child to the scroll container's content edge, and padding
+   there would hold the veil above the visible bottom. Negative side
+   margins let the fade span the side padding. JS toggles .has-more
+   from the scroll metrics. */
+
+.card-description::before {
+  content: "";
+  display: block;
+  height: 12px;
+}
+
+.card-description::after {
+  content: "\2726";
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 30px;
+  margin: -18px -14px 0;
+  padding-bottom: 1px;
+  font-size: 0.62rem;
+  line-height: 1;
+  color: var(--gold);
+  background:
+    linear-gradient(to bottom, transparent, var(--description-bg) 70%),
+    linear-gradient(to bottom, transparent, var(--surface) 70%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.card-description.has-more::after {
+  opacity: 1;
+  animation: description-more-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes description-more-pulse {
+  0%, 100% { color: var(--gold-dim); text-shadow: none; }
+  50% { color: var(--gold); text-shadow: 0 0 6px color-mix(in srgb, var(--gold) 60%, transparent); }
 }
 
 .hint {
@@ -2344,6 +2393,7 @@ body {
   :root:not([data-theme]) .motif-stars::after,
   :root:not([data-theme]) .card-slot::before,
   :root:not([data-theme]) .card-front,
+  .card-description.has-more::after,
   .mystic-frame,
   .card-front.card-secret-burning,
   .card-secret.is-revealed .card-secret-text,
