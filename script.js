@@ -2118,6 +2118,19 @@ cardSlotEl.addEventListener("animationend", (event) => {
   }
   ticksEl.innerHTML = `<path d="${ticks}"/>`;
 
+  // 40 light rays, 1.4deg wide every 9deg, faded in and out along their
+  // length by #haloRayFade.
+  const raysEl = document.querySelector(".major-halo-rays");
+  if (raysEl) {
+    let rays = "";
+    for (let k = 0; k < 40; k++) {
+      const from = (k * 9 * Math.PI) / 180;
+      const to = ((k * 9 + 1.4) * Math.PI) / 180;
+      rays += `M${point(18.5, from)}L${point(43.8, from)}L${point(43.8, to)}L${point(18.5, to)}Z`;
+    }
+    raysEl.setAttribute("d", rays);
+  }
+
   starsEl.innerHTML = Array.from({ length: 12 }, (_, k) => {
     const [cx, cy] = point(40.5, (k * Math.PI) / 6 + Math.PI / 12).split(" ");
     return `<circle cx="${cx}" cy="${cy}" r="${k % 3 === 0 ? 1.1 : 0.7}"/>`;

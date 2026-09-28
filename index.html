@@ -7,7 +7,7 @@
 <title>Tarot Pull</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css?v=20261003">
+<link rel="stylesheet" href="style.css?v=20261004">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Grenze+Gotisch:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Cinzel:wght@500;600&family=Cinzel+Decorative:wght@400;700;900&family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&family=Marck+Script&display=swap" rel="stylesheet">
@@ -188,6 +188,20 @@
       </div>
       <div class="major-halo" id="majorHalo" aria-hidden="true">
         <svg viewBox="0 0 100 100" fill="none" stroke="currentColor">
+          <defs>
+            <radialGradient id="haloBloom" cx="50" cy="50" r="28" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="currentColor" stop-opacity="0.42"/>
+              <stop offset="0.55" stop-color="currentColor" stop-opacity="0.2"/>
+              <stop offset="1" stop-color="currentColor" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="haloRayFade" cx="50" cy="50" r="43.8" gradientUnits="userSpaceOnUse">
+              <stop offset="0.43" stop-color="currentColor" stop-opacity="0"/>
+              <stop offset="0.57" stop-color="currentColor" stop-opacity="0.34"/>
+              <stop offset="1" stop-color="currentColor" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <circle cx="50" cy="50" r="28" fill="url(#haloBloom)" stroke="none"/>
+          <path class="major-halo-rays" fill="url(#haloRayFade)" stroke="none"/>
           <circle cx="50" cy="50" r="45" stroke-width="0.4"/>
           <circle cx="50" cy="50" r="36" stroke-width="0.3"/>
           <circle cx="50" cy="50" r="48.5" stroke-width="0.25" stroke-dasharray="0.6 2.2"/>
@@ -392,6 +406,6 @@
   </a>
 </footer>
 
-<script src="script.js?v=20261003"></script>
+<script src="script.js?v=20261004"></script>
 </body>
 </html>

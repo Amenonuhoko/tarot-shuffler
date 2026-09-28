@@ -766,24 +766,10 @@ body {
   height: 100%;
 }
 
-.major-halo::before {
-  content: "";
-  position: absolute;
-  inset: 6%;
-  border-radius: 50%;
-  background: repeating-conic-gradient(color-mix(in srgb, var(--gold) 34%, transparent) 0 1.4deg, transparent 1.4deg 9deg);
-  -webkit-mask: radial-gradient(circle, transparent 30%, #000 40%, transparent 70%);
-  mask: radial-gradient(circle, transparent 30%, #000 40%, transparent 70%);
-}
-
-.major-halo::after {
-  content: "";
-  position: absolute;
-  inset: 24%;
-  border-radius: 50%;
-  background: radial-gradient(circle, color-mix(in srgb, var(--gold) 42%, transparent), transparent 70%);
-  filter: blur(8px);
-}
+/* The light rays and the soft bloom at its heart are part of the SVG
+   (#haloRayFade, #haloBloom): drawn once with gradients. They used to be
+   a mask-cut conic gradient and a blur filter on pseudo-elements, which
+   Chrome re-rasterized as the halo grew through every Major pull. */
 
 body.major-omen .major-halo {
   animation: major-halo 2.4s cubic-bezier(0.2, 0.7, 0.3, 1) 0.5s both;
@@ -981,6 +967,24 @@ body.major-omen .omen-veil {
 @keyframes content-reveal {
   0% { opacity: 0; transform: translateY(8px); }
   100% { opacity: 1; transform: translateY(0); }
+}
+
+/* A reversed card's art stays upside down the whole way through its
+   reveal. It used to rise in upright and only then turn over - the
+   reveal animation and the pending pose didn't carry the rotation, so
+   the art's own rotate transition played after it appeared. (In the
+   rotated frame translateY(-8px) is still 8px lower on screen.) */
+.card-front-content.content-pending > .card-art.is-reversed {
+  transform: rotate(180deg) translateY(-8px);
+}
+
+.card-front-content.content-cascade > .card-art.is-reversed {
+  animation-name: content-reveal-reversed;
+}
+
+@keyframes content-reveal-reversed {
+  0% { opacity: 0; transform: rotate(180deg) translateY(-8px); }
+  100% { opacity: 1; transform: rotate(180deg) translateY(0); }
 }
 
 .card-face {
@@ -2715,10 +2719,21 @@ body.major-omen .omen-veil {
 
 :root:not([data-theme]) .motif-sigil {
   display: block;
+}
+
+/* No opacity on any group around the turning wheels. Opacity on a
+   parent of moving layers makes the GPU paint the whole sigil into an
+   intermediate image and blend it again, every frame - it held Major
+   pulls back hardest. Each wheel carries the old 62% itself, the reveal
+   surge flares the wheels directly, and the slow breath lives on the
+   violet aura (a wheel can't breathe and surge at once without a
+   visible step when the surge ends). */
+.sigil-spin {
   opacity: 0.62;
 }
 
-:root:not([data-theme]) .sigil-breath {
+:root:not([data-theme]) .sigil-aura {
+  opacity: 0.62;
   animation: sigil-breathe 14s ease-in-out infinite;
 }
 
@@ -2794,15 +2809,25 @@ body.major-omen .omen-veil {
 }
 
 @keyframes sigil-breathe {
-  0%, 100% { opacity: 0.75; }
-  50% { opacity: 1; }
+  0%, 100% { opacity: 0.465; }
+  50% { opacity: 0.62; }
 }
 
 /* A flare of brightness only. It also swelled 3.5% via scale, but
    scaling the three large wheel layers on every reveal - right as the
    card lands - cost extra raster work each time. */
-:root:not([data-theme]) .motif-sigil.is-surging {
-  animation: sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
+/* Listed after each wheel's turn so the turn keeps running when the
+   surge is added (animations are matched by name). */
+:root:not([data-theme]) .motif-sigil.is-surging .sigil-spin-rim {
+  animation: sigil-turn 360s linear infinite, sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+:root:not([data-theme]) .motif-sigil.is-surging .sigil-spin-zodiac {
+  animation: sigil-turn 240s linear infinite reverse, sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+:root:not([data-theme]) .motif-sigil.is-surging .sigil-spin-planets {
+  animation: sigil-turn 120s linear infinite, sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
 @keyframes sigil-surge {
@@ -3033,7 +3058,7 @@ body.major-omen .omen-veil {
   :root:not([data-theme]) .motif-sigil,
   :root:not([data-theme]) .sigil-breath,
   :root:not([data-theme]) .sigil-layer,
-  .sigil-spin,
+  .sigil-spin, .sigil-aura,
   :root:not([data-theme]) .motif-veil,
   :root:not([data-theme]) .motif-stars,
   :root:not([data-theme]) .motif-stars::after,
