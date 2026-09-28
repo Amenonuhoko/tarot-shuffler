@@ -7,7 +7,7 @@
 <title>Tarot Pull</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css?v=20260928">
+<link rel="stylesheet" href="style.css?v=20260929">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Grenze+Gotisch:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Cinzel:wght@500;600&family=Cinzel+Decorative:wght@400;700;900&family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&family=Marck+Script&display=swap" rel="stylesheet">
@@ -223,8 +223,11 @@
           <g class="major-halo-stars" fill="currentColor" stroke="none"></g>
         </svg>
       </div>
+      <div class="slot-shadow" aria-hidden="true"></div>
+      <div class="slot-glow" aria-hidden="true"></div>
       <div class="card-tilt" id="cardTilt">
       <div class="card" id="card">
+        <div class="card-glow" aria-hidden="true"></div>
         <div class="card-face card-back" id="cardBack">
           <svg class="back-motif" viewBox="0 0 100 160" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true">
             <!-- double frame, four-point stars in the corners -->
@@ -259,11 +262,22 @@
               <circle cx="24.5" cy="105.5" r="0.9"/><circle cx="75.5" cy="105.5" r="0.9"/>
             </g>
           </svg>
-          <div class="foil-glare" aria-hidden="true"></div>
+          <div class="foil-glare" aria-hidden="true"><span class="foil-glare-spot"></span></div>
         </div>
         <div class="card-face card-front" id="cardFront">
           <svg class="mystic-frame" viewBox="0 0 300 500" preserveAspectRatio="none" fill="none" stroke="currentColor" aria-hidden="true">
-            <rect x="0.5" y="0.5" width="299" height="499" rx="14" stroke-width="1" stroke-dasharray="22 5 1.5 5" stroke-linecap="round"/>
+            <!-- gilded edge: one continuous line that catches the light at
+                 opposite corners, like the foil edge of a printed deck -->
+            <defs>
+              <linearGradient id="mysticEdgeGilt" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="currentColor" stop-opacity="0.95"/>
+                <stop offset="0.3" stop-color="currentColor" stop-opacity="0.38"/>
+                <stop offset="0.7" stop-color="currentColor" stop-opacity="0.38"/>
+                <stop offset="1" stop-color="currentColor" stop-opacity="0.95"/>
+              </linearGradient>
+            </defs>
+            <rect class="mystic-frame-edge" x="0.6" y="0.6" width="298.8" height="498.8" rx="14" stroke="url(#mysticEdgeGilt)" stroke-width="1.2"/>
+            <g class="mystic-frame-inner">
             <rect x="7.5" y="7.5" width="285" height="485" rx="9" stroke-width="0.6" opacity="0.55"/>
             <!-- four-point stars tucked into the corners, inside the inner line -->
             <g fill="currentColor" stroke="none">
@@ -271,6 +285,7 @@
               <path d="M283,11.5 L284.5,15.5 L288.5,17 L284.5,18.5 L283,22.5 L281.5,18.5 L277.5,17 L281.5,15.5 Z"/>
               <path d="M17,477.5 L18.5,481.5 L22.5,483 L18.5,484.5 L17,488.5 L15.5,484.5 L11.5,483 L15.5,481.5 Z"/>
               <path d="M283,477.5 L284.5,481.5 L288.5,483 L284.5,484.5 L283,488.5 L281.5,484.5 L277.5,483 L281.5,481.5 Z"/>
+            </g>
             </g>
           </svg>
           <div class="card-illum" aria-hidden="true">
@@ -309,7 +324,7 @@
           <div class="reveal-flash" id="revealFlash" aria-hidden="true"></div>
           <div class="burn-glow" id="burnGlow" aria-hidden="true"></div>
           <div class="burn-embers" id="burnEmbers" aria-hidden="true"></div>
-          <div class="foil-glare" aria-hidden="true"></div>
+          <div class="foil-glare" aria-hidden="true"><span class="foil-glare-spot"></span></div>
         </div>
       </div>
       </div>
@@ -405,6 +420,6 @@
   </a>
 </footer>
 
-<script src="script.js?v=20260928"></script>
+<script src="script.js?v=20260929"></script>
 </body>
 </html>

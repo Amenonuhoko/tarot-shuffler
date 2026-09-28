@@ -839,30 +839,36 @@ const CARD_SECRET_MESSAGES = {
   "The Magician": "To the magician in our lives:\n\nDream it,\nand it will be real"
 };
 
-const IMAGE_EXTENSIONS = ["png", "jpg", "jpeg", "webp"];
+// Card art lives at images/<slug>.<extension>. List each file here as
+// it's added, keyed by the card's slug, e.g. "the-fool": "webp". Only
+// listed cards are ever requested: the old approach guessed four
+// extensions per draw and every guess was a failed request, which cost
+// time and data on every single pull. Unlisted cards keep the
+// placeholder outline in the painted art window.
+const CARD_ART = {};
+
+function showArtPlaceholder() {
+  cardArtImgEl.removeAttribute("src");
+  cardArtImgEl.classList.remove("loaded");
+  cardArtFallbackEl.classList.remove("hidden");
+}
 
 function loadCardArt(card) {
-  let i = 0;
+  cardArtImgEl.onload = null;
+  cardArtImgEl.onerror = null;
 
-  function tryNext() {
-    if (i >= IMAGE_EXTENSIONS.length) {
-      cardArtImgEl.removeAttribute("src");
-      cardArtImgEl.classList.remove("loaded");
-      cardArtFallbackEl.classList.remove("hidden");
-      return;
-    }
-
-    const ext = IMAGE_EXTENSIONS[i++];
-    cardArtImgEl.src = `images/${card.slug}.${ext}`;
+  const extension = CARD_ART[card.slug];
+  if (!extension) {
+    showArtPlaceholder();
+    return;
   }
 
   cardArtImgEl.onload = () => {
     cardArtImgEl.classList.add("loaded");
     cardArtFallbackEl.classList.add("hidden");
   };
-
-  cardArtImgEl.onerror = tryNext;
-  tryNext();
+  cardArtImgEl.onerror = showArtPlaceholder;
+  cardArtImgEl.src = `images/${card.slug}.${extension}`;
 }
 
 let isFlipped = false;
@@ -1014,6 +1020,13 @@ function renderCardFace(card, roleOverride) {
 // card on top of a newer one, or leaving the reveal stuck mid-flip.
 let pendingFlipTransitionCallback = null;
 let pendingFlipFallbackTimer = null;
+// What the pending callback is waiting for: "transition" (the card
+// turning face-down, or reversing mid-turn) or "animation" (an opening
+// keyframe flip). A transitionend can still be queued from a turn that
+// finished just as the fallback timer moved on to the next card; left to
+// settle a keyframe flip, it started the reveal mid-flip, and once the
+// reveal ended the browser replayed the whole flip.
+let pendingFlipSettlesOn = null;
 // True while the card is turning back face-down (a transition, not a
 // keyframe flip). Opening a card mid-turn must reverse that transition
 // rather than restart a keyframe flip from 0deg, or the card would snap.
@@ -1022,6 +1035,7 @@ let flipBackInFlight = false;
 function settlePendingFlip() {
   clearTimeout(pendingFlipFallbackTimer);
   pendingFlipFallbackTimer = null;
+  pendingFlipSettlesOn = null;
   flipBackInFlight = false;
   const callback = pendingFlipTransitionCallback;
   pendingFlipTransitionCallback = null;
@@ -1034,7 +1048,10 @@ cardEl.addEventListener("transitionend", (event) => {
   if (event.target !== cardEl || event.propertyName !== "transform") {
     return;
   }
-  settlePendingFlip();
+  flipBackInFlight = false;
+  if (pendingFlipSettlesOn === "transition") {
+    settlePendingFlip();
+  }
 });
 
 // Opening flips are keyframe animations (see .draw-flip/.major-flip in
@@ -1043,9 +1060,10 @@ cardEl.addEventListener("transitionend", (event) => {
 // flip that never fires either event (a turn whose start and end
 // transforms happen to match runs no transition at all), so a reveal can
 // never hang waiting on one.
-function onCardFlipTransitionEnd(callback, fallbackMs = 1000) {
+function onCardFlipTransitionEnd(callback, fallbackMs = 1000, settlesOn = "transition") {
   clearTimeout(pendingFlipFallbackTimer);
   pendingFlipTransitionCallback = callback;
+  pendingFlipSettlesOn = settlesOn;
   pendingFlipFallbackTimer = setTimeout(settlePendingFlip, fallbackMs);
 }
 
@@ -1053,6 +1071,7 @@ function cancelPendingReveal() {
   clearTimeout(pendingFlipFallbackTimer);
   pendingFlipFallbackTimer = null;
   pendingFlipTransitionCallback = null;
+  pendingFlipSettlesOn = null;
 }
 
 function prefersReducedMotion() {
@@ -1076,7 +1095,9 @@ function stopFlipAnimations() {
 }
 
 function triggerRevealFanfare(isMajor = false) {
-  cardEl.classList.remove("revealing", "major-landing");
+  // Normally the flip has already ended; if the fallback timer got here
+  // first, finish the flip now rather than let .revealing override it.
+  cardEl.classList.remove("draw-flip", "major-flip", "revealing", "major-landing");
   void cardEl.offsetWidth;
   cardEl.classList.add("revealing");
   cardEl.classList.toggle("major-landing", isMajor);
@@ -1130,7 +1151,7 @@ function openCard(card, roleOverride, ceremony = false) {
   if (isMajor) {
     startMajorOmen();
   }
-  onCardFlipTransitionEnd(() => triggerRevealFanfare(isMajor), isMajor ? 2600 : 1500);
+  onCardFlipTransitionEnd(() => triggerRevealFanfare(isMajor), isMajor ? 2600 : 1500, "animation");
 }
 
 function revealCard(card, roleOverride, ceremony = false) {
@@ -1924,7 +1945,9 @@ cardEl.addEventListener("animationend", (event) => {
   const name = event.animationName;
   if (event.target === cardEl && (name === "draw-flip" || name === "major-flip")) {
     cardEl.classList.remove("draw-flip", "major-flip");
-    settlePendingFlip();
+    if (pendingFlipSettlesOn === "animation") {
+      settlePendingFlip();
+    }
   } else if (name === "shuffle-shake") {
     cardEl.classList.remove("shuffling");
   } else if (name === "reveal-flash-burst" || name === "major-flash") {
@@ -1970,18 +1993,28 @@ cardSlotEl.addEventListener("animationend", (event) => {
 })();
 
 // ---- Foil tilt ----
-// The card leans toward the pointer with a moving glare (--tilt-* and
-// --glare-* on the slot drive .card-tilt and .foil-glare in style.css).
-// A mouse or pen tilts it on hover; a finger tilts it only while pressed,
-// so page scrolling on touch is never blocked.
+// The card leans toward the pointer with a moving glare. Only transforms
+// change - the rotation on .card-tilt and the glare spot's position - so
+// the compositor does all the work and nothing repaints. A mouse or pen
+// tilts it on hover; a finger tilts it only while pressed, so page
+// scrolling on touch is never blocked.
+//
+// The lean follows the pointer only while it moves, then eases back
+// flat once it rests: browsers render a layer under a live perspective
+// tilt at reduced resolution, so a card left leaning looked grainy and
+// jagged along its edges. Flat, it's crisp again for reading.
 
-const TILT_MAX_X_DEG = 7;
-const TILT_MAX_Y_DEG = 9;
-const TILT_PROPERTIES = ["--tilt-x", "--tilt-y", "--glare-x", "--glare-y", "--tilt-o"];
+const TILT_MAX_X_DEG = 6;
+const TILT_MAX_Y_DEG = 8;
+const TILT_SETTLE_MS = 600;
+
+const cardTiltEl = document.getElementById("cardTilt");
+const foilGlareSpotEls = document.querySelectorAll(".foil-glare-spot");
 
 let tiltTouchId = null;
 let tiltFrame = null;
 let tiltPoint = null;
+let tiltSettleTimer = null;
 
 function applyTilt() {
   tiltFrame = null;
@@ -1990,11 +2023,15 @@ function applyTilt() {
   }
 
   const { x, y } = tiltPoint;
-  cardSlotEl.style.setProperty("--tilt-x", `${((0.5 - y) * 2 * TILT_MAX_X_DEG).toFixed(2)}deg`);
-  cardSlotEl.style.setProperty("--tilt-y", `${((x - 0.5) * 2 * TILT_MAX_Y_DEG).toFixed(2)}deg`);
-  cardSlotEl.style.setProperty("--glare-x", `${(x * 100).toFixed(1)}%`);
-  cardSlotEl.style.setProperty("--glare-y", `${(y * 100).toFixed(1)}%`);
-  cardSlotEl.style.setProperty("--tilt-o", "1");
+  const rotateX = ((0.5 - y) * 2 * TILT_MAX_X_DEG).toFixed(2);
+  const rotateY = ((x - 0.5) * 2 * TILT_MAX_Y_DEG).toFixed(2);
+  cardTiltEl.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+
+  // The spot is twice the card's size, so a 50% shift spans the card.
+  const glare = `translate(${((x - 0.5) * 50).toFixed(2)}%, ${((y - 0.5) * 50).toFixed(2)}%)`;
+  foilGlareSpotEls.forEach((spot) => {
+    spot.style.transform = glare;
+  });
 }
 
 function trackTilt(event) {
@@ -2011,17 +2048,30 @@ function trackTilt(event) {
   if (tiltFrame === null) {
     tiltFrame = requestAnimationFrame(applyTilt);
   }
+
+  clearTimeout(tiltSettleTimer);
+  tiltSettleTimer = setTimeout(settleTilt, TILT_SETTLE_MS);
 }
 
-function resetTilt() {
+// Ease back to flat without forgetting a finger that's still pressed.
+function settleTilt() {
+  clearTimeout(tiltSettleTimer);
+  tiltSettleTimer = null;
   tiltPoint = null;
-  tiltTouchId = null;
   if (tiltFrame !== null) {
     cancelAnimationFrame(tiltFrame);
     tiltFrame = null;
   }
   cardSlotEl.classList.remove("is-tilting");
-  TILT_PROPERTIES.forEach((name) => cardSlotEl.style.removeProperty(name));
+  cardTiltEl.style.transform = "";
+  foilGlareSpotEls.forEach((spot) => {
+    spot.style.transform = "";
+  });
+}
+
+function resetTilt() {
+  tiltTouchId = null;
+  settleTilt();
 }
 
 cardSlotEl.addEventListener("pointermove", (event) => {

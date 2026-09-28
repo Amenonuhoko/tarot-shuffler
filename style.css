@@ -26,15 +26,6 @@
   --radius-icon: 50%;
 }
 
-/* Pointer-driven foil tilt (see the tilt handlers in script.js).
-   Registered so they can transition smoothly back to rest; browsers
-   without @property just snap back instead. */
-@property --tilt-x { syntax: "<angle>"; inherits: true; initial-value: 0deg; }
-@property --tilt-y { syntax: "<angle>"; inherits: true; initial-value: 0deg; }
-@property --glare-x { syntax: "<percentage>"; inherits: true; initial-value: 50%; }
-@property --glare-y { syntax: "<percentage>"; inherits: true; initial-value: 50%; }
-@property --tilt-o { syntax: "<number>"; inherits: true; initial-value: 0; }
-
 /* ================================================================
    BOMBASTIC THEME DIRECTIONS
    Each theme redefines the base palette/font variables AND applies
@@ -356,63 +347,92 @@ body {
   perspective: 1200px;
   width: min(300px, calc(100vw - 40px));
   aspect-ratio: 3 / 5;
-  transition:
-    --tilt-x 0.7s cubic-bezier(0.2, 0.8, 0.2, 1),
-    --tilt-y 0.7s cubic-bezier(0.2, 0.8, 0.2, 1),
-    --glare-x 0.7s ease,
-    --glare-y 0.7s ease,
-    --tilt-o 0.5s ease;
 }
 
-.card-slot.is-tilting {
-  transition:
-    --tilt-x 0.12s linear,
-    --tilt-y 0.12s linear,
-    --glare-x 0.12s linear,
-    --glare-y 0.12s linear,
-    --tilt-o 0.3s ease;
-}
+/* -- Performance rule for everything that moves on the card: animate
+   only transform and opacity. Those run on the compositor; animating
+   filter or box-shadow (or inherited custom properties) repaints the
+   whole 3D card on the main thread every frame, which is what made the
+   page lag. Shadows and glows below are drawn once, on their own
+   layers, and only fade or move. -- */
 
 /* -- Foil tilt: the card leans toward the pointer (a fine pointer
    hovering, or a finger while it's pressed) with a moving glare.
-   Lives on its own wrapper so it composes with the flip, shake and
-   reveal transforms on .card instead of fighting them. -- */
+   script.js sets the rotation straight on this wrapper, so it composes
+   with the flip, shake and reveal transforms on .card instead of
+   fighting them. -- */
 .card-tilt {
   position: relative;
   z-index: 1;
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
-  transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.card-slot.is-tilting .card-tilt {
+  transition: transform 0.12s linear;
 }
 
 .foil-glare {
   position: absolute;
   inset: 0;
   z-index: 5;
+  overflow: hidden;
   border-radius: inherit;
   pointer-events: none;
-  opacity: var(--tilt-o);
-  background:
-    radial-gradient(circle at var(--glare-x) var(--glare-y), rgba(255, 250, 235, 0.34), transparent 52%),
-    linear-gradient(115deg, transparent 22%, color-mix(in srgb, var(--lavender) 24%, transparent) 40%, color-mix(in srgb, var(--gold) 28%, transparent) 50%, rgba(220, 130, 210, 0.16) 60%, transparent 78%);
-  background-size: 100% 100%, 260% 260%;
-  background-position: 0 0, var(--glare-x) var(--glare-y);
-  mix-blend-mode: overlay;
+  opacity: 0;
+  transition: opacity 0.5s ease;
 }
 
-/* -- Draw: as the card lifts and turns, its shadow deepens beneath it
+.card-slot.is-tilting .foil-glare {
+  opacity: 1;
+  transition-duration: 0.3s;
+}
+
+/* Twice the card's size, so script.js can slide the highlight under
+   the pointer with a transform alone. */
+.foil-glare-spot {
+  position: absolute;
+  left: -50%;
+  top: -50%;
+  width: 200%;
+  height: 200%;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 250, 235, 0.2), rgba(255, 250, 235, 0.06) 16%, transparent 30%),
+    linear-gradient(115deg, transparent 38%, color-mix(in srgb, var(--lavender) 14%, transparent) 46%, color-mix(in srgb, var(--gold) 16%, transparent) 50%, rgba(220, 130, 210, 0.1) 54%, transparent 62%);
+  transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.card-slot.is-tilting .foil-glare-spot {
+  transition: transform 0.12s linear;
+}
+
+/* -- Draw: as the card lifts and turns, a shadow deepens beneath it
    (the ominous half), then the gold aura blooms on landing (the divine
-   half, see .reveal-flash). filter rather than box-shadow so it stays
-   on the compositor while the card is mid-flip. -- */
-.card-slot.pulling {
+   half, see .reveal-flash). -- */
+.slot-shadow,
+.slot-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: var(--radius-card);
+  pointer-events: none;
+  opacity: 0;
+}
+
+.slot-shadow {
+  box-shadow: 0 26px 30px -6px rgba(0, 0, 0, 0.6);
+}
+
+.card-slot.pulling .slot-shadow {
   animation: pull-card 0.9s ease-out;
 }
 
 @keyframes pull-card {
-  0% { filter: drop-shadow(0 0 0 transparent); }
-  45% { filter: drop-shadow(0 26px 20px rgba(0, 0, 0, 0.55)); }
-  100% { filter: drop-shadow(0 0 0 transparent); }
+  0% { opacity: 0; transform: translateY(0) scale(0.98); }
+  45% { opacity: 1; transform: translateY(6px) scale(1.02); }
+  100% { opacity: 0; transform: translateY(0) scale(1); }
 }
 
 /* -- Shuffle fanfare: a riffle/bridge shuffle. Ten ghost cards behind
@@ -440,7 +460,11 @@ body {
   opacity: 0;
 }
 
-.card-slot.shuffle-fan {
+.slot-glow {
+  box-shadow: 0 0 18px color-mix(in srgb, var(--gold) 60%, transparent);
+}
+
+.card-slot.shuffle-fan .slot-glow {
   animation: shuffle-slot-glow 1.45s ease-out;
 }
 
@@ -473,11 +497,11 @@ body {
 /* Two beats: a bloom as the deck breaks apart, then a tight glint the
    moment it squares back into order. */
 @keyframes shuffle-slot-glow {
-  0% { filter: drop-shadow(0 0 0 transparent); }
-  28% { filter: drop-shadow(0 0 18px color-mix(in srgb, var(--gold) 55%, transparent)); }
-  70% { filter: drop-shadow(0 0 7px color-mix(in srgb, var(--gold) 22%, transparent)); }
-  84% { filter: drop-shadow(0 0 12px color-mix(in srgb, var(--gold) 70%, transparent)); }
-  100% { filter: drop-shadow(0 0 0 transparent); }
+  0% { opacity: 0; }
+  28% { opacity: 0.9; }
+  70% { opacity: 0.3; }
+  84% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 @media (max-height: 700px) {
@@ -595,6 +619,8 @@ body {
   position: absolute;
   inset: 0;
   border-radius: inherit;
+  box-shadow: 0 0 30px 2px color-mix(in srgb, var(--gold) 40%, transparent);
+  opacity: 0;
 }
 
 .card.revealing .reveal-flash::before {
@@ -602,9 +628,9 @@ body {
 }
 
 @keyframes reveal-aura-glow {
-  0% { box-shadow: 0 0 0 0 transparent; }
-  45% { box-shadow: 0 0 30px 2px color-mix(in srgb, var(--gold) 40%, transparent); }
-  100% { box-shadow: 0 0 0 0 transparent; }
+  0% { opacity: 0; }
+  45% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 .card.revealing.major-landing .reveal-flash {
@@ -612,6 +638,7 @@ body {
 }
 
 .card.revealing.major-landing .reveal-flash::before {
+  box-shadow: 0 0 46px 6px color-mix(in srgb, var(--gold) 55%, transparent);
   animation: major-aura 1.9s ease-out;
 }
 
@@ -622,9 +649,9 @@ body {
 }
 
 @keyframes major-aura {
-  0% { box-shadow: 0 0 0 0 transparent; }
-  30% { box-shadow: 0 0 46px 6px color-mix(in srgb, var(--gold) 55%, transparent); }
-  100% { box-shadow: 0 0 0 0 transparent; }
+  0% { opacity: 0; }
+  30% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 /* -- Major Arcana halo: a star-chart ring (ticks and plotted stars
@@ -2187,8 +2214,8 @@ body.major-omen .omen-veil {
   display: none;
 }
 
-[data-theme="terminal"] .foil-glare {
-  background: radial-gradient(circle at var(--glare-x) var(--glare-y), rgba(182, 255, 212, 0.2), transparent 55%);
+[data-theme="terminal"] .foil-glare-spot {
+  background: radial-gradient(circle at 50% 50%, rgba(182, 255, 212, 0.18), transparent 30%);
 }
 
 [data-theme="terminal"] .deck-selector span::before {
@@ -2638,9 +2665,12 @@ body.major-omen .omen-veil {
   animation: mystic-halo-breathe 9s ease-in-out infinite;
 }
 
+/* Opacity only: with a scale in here too, every frame of the card's
+   flip or tilt made the browser repaint this whole gradient on the
+   main thread (roughly 1.5s of work per second of motion). */
 @keyframes mystic-halo-breathe {
-  0%, 100% { opacity: 0.75; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.04); }
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 1; }
 }
 
 /* Small gold diamonds bracket the hint text, echoing the corner stars
@@ -2673,20 +2703,41 @@ body.major-omen .omen-veil {
   box-shadow: inset 0 1px 0 rgba(216, 183, 106, 0.16), 0 10px 22px -14px rgba(0, 0, 0, 0.8);
 }
 
-:root:not([data-theme]) .card-front {
-  /* filter, not box-shadow: this element is backface-hidden inside
-     a 3D-rotated card, and an animated box-shadow forces a geometry
-     repaint every frame that some mobile GPUs occasionally
-     mis-rasterize mid-flip, showing up as the dashed frame
-     momentarily jumping. filter is a pure compositor effect and
-     doesn't have that failure mode. */
+/* The Mystic card's slow breathing glow. It used to animate a
+   drop-shadow filter on .card-front, which repainted the whole 3D face
+   on the main thread every frame - about half the main thread at idle.
+   Now the glow is a static shadow on its own layer behind the front
+   face (rotated and backface-hidden with it, so it only shows once the
+   card is face up), and only its opacity breathes. Animated box-shadow
+   stays off the card too: it forces a repaint every frame that some
+   mobile GPUs mis-rasterize mid-flip. */
+.card-glow {
+  position: absolute;
+  inset: 0;
+  display: none;
+  border-radius: var(--radius-card);
+  transform: rotateY(180deg) translateZ(-1px);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  pointer-events: none;
+}
+
+:root:not([data-theme]) .card-glow {
+  display: block;
+  box-shadow: 0 0 22px rgba(216, 183, 106, 0.5);
+  opacity: 0.7;
   animation: mystic-card-glow 7s ease-in-out infinite;
-  will-change: filter;
 }
 
 @keyframes mystic-card-glow {
-  0%, 100% { filter: drop-shadow(0 0 18px rgba(216, 183, 106, 0.35)); }
-  50% { filter: drop-shadow(0 0 22px rgba(216, 183, 106, 0.5)); }
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+/* The gilded edge is the Mystic front's outline, so the plain border
+   underneath steps aside instead of doubling it. */
+:root:not([data-theme]) .card-front {
+  border-color: transparent;
 }
 
 .mystic-frame {
@@ -2698,12 +2749,19 @@ body.major-omen .omen-veil {
   color: var(--gold);
   pointer-events: none;
   z-index: 3;
-  transition: opacity 0.6s ease;
 }
 
 :root:not([data-theme]) .mystic-frame {
   display: block;
+}
+
+.mystic-frame-edge {
+  opacity: 0.75;
+}
+
+.mystic-frame-inner {
   opacity: 0.33;
+  transition: opacity 0.6s ease;
 }
 
 /* Mystic's own frame already draws the inset hairline and corner stars
@@ -2713,9 +2771,10 @@ body.major-omen .omen-veil {
   display: none;
 }
 
-/* Spreads dissolve the ornate frame away once opened, clearing the way
-   for the circles rather than competing with them. */
-.card-front.is-open .mystic-frame {
+/* Spreads dissolve the ornate inner frame away once opened, clearing
+   the way for the circles rather than competing with them; the gilded
+   edge stays as the card's outline. */
+.card-front.is-open .mystic-frame-inner {
   opacity: 0;
 }
 
@@ -2723,7 +2782,8 @@ body.major-omen .omen-veil {
   .card, .card.shuffling, .card.revealing, .reveal-flash, .card.revealing .reveal-flash,
   .reveal-flash::before, .card.revealing .reveal-flash::before,
   .card-front-content.content-cascade > *,
-  .card-slot.pulling, .card-slot.shuffle-fan, .deck-card, .card-slot.shuffle-fan .deck-card,
+  .card-slot.pulling .slot-shadow, .card-slot.shuffle-fan .slot-glow, .deck-card, .card-slot.shuffle-fan .deck-card,
+  .card-glow, .card-tilt, .foil-glare, .foil-glare-spot,
   .card.draw-flip, .card.major-flip, .major-halo, .omen-veil,
   .card.revealing.major-landing .reveal-flash, .card.revealing.major-landing .reveal-flash::before,
   .history-row-enter, .card-search-input.not-found,
@@ -2738,7 +2798,7 @@ body.major-omen .omen-veil {
   :root:not([data-theme]) .card-slot::before,
   :root:not([data-theme]) .card-front,
   .card-description.has-more::after,
-  .mystic-frame,
+  .mystic-frame, .mystic-frame-inner,
   .card-front.card-secret-burning,
   .card-secret.is-revealed .card-secret-text,
   .ember {
