@@ -17,6 +17,8 @@
 <canvas class="terminal-rain" id="terminalRain" aria-hidden="true" hidden></canvas>
 
 <div class="mystic-motif" aria-hidden="true">
+  <span class="motif-veil"></span>
+  <span class="motif-stars"></span>
   <svg class="motif-orbits" viewBox="0 0 300 300" fill="none" stroke="currentColor">
     <!-- chart rings: sun hub, house-numeral band, zodiac-symbol band,
          constellation band -->
@@ -224,16 +226,53 @@
       <div class="card-tilt" id="cardTilt">
       <div class="card" id="card">
         <div class="card-face card-back" id="cardBack">
-          <svg class="back-motif" viewBox="0 0 100 160" aria-hidden="true">
-            <rect x="6" y="6" width="88" height="148" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
-            <circle cx="50" cy="80" r="26" fill="none" stroke="currentColor" stroke-width="1"/>
-            <circle cx="50" cy="80" r="2" fill="currentColor"/>
-            <path d="M50 34 L50 54 M50 106 L50 126 M20 80 L36 80 M64 80 L80 80" stroke="currentColor" stroke-width="1"/>
-            <path d="M28 58 L38 68 M62 68 L72 58 M28 102 L38 92 M62 92 L72 102" stroke="currentColor" stroke-width="1"/>
+          <svg class="back-motif" viewBox="0 0 100 160" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true">
+            <!-- double frame, four-point stars in the corners -->
+            <rect x="6" y="6" width="88" height="148" rx="4" stroke-width="1.2"/>
+            <rect x="10.5" y="10.5" width="79" height="139" rx="2.5" stroke-width="0.5" opacity="0.7"/>
+            <g fill="currentColor" stroke="none">
+              <path d="M17,12.5 L18.1,15.9 L21.5,17 L18.1,18.1 L17,21.5 L15.9,18.1 L12.5,17 L15.9,15.9 Z"/>
+              <path d="M83,12.5 L84.1,15.9 L87.5,17 L84.1,18.1 L83,21.5 L81.9,18.1 L78.5,17 L81.9,15.9 Z"/>
+              <path d="M17,138.5 L18.1,141.9 L21.5,143 L18.1,144.1 L17,147.5 L15.9,144.1 L12.5,143 L15.9,141.9 Z"/>
+              <path d="M83,138.5 L84.1,141.9 L87.5,143 L84.1,144.1 L83,147.5 L81.9,144.1 L78.5,143 L81.9,141.9 Z"/>
+            </g>
+            <!-- crescent above, sun below -->
+            <path d="M50,15.5 a6.5,6.5 0 1,0 0,13 a8.5,8.5 0 0,1 0,-13 z" stroke-width="0.9"/>
+            <g stroke-width="0.9">
+              <circle cx="50" cy="138" r="4"/>
+              <path d="M56,138 L58.5,138 M44,138 L41.5,138 M50,132 L50,129.5 M50,144 L50,146.5 M54.24,133.76 L56.01,131.99 M45.76,133.76 L43.99,131.99 M54.24,142.24 L56.01,144.01 M45.76,142.24 L43.99,144.01"/>
+            </g>
+            <!-- central seal: dotted ring, octagram, compass rays -->
+            <circle cx="50" cy="80" r="26" stroke-width="1"/>
+            <circle cx="50" cy="80" r="30.5" stroke-width="1.3" stroke-dasharray="0.01 4" opacity="0.85"/>
+            <g stroke-width="0.7">
+              <rect x="36" y="66" width="28" height="28"/>
+              <rect x="36" y="66" width="28" height="28" transform="rotate(45 50 80)"/>
+              <circle cx="50" cy="80" r="6"/>
+            </g>
+            <circle cx="50" cy="80" r="2" fill="currentColor" stroke="none"/>
+            <path d="M50 36 L50 54 M50 106 L50 124 M22 80 L36 80 M64 80 L78 80" stroke-width="1"/>
+            <g fill="currentColor" stroke="none">
+              <circle cx="50" cy="36" r="1.3"/><circle cx="50" cy="124" r="1.3"/>
+              <circle cx="22" cy="80" r="1.3"/><circle cx="78" cy="80" r="1.3"/>
+              <circle cx="24.5" cy="54.5" r="0.9"/><circle cx="75.5" cy="54.5" r="0.9"/>
+              <circle cx="24.5" cy="105.5" r="0.9"/><circle cx="75.5" cy="105.5" r="0.9"/>
+            </g>
           </svg>
           <div class="foil-glare" aria-hidden="true"></div>
         </div>
         <div class="card-face card-front" id="cardFront">
+          <svg class="mystic-frame" viewBox="0 0 300 500" preserveAspectRatio="none" fill="none" stroke="currentColor" aria-hidden="true">
+            <rect x="0.5" y="0.5" width="299" height="499" rx="14" stroke-width="1" stroke-dasharray="22 5 1.5 5" stroke-linecap="round"/>
+            <rect x="7.5" y="7.5" width="285" height="485" rx="9" stroke-width="0.6" opacity="0.55"/>
+            <!-- four-point stars tucked into the corners, inside the inner line -->
+            <g fill="currentColor" stroke="none">
+              <path d="M17,11.5 L18.5,15.5 L22.5,17 L18.5,18.5 L17,22.5 L15.5,18.5 L11.5,17 L15.5,15.5 Z"/>
+              <path d="M283,11.5 L284.5,15.5 L288.5,17 L284.5,18.5 L283,22.5 L281.5,18.5 L277.5,17 L281.5,15.5 Z"/>
+              <path d="M17,477.5 L18.5,481.5 L22.5,483 L18.5,484.5 L17,488.5 L15.5,484.5 L11.5,483 L15.5,481.5 Z"/>
+              <path d="M283,477.5 L284.5,481.5 L288.5,483 L284.5,484.5 L283,488.5 L281.5,484.5 L277.5,483 L281.5,481.5 Z"/>
+            </g>
+          </svg>
           <div class="card-illum" aria-hidden="true">
             <span class="illum-corner illum-corner--tl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M2 22V9Q2 2 9 2H22M6 22V11Q6 6 11 6H22"/><path d="M11 11l2.5-2.5L16 11l-2.5 2.5z" fill="currentColor" stroke="none"/></svg></span>
             <span class="illum-corner illum-corner--tr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M2 22V9Q2 2 9 2H22M6 22V11Q6 6 11 6H22"/><path d="M11 11l2.5-2.5L16 11l-2.5 2.5z" fill="currentColor" stroke="none"/></svg></span>

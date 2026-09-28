@@ -944,6 +944,25 @@ function animateCardPull() {
   cardSlotEl.classList.add("pulling");
 }
 
+// The meaning box scrolls when a reading runs long. .has-more shows the
+// veil-and-star cue at its bottom edge only while text is still hidden
+// below the fold, and lifts it once the reader reaches the end.
+function updateDescriptionOverflow() {
+  const hiddenBelow = cardDescriptionEl.scrollHeight - cardDescriptionEl.clientHeight - cardDescriptionEl.scrollTop;
+  cardDescriptionEl.classList.toggle("has-more", hiddenBelow > 4);
+}
+
+function setCardDescription(text) {
+  cardDescriptionEl.textContent = text;
+  cardDescriptionEl.scrollTop = 0;
+  updateDescriptionOverflow();
+}
+
+cardDescriptionEl.addEventListener("scroll", updateDescriptionOverflow, { passive: true });
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(updateDescriptionOverflow);
+}
+
 let lastRoleOverride = null;
 
 function isMajorCard(card) {
@@ -975,9 +994,9 @@ function renderCardFace(card, roleOverride) {
   const [uprightLabel, reversedLabel] = activeDeck.orientationLabels || ["Upright", "Reversed"];
   orientationLabelEl.textContent = card.reversed ? reversedLabel : uprightLabel;
   orientationLabelEl.classList.toggle("is-reversed", card.reversed);
-  cardDescriptionEl.textContent = card.meanings
+  setCardDescription(card.meanings
     ? card.meanings[card.reversed ? 1 : 0]
-    : card.meaning || "";
+    : card.meaning || "");
   cardArtEl.style.setProperty("--card-color", card.color);
   cardArtEl.dataset.element = cardElement(card);
   cardArtEl.classList.toggle("is-reversed", card.reversed);
@@ -1256,7 +1275,7 @@ function clearCardDisplay() {
   cardSubtitleEl.hidden = true;
   orientationLabelEl.textContent = "";
   orientationLabelEl.classList.remove("is-reversed");
-  cardDescriptionEl.textContent = "";
+  setCardDescription("");
   cardArtEl.classList.remove("is-reversed");
   delete cardArtEl.dataset.element;
   cardFrontContentEl.classList.remove("is-reversed");
@@ -1539,7 +1558,7 @@ function prepareSpreadClosed() {
   orientationRowEl.hidden = true;
   orientationLabelEl.textContent = "";
   orientationLabelEl.classList.remove("is-reversed");
-  cardDescriptionEl.textContent = "";
+  setCardDescription("");
   cardArtEl.classList.remove("is-reversed");
   delete cardArtEl.dataset.element;
   cardFrontContentEl.classList.remove("is-reversed");
@@ -2222,6 +2241,7 @@ function stopTerminalRain() {
 }
 
 window.addEventListener("resize", () => {
+  updateDescriptionOverflow();
   if (terminalRainFrame) {
     resizeTerminalRain();
   }

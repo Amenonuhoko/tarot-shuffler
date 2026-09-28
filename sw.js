@@ -1,4 +1,4 @@
-const CACHE_NAME = "tarot-pull-v7";
+const CACHE_NAME = "tarot-pull-v8";
 
 const ASSETS = [
   "./",
