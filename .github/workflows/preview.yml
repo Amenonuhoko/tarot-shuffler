@@ -1,0 +1,28 @@
+# Stages the `preview` branch through the "preview" environment. When it
+# passes, "Deploy site" (deploy-site.yml) republishes Pages with this
+# branch at /preview/. Protection rules on the environment, such as
+# required reviewers, gate the preview going live.
+name: Preview
+
+on:
+  push:
+    branches: [preview]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stage:
+    runs-on: ubuntu-latest
+    environment:
+      name: preview
+      url: https://amenonuhoko.github.io/tarot-shuffler/preview/
+    steps:
+      - name: Check out preview
+        uses: actions/checkout@v4
+        with:
+          ref: preview
+
+      - name: Check the script parses
+        run: node --check script.js

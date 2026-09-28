@@ -43,4 +43,6 @@ This is a plain HTML/CSS/JavaScript site with no build step and no dependencies 
 python3 -m http.server 8000
 ```
 
-Then visit `http://localhost:8000`. The site is automatically published to GitHub Pages from the `main` branch.
+Then visit `http://localhost:8000`.
+
+The site is published to GitHub Pages by the **Deploy site** workflow: `main` at the root, and whatever is on the `preview` branch at [/preview/](https://amenonuhoko.github.io/tarot-shuffler/preview/). To try a change before it goes live, push it to `preview`; it runs through the repo's `preview` environment first, then the site redeploys with it. (Pages must be set to deploy from GitHub Actions: Settings → Pages → Source.)

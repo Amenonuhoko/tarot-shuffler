@@ -1,0 +1,88 @@
+# Publishes the GitHub Pages site: main at the root, and whatever is on
+# the `preview` branch at /preview/. Pages serves one site per repo, so
+# every deploy (a push to main, or a new preview) rebuilds both halves.
+# Needs Settings -> Pages -> Source set to "GitHub Actions"; until then
+# each run just notes that and skips the deploy.
+name: Deploy site
+
+on:
+  push:
+    branches: [main]
+  workflow_run:
+    workflows: [Preview]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    # A preview only publishes once its run through the preview
+    # environment succeeded (including any approvals you add there).
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.pages.outputs.ready }}
+    steps:
+      - name: Check Pages is set to deploy from GitHub Actions
+        id: pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          build_type=$(gh api "repos/${GITHUB_REPOSITORY}/pages" --jq .build_type 2>/dev/null || echo "not enabled")
+          if [ "$build_type" = "workflow" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::GitHub Pages source is '${build_type}', not GitHub Actions. Set Settings > Pages > Source to GitHub Actions, then re-run this workflow to publish."
+          fi
+
+      - name: Check out main
+        if: steps.pages.outputs.ready == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: _site
+
+      - name: Look for a preview branch
+        if: steps.pages.outputs.ready == 'true'
+        id: preview
+        run: |
+          if git -C _site ls-remote --exit-code --heads origin preview > /dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check out preview into /preview/
+        if: steps.preview.outputs.exists == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: preview
+          path: _site/preview
+
+      - name: Strip repository metadata
+        if: steps.pages.outputs.ready == 'true'
+        run: rm -rf _site/.git _site/.github _site/preview/.git _site/preview/.github
+
+      - name: Upload the site
+        if: steps.pages.outputs.ready == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    if: needs.build.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
