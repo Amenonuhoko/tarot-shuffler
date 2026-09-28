@@ -539,25 +539,73 @@ body {
   transform: rotateY(180deg);
 }
 
-/* -- Opening flips run as keyframe animations rather than the plain
-   transition above, so the card can lift off the table while it
-   turns (and, for a Major, pause edge-on). transition: none keeps the
-   .flipped transition from starting underneath; when the animation
-   ends the base transform is already rotateY(180deg), so nothing
-   jumps. script.js settles the reveal off their animationend. -- */
+/* -- The card's turns run as keyframe animations rather than the plain
+   transition above, so the card can lift off the table while it turns
+   (and, for a Major, pause edge-on). transition: none keeps the
+   .flipped transition from starting underneath; each turn ends on a
+   pose equal to the base rotateY(180deg), so nothing jumps. script.js
+   settles the reveal off the rotation's animationend.
+
+   The rotation is always ONE keyframe segment with one easing curve.
+   Easing applies per segment, so intermediate rotation keyframes made
+   the card slow to a near stop at each one - a stall mid-turn that read
+   as stutter. The lift rides a separate animation on the independent
+   `translate` property, so it rises and settles on its own curve
+   without ever slowing the turn.
+
+   .draw-flip: face-down to face-up.
+   .redraw-turn: a face-up card turns all the way over (180deg to
+   540deg, which lands on the same pose as 180deg) in one continuous
+   motion; script.js swaps in the next card's face while its back is
+   toward you. The old approach flipped back down, stopped while the
+   page did its work, then flipped up again. -- */
 .card.draw-flip {
   transition: none;
-  animation: draw-flip 0.82s cubic-bezier(0.3, 0.05, 0.2, 1);
+  animation: turn-up 0.9s cubic-bezier(0.3, 0, 0.2, 1), card-lift 0.9s ease-in-out;
+}
+
+.card.redraw-turn {
+  transition: none;
+  animation: turn-over 1.25s cubic-bezier(0.45, 0, 0.25, 1), card-lift 1.25s ease-in-out;
+}
+
+/* The outgoing card's face drops out the moment it goes edge-on, on
+   the compositor's own clock, so it can never come back around even if
+   the script swapping in the next face runs late. */
+.card.redraw-turn .card-front-content {
+  animation: turn-hide-face 1.25s linear;
+}
+
+.card.major-redraw .card-front-content {
+  animation: turn-hide-face-major 2s linear;
+}
+
+@keyframes turn-hide-face {
+  0%, 27% { opacity: 1; }
+  28%, 100% { opacity: 0; }
+}
+
+@keyframes turn-hide-face-major {
+  0%, 10% { opacity: 1; }
+  10.5%, 100% { opacity: 0; }
+}
+
+@keyframes turn-up {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(180deg); }
+}
+
+@keyframes turn-over {
+  from { transform: rotateY(180deg); }
+  to { transform: rotateY(540deg); }
 }
 
 /* Pixel, not percentage, offsets in every keyframe that moves the
    card: a percentage translate makes Chrome re-rasterize the moving
    layer every frame instead of once. */
-@keyframes draw-flip {
-  0% { transform: translateY(0) translateZ(0) rotateY(0deg) rotateZ(0deg); }
-  18% { transform: translateY(-10px) translateZ(18px) rotateY(10deg) rotateZ(-1.2deg); }
-  55% { transform: translateY(-15px) translateZ(46px) rotateY(115deg) rotateZ(-0.6deg); }
-  100% { transform: translateY(0) translateZ(0) rotateY(180deg) rotateZ(0deg); }
+@keyframes card-lift {
+  0%, 100% { translate: 0 0 0; }
+  45% { translate: 0 -14px 44px; }
 }
 
 /* -- Major Arcana: an ominous draw-in (the card sinks back and winds
@@ -567,6 +615,24 @@ body {
 .card.major-flip {
   transition: none;
   animation: major-flip 1.7s cubic-bezier(0.45, 0, 0.25, 1);
+}
+
+/* A Major drawn over a face-up card: the old card turns away and the
+   new one comes on around in one motion, with the same beats. Here the
+   pauses between segments are the point - sinking back face-down,
+   winding against the turn, holding edge-on. */
+.card.major-redraw {
+  transition: none;
+  animation: major-turn-over 2s cubic-bezier(0.45, 0, 0.25, 1);
+}
+
+@keyframes major-turn-over {
+  0% { transform: translateY(0) translateZ(0) rotateY(180deg) scale(1); }
+  28% { transform: translateY(5px) translateZ(-16px) rotateY(360deg) scale(0.985); }
+  38% { transform: translateY(2px) translateZ(-12px) rotateY(355deg) scale(0.985); }
+  62% { transform: translateY(-15px) translateZ(40px) rotateY(444deg) scale(1.02); }
+  76% { transform: translateY(-17px) translateZ(48px) rotateY(456deg) scale(1.03); }
+  100% { transform: translateY(0) translateZ(0) rotateY(540deg) scale(1); }
 }
 
 @keyframes major-flip {
@@ -877,24 +943,28 @@ body.major-omen .omen-veil {
   85% { filter: brightness(0.96); }
 }
 
-/* -- Reveal cascade: the card's own content materializes out of a
-   soft mist piece by piece (label, title, art, orientation,
-   description) instead of appearing all at once. Content must be
-   explicitly hidden while "pending" because the 3D flip itself
+/* -- Reveal cascade: the card's own content rises into place piece by
+   piece (label, art, title, orientation, description) under the gold
+   aura of .reveal-flash instead of appearing all at once. Content must
+   be explicitly hidden while "pending" because the 3D flip itself
    exposes the front face (via backface-visibility) partway through
-   its own rotation, well before any JS-triggered reveal class
-   would otherwise apply. -- */
+   its own rotation, well before any JS-triggered reveal class would
+   otherwise apply.
+
+   Opacity and transform only. This used to blur each piece in from
+   blur(4px), but Chrome can't run a moving blur on the compositor, so
+   the whole face was repainted and re-rasterized every frame for over
+   a second - right as the card landed, which read as a stuttery turn
+   on phones. -- */
 
 .card-front-content > * {
   opacity: 1;
   transform: translateY(0);
-  filter: blur(0);
 }
 
 .card-front-content.content-pending > * {
   opacity: 0;
-  transform: translateY(6px);
-  filter: blur(4px);
+  transform: translateY(8px);
 }
 
 .card-front-content.content-cascade > * {
@@ -909,8 +979,8 @@ body.major-omen .omen-veil {
 .card-front-content.content-cascade > *:nth-child(6) { animation-delay: 0.59s; }
 
 @keyframes content-reveal {
-  0% { opacity: 0; transform: translateY(6px); filter: blur(4px); }
-  100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 .card-face {
@@ -1052,7 +1122,9 @@ body.major-omen .omen-veil {
   margin: 4px 0;
   overflow: hidden;
   position: relative;
-  transition: background 0.4s ease, transform 0.4s ease;
+  /* transform only: its gradient backgrounds can't interpolate, so a
+     background transition just repainted it every frame of a draw. */
+  transition: transform 0.4s ease;
 }
 
 /* A painted ground for the art window, one per element, so the frame
@@ -2804,7 +2876,7 @@ body.major-omen .omen-veil {
   .card-front-content.content-cascade > *,
   .card-slot.pulling .slot-shadow, .card-slot.shuffle-fan .slot-glow, .deck-card, .card-slot.shuffle-fan .deck-card,
   .card-glow, .card-tilt, .foil-glare, .foil-glare-spot,
-  .card.draw-flip, .card.major-flip, .major-halo, .omen-veil,
+  .card.draw-flip, .card.major-flip, .card.redraw-turn, .card.major-redraw, .major-halo, .omen-veil,
   .card.revealing.major-landing .reveal-flash, .card.revealing.major-landing .reveal-flash::before,
   .history-row-enter, .card-search-input.not-found,
   [data-theme="holo"] body, [data-theme="holo"] .card-face, [data-theme="holo"] .card-front::after, [data-theme="holo"] .card-title,

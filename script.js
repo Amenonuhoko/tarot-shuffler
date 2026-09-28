@@ -1021,8 +1021,8 @@ function renderCardFace(card, roleOverride) {
 let pendingFlipTransitionCallback = null;
 let pendingFlipFallbackTimer = null;
 // What the pending callback is waiting for: "transition" (the card
-// turning face-down, or reversing mid-turn) or "animation" (an opening
-// keyframe flip). A transitionend can still be queued from a turn that
+// turning face-down for a shuffle, or reversing mid-turn) or "animation"
+// (one of the keyframe turns). A transitionend can still be queued from a turn that
 // finished just as the fallback timer moved on to the next card; left to
 // settle a keyframe flip, it started the reveal mid-flip, and once the
 // reveal ended the browser replayed the whole flip.
@@ -1054,9 +1054,10 @@ cardEl.addEventListener("transitionend", (event) => {
   }
 });
 
-// Opening flips are keyframe animations (see .draw-flip/.major-flip in
-// style.css), so they settle off animationend instead - handled in the
-// cardEl animationend listener further down. The fallback timer covers a
+// The card's turns are keyframe animations (see TURN_CLASSES below), so
+// they settle off animationend instead - handled in the cardEl
+// animationend listener further down. Only a shuffle still turns the
+// card face-down with the plain transition. The fallback timer covers a
 // flip that never fires either event (a turn whose start and end
 // transforms happen to match runs no transition at all), so a reveal can
 // never hang waiting on one.
@@ -1089,15 +1090,37 @@ function endMajorOmen() {
   document.body.classList.remove("major-omen");
 }
 
+// The card's turns (see .draw-flip/.major-flip/.redraw-turn/.major-redraw
+// in style.css). A turn in flight lands on the most recently requested
+// card: drawing again mid-turn retargets it rather than restarting it,
+// so the motion never stops and starts.
+const TURN_CLASSES = ["draw-flip", "major-flip", "redraw-turn", "major-redraw"];
+const TURN_ANIMATIONS = new Set(["turn-up", "major-flip", "turn-over", "major-turn-over"]);
+// When a face-up card turning all the way over shows its back flat to
+// the viewer - the middle of the window where its face is hidden
+// (361-641ms of the 1.25s turn; 218-1348ms of the 2s Major turn).
+const REDRAW_SWAP_MS = 485;
+const REDRAW_SWAP_MAJOR_MS = 700;
+
+let turnInFlight = false;
+let turnTarget = null;
+let turnIsMajor = false;
+let turnFaceSwapped = false;
+let turnSwapTimer = null;
+
 function stopFlipAnimations() {
-  cardEl.classList.remove("draw-flip", "major-flip", "revealing", "major-landing");
+  cardEl.classList.remove(...TURN_CLASSES, "revealing", "major-landing");
   endMajorOmen();
+  turnInFlight = false;
+  turnFaceSwapped = false;
+  clearTimeout(turnSwapTimer);
+  turnSwapTimer = null;
 }
 
 function triggerRevealFanfare(isMajor = false) {
-  // Normally the flip has already ended; if the fallback timer got here
-  // first, finish the flip now rather than let .revealing override it.
-  cardEl.classList.remove("draw-flip", "major-flip", "revealing", "major-landing");
+  // Normally the turn has already ended; if the fallback timer got here
+  // first, finish it now rather than let .revealing override it.
+  cardEl.classList.remove(...TURN_CLASSES, "revealing", "major-landing");
   void cardEl.offsetWidth;
   cardEl.classList.add("revealing");
   cardEl.classList.toggle("major-landing", isMajor);
@@ -1107,24 +1130,43 @@ function triggerRevealFanfare(isMajor = false) {
   cardFrontContentEl.classList.add("content-cascade");
 }
 
-// ceremony: a fresh draw (not a search or history lookup), which gets
-// the full Major Arcana entrance when it lands on a Major.
+// Renders the card about to be revealed while it's still hidden:
+// content-pending hides every piece of the face until the cascade.
+function renderPendingFace(card, roleOverride) {
+  cardFrontContentEl.classList.remove("content-cascade");
+  cardFrontContentEl.classList.add("content-pending");
+  renderCardFace(card, roleOverride);
+  flipBtn.hidden = !activeDeck.allowReversed;
+  hintEl.textContent = isArchetypesActive() ? "" : "Tap anywhere to draw again";
+}
+
+function startTurn(target, isMajor) {
+  turnInFlight = true;
+  turnTarget = target;
+  turnIsMajor = isMajor;
+}
+
+function landTurn() {
+  if (!turnFaceSwapped) {
+    renderPendingFace(turnTarget.card, turnTarget.roleOverride);
+  }
+  const landsMajor = turnIsMajor && isMajorCard(turnTarget.card);
+  turnInFlight = false;
+  turnFaceSwapped = false;
+  clearTimeout(turnSwapTimer);
+  turnSwapTimer = null;
+  triggerRevealFanfare(landsMajor);
+}
+
+// Face-down to face-up. ceremony: a fresh draw (not a search or history
+// lookup), which gets the full Major Arcana entrance on a Major.
 function openCard(card, roleOverride, ceremony = false) {
   const midFlipBack = flipBackInFlight;
   flipBackInFlight = false;
 
-  cardFrontContentEl.classList.remove("content-cascade");
-  cardFrontContentEl.classList.add("content-pending");
-  renderCardFace(card, roleOverride);
-  animateCardPull();
-  flipBtn.hidden = !activeDeck.allowReversed;
   stopFlipAnimations();
-
-  if (isArchetypesActive()) {
-    hintEl.textContent = "";
-  } else {
-    hintEl.textContent = "Tap anywhere to draw again";
-  }
+  renderPendingFace(card, roleOverride);
+  animateCardPull();
 
   const isMajor = ceremony && isMajorCard(card);
 
@@ -1136,40 +1178,73 @@ function openCard(card, roleOverride, ceremony = false) {
   }
 
   if (midFlipBack) {
-    // Still turning face-down from the previous card: let the running
-    // transition reverse smoothly back up instead of snapping to 0deg.
+    // Still turning face-down (a shuffle): let the running transition
+    // reverse smoothly back up instead of snapping to 0deg.
+    startTurn({ card, roleOverride, ceremony }, false);
+    turnFaceSwapped = true;
     cardEl.classList.add("flipped");
     isFlipped = true;
-    onCardFlipTransitionEnd(() => triggerRevealFanfare(isMajor));
+    onCardFlipTransitionEnd(landTurn);
     return;
   }
 
-  // Commit the face-down pose first so the keyframe flip starts from it.
+  suspendTilt(isMajor ? 1800 : 1000);
+  startTurn({ card, roleOverride, ceremony }, isMajor);
+  turnFaceSwapped = true;
+
+  // Commit the face-down pose first so the turn starts from it.
   void cardEl.offsetWidth;
   cardEl.classList.add("flipped", isMajor ? "major-flip" : "draw-flip");
   isFlipped = true;
   if (isMajor) {
     startMajorOmen();
   }
-  onCardFlipTransitionEnd(() => triggerRevealFanfare(isMajor), isMajor ? 2600 : 1500, "animation");
+  onCardFlipTransitionEnd(landTurn, isMajor ? 2600 : 1600, "animation");
 }
 
 function revealCard(card, roleOverride, ceremony = false) {
+  if (turnInFlight) {
+    // Already turning: land on this card instead. If its face is already
+    // in place (hidden), refresh it now; otherwise the swap picks it up.
+    turnTarget = { card, roleOverride, ceremony };
+    if (turnFaceSwapped) {
+      renderPendingFace(card, roleOverride);
+    }
+    return;
+  }
+
   if (!isFlipped) {
     openCard(card, roleOverride, ceremony);
     return;
   }
 
+  const isMajor = ceremony && isMajorCard(card);
   stopFlipAnimations();
-  cardEl.classList.remove("flipped");
-  isFlipped = false;
 
   if (prefersReducedMotion()) {
-    openCard(card, roleOverride, ceremony);
-  } else {
-    flipBackInFlight = true;
-    onCardFlipTransitionEnd(() => openCard(card, roleOverride, ceremony));
+    renderPendingFace(card, roleOverride);
+    triggerRevealFanfare(isMajor);
+    return;
   }
+
+  // Face up already: turn all the way over in one continuous motion and
+  // swap in the next face while the back is toward the viewer. The swap
+  // is page work, but the turn itself runs on the compositor, so it
+  // can't stall the motion.
+  suspendTilt(isMajor ? 2100 : 1350);
+  startTurn({ card, roleOverride, ceremony }, isMajor);
+  animateCardPull();
+  void cardEl.offsetWidth;
+  cardEl.classList.add(isMajor ? "major-redraw" : "redraw-turn");
+  if (isMajor) {
+    startMajorOmen();
+  }
+  turnSwapTimer = setTimeout(() => {
+    turnSwapTimer = null;
+    turnFaceSwapped = true;
+    renderPendingFace(turnTarget.card, turnTarget.roleOverride);
+  }, isMajor ? REDRAW_SWAP_MAJOR_MS : REDRAW_SWAP_MS);
+  onCardFlipTransitionEnd(landTurn, isMajor ? 2900 : 2000, "animation");
 }
 
 function showCard(card) {
@@ -1891,6 +1966,7 @@ function startShuffleShake() {
 shuffleBtn.addEventListener("click", () => {
   const wasFlipped = isFlipped;
   const reduceMotion = prefersReducedMotion();
+  suspendTilt(wasFlipped ? 2000 : 1500);
 
   if (isArchetypesActive()) {
     resetSpreadPositions();
@@ -1931,7 +2007,12 @@ flipBtn.addEventListener("click", (event) => {
   }
 
   currentCard.reversed = !currentCard.reversed;
-  renderCardFace(currentCard);
+  // Mid-turn, before the next face is swapped in, this button still sits
+  // on the outgoing card: leave that face alone and let the swap pick up
+  // the new orientation (currentCard is the turn's target).
+  if (!(turnInFlight && !turnFaceSwapped)) {
+    renderCardFace(currentCard);
+  }
 
   if (currentSpreadPositionIndex !== null) {
     const position = spreadPositions[currentSpreadPositionIndex];
@@ -1943,10 +2024,11 @@ flipBtn.addEventListener("click", (event) => {
 
 cardEl.addEventListener("animationend", (event) => {
   const name = event.animationName;
-  if (event.target === cardEl && (name === "draw-flip" || name === "major-flip")) {
-    cardEl.classList.remove("draw-flip", "major-flip");
+  if (event.target === cardEl && TURN_ANIMATIONS.has(name)) {
     if (pendingFlipSettlesOn === "animation") {
       settlePendingFlip();
+    } else {
+      cardEl.classList.remove(...TURN_CLASSES);
     }
   } else if (name === "shuffle-shake") {
     cardEl.classList.remove("shuffling");
@@ -2003,18 +2085,27 @@ cardSlotEl.addEventListener("animationend", (event) => {
 // flat once it rests: browsers render a layer under a live perspective
 // tilt at reduced resolution, so a card left leaning looked grainy and
 // jagged along its edges. Flat, it's crisp again for reading.
+//
+// The tilt also stays out of the way of the card turning. A finger only
+// tilts once it drags, never on a tap - a tap is a draw, and tilting
+// plus building the glare layers in the same frames the flip started
+// is what made the turn stutter on phones - and any draw or shuffle
+// eases the card flat and ignores the pointer until the turn is done.
 
 const TILT_MAX_X_DEG = 6;
 const TILT_MAX_Y_DEG = 8;
 const TILT_SETTLE_MS = 600;
+const TILT_TOUCH_DRAG_PX = 10;
 
 const cardTiltEl = document.getElementById("cardTilt");
 const foilGlareSpotEls = document.querySelectorAll(".foil-glare-spot");
 
 let tiltTouchId = null;
+let tiltTouchStart = null;
 let tiltFrame = null;
 let tiltPoint = null;
 let tiltSettleTimer = null;
+let tiltSuspendedUntil = 0;
 
 function applyTilt() {
   tiltFrame = null;
@@ -2035,6 +2126,10 @@ function applyTilt() {
 }
 
 function trackTilt(event) {
+  if (performance.now() < tiltSuspendedUntil) {
+    return;
+  }
+
   const rect = cardSlotEl.getBoundingClientRect();
   if (!rect.width || !rect.height) {
     return;
@@ -2071,6 +2166,13 @@ function settleTilt() {
 
 function resetTilt() {
   tiltTouchId = null;
+  tiltTouchStart = null;
+  settleTilt();
+}
+
+// Called when the card starts turning (a draw or a shuffle).
+function suspendTilt(ms) {
+  tiltSuspendedUntil = Math.max(tiltSuspendedUntil, performance.now() + ms);
   settleTilt();
 }
 
@@ -2078,8 +2180,17 @@ cardSlotEl.addEventListener("pointermove", (event) => {
   if (prefersReducedMotion()) {
     return;
   }
-  if (event.pointerType === "touch" && event.pointerId !== tiltTouchId) {
-    return;
+  if (event.pointerType === "touch") {
+    if (event.pointerId !== tiltTouchId) {
+      return;
+    }
+    if (tiltTouchStart) {
+      const dragged = Math.hypot(event.clientX - tiltTouchStart.x, event.clientY - tiltTouchStart.y);
+      if (dragged < TILT_TOUCH_DRAG_PX) {
+        return;
+      }
+      tiltTouchStart = null;
+    }
   }
   trackTilt(event);
 });
@@ -2089,7 +2200,7 @@ cardSlotEl.addEventListener("pointerdown", (event) => {
     return;
   }
   tiltTouchId = event.pointerId;
-  trackTilt(event);
+  tiltTouchStart = { x: event.clientX, y: event.clientY };
 });
 
 cardSlotEl.addEventListener("pointerleave", (event) => {
