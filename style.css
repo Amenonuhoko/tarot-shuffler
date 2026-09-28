@@ -2687,27 +2687,65 @@ body.major-omen .omen-veil {
   animation: sigil-breathe 14s ease-in-out infinite;
 }
 
-:root:not([data-theme]) .sigil-layer {
-  display: block;
+/* Each wheel turns as a plain div around its SVG, centered with
+   offsets so its keyframes hold nothing but the rotation. Rotating the
+   SVGs themselves through translate(-50%, -50%) rotate() made Chrome
+   re-rasterize all three wheels whenever anything else on the page
+   moved - ~5s of raster work during a single card turn, dropping it to
+   ~10fps on a phone - and restyled the SVGs on every frame. Same
+   wheels, sizes, speeds and directions as before. */
+.sigil-spin {
+  position: absolute;
+  aspect-ratio: 1;
+}
+
+:root:not([data-theme]) .sigil-spin {
   will-change: transform;
 }
 
-.sigil-rim {
+.sigil-spin-rim {
   width: 100%;
-  opacity: 0.5;
+  left: 0;
+  top: 0;
   animation: sigil-turn 360s linear infinite;
 }
 
-.sigil-zodiac {
+.sigil-spin-zodiac {
   width: 83.333%;
-  opacity: 0.6;
+  left: 8.3335%;
+  top: 8.3335%;
   animation: sigil-turn 240s linear infinite reverse;
 }
 
-.sigil-planets {
+.sigil-spin-planets {
   width: 50.667%;
-  opacity: 0.75;
+  left: 24.6665%;
+  top: 24.6665%;
   animation: sigil-turn 120s linear infinite;
+}
+
+.mystic-motif .sigil-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: none;
+}
+
+:root:not([data-theme]) .sigil-layer {
+  display: block;
+}
+
+.sigil-rim {
+  opacity: 0.5;
+}
+
+.sigil-zodiac {
+  opacity: 0.6;
+}
+
+.sigil-planets {
+  opacity: 0.75;
 }
 
 .sigil-inscription {
@@ -2716,8 +2754,8 @@ body.major-omen .omen-veil {
 }
 
 @keyframes sigil-turn {
-  from { transform: translate(-50%, -50%) rotate(0deg); }
-  to { transform: translate(-50%, -50%) rotate(360deg); }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 @keyframes sigil-breathe {
@@ -2725,15 +2763,17 @@ body.major-omen .omen-veil {
   50% { opacity: 1; }
 }
 
-/* scale, not transform: transform already holds the centering. */
+/* A flare of brightness only. It also swelled 3.5% via scale, but
+   scaling the three large wheel layers on every reveal - right as the
+   card lands - cost extra raster work each time. */
 :root:not([data-theme]) .motif-sigil.is-surging {
   animation: sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
 @keyframes sigil-surge {
-  0% { opacity: 0.62; scale: 1; }
-  16% { opacity: 1; scale: 1.035; }
-  100% { opacity: 0.62; scale: 1; }
+  0% { opacity: 0.62; }
+  16% { opacity: 1; }
+  100% { opacity: 0.62; }
 }
 
 /* Atmosphere behind the chart, back to front: a nebula veil that
@@ -2958,6 +2998,7 @@ body.major-omen .omen-veil {
   :root:not([data-theme]) .motif-sigil,
   :root:not([data-theme]) .sigil-breath,
   :root:not([data-theme]) .sigil-layer,
+  .sigil-spin,
   :root:not([data-theme]) .motif-veil,
   :root:not([data-theme]) .motif-stars,
   :root:not([data-theme]) .motif-stars::after,
