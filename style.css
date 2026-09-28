@@ -2576,20 +2576,92 @@ body.major-omen .omen-veil {
   text-shadow: 0 0 6px rgba(163, 16, 44, 0.7);
 }
 
-/* -- Mystic Violet: an astrological star chart (ringed wheel with
-   12 house divisions and plotted bodies) behind the card, gold
-   line-art linework, and a slow pulsing glow -- */
+/* -- Mystic Violet: a great turning sigil behind the card, three
+   wheels of gold linework turning against each other over a violet
+   aura - an outer rim (crown of rays, degree scale and the Emerald
+   Tablet's inscription), the zodiac with each sign's constellation,
+   and the seven planets on a heptagram at the hub. script.js pins
+   its center to the card and flares it on every reveal. -- */
 
-:root:not([data-theme]) .motif-orbits {
-  display: block;
-  width: 420px;
-  opacity: 0.2;
-  animation: mystic-chart-spin 220s linear infinite;
+.motif-sigil {
+  position: absolute;
+  left: var(--sigil-x, 50%);
+  top: var(--sigil-y, 50%);
+  width: min(1040px, max(720px, 130vmin));
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  display: none;
 }
 
-@keyframes mystic-chart-spin {
+.sigil-aura,
+.sigil-breath {
+  position: absolute;
+  inset: 0;
+}
+
+.sigil-aura {
+  border-radius: 50%;
+  background:
+    radial-gradient(closest-side, transparent 86%, rgba(216, 183, 106, 0.08) 93%, transparent 99%),
+    radial-gradient(closest-side, rgba(122, 84, 224, 0.26), rgba(122, 84, 224, 0.1) 45%, rgba(216, 183, 106, 0.05) 70%, transparent 100%);
+}
+
+:root:not([data-theme]) .motif-sigil {
+  display: block;
+  opacity: 0.62;
+}
+
+:root:not([data-theme]) .sigil-breath {
+  animation: sigil-breathe 14s ease-in-out infinite;
+}
+
+:root:not([data-theme]) .sigil-layer {
+  display: block;
+  will-change: transform;
+}
+
+.sigil-rim {
+  width: 100%;
+  opacity: 0.5;
+  animation: sigil-turn 360s linear infinite;
+}
+
+.sigil-zodiac {
+  width: 83.333%;
+  opacity: 0.6;
+  animation: sigil-turn 240s linear infinite reverse;
+}
+
+.sigil-planets {
+  width: 50.667%;
+  opacity: 0.75;
+  animation: sigil-turn 120s linear infinite;
+}
+
+.sigil-inscription {
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+}
+
+@keyframes sigil-turn {
   from { transform: translate(-50%, -50%) rotate(0deg); }
   to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes sigil-breathe {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 1; }
+}
+
+/* scale, not transform: transform already holds the centering. */
+:root:not([data-theme]) .motif-sigil.is-surging {
+  animation: sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+@keyframes sigil-surge {
+  0% { opacity: 0.62; scale: 1; }
+  16% { opacity: 1; scale: 1.035; }
+  100% { opacity: 0.62; scale: 1; }
 }
 
 /* Atmosphere behind the chart, back to front: a nebula veil that
@@ -2811,7 +2883,9 @@ body.major-omen .omen-veil {
   [data-theme="terminal"] body, [data-theme="terminal"] .card-face, [data-theme="terminal"] .card-front::after, [data-theme="terminal"] .card-title, [data-theme="terminal"] .hint::after,
   [data-theme="deco"] body::before, [data-theme="deco"] .card-title,
   [data-theme="bloodmoon"] .card-face, [data-theme="bloodmoon"] .card-title, [data-theme="bloodmoon"] .hint::after,
-  :root:not([data-theme]) .motif-orbits,
+  :root:not([data-theme]) .motif-sigil,
+  :root:not([data-theme]) .sigil-breath,
+  :root:not([data-theme]) .sigil-layer,
   :root:not([data-theme]) .motif-veil,
   :root:not([data-theme]) .motif-stars,
   :root:not([data-theme]) .motif-stars::after,
