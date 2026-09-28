@@ -34,6 +34,19 @@ const MINOR_RANKS = [
   "Eight", "Nine", "Ten", "Page", "Knight", "Queen", "King"
 ];
 
+// Shown in the numeral cartouche at the top of the card face.
+const MAJOR_NUMERALS = [
+  "0", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X",
+  "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI"
+];
+const MINOR_RANK_NUMERALS = [
+  "Ace", "II", "III", "IV", "V", "VI", "VII",
+  "VIII", "IX", "X", "Page", "Knight", "Queen", "King"
+];
+
+// Picks the painted ground behind the card art (see .card-art[data-element]).
+const SUIT_ELEMENTS = { Wands: "fire", Cups: "water", Swords: "air", Pentacles: "earth" };
+
 const MAJOR_COLORS = {
   "The Fool": "#e8c34a",
   "The Magician": "#f2c14e",
@@ -608,25 +621,27 @@ function capitalize(text) {
 }
 
 function buildDeck() {
-  const deck = MAJOR_ARCANA.map(name => ({
+  const deck = MAJOR_ARCANA.map((name, index) => ({
     name,
     arcana: "Major Arcana",
+    numeral: MAJOR_NUMERALS[index],
     color: MAJOR_COLORS[name],
     slug: slugify(name),
     meanings: CARD_MEANINGS[name]
   }));
 
   for (const suit of MINOR_SUITS) {
-    for (const rank of MINOR_RANKS) {
+    MINOR_RANKS.forEach((rank, rankIndex) => {
       const name = `${rank} of ${suit}`;
       deck.push({
         name,
         arcana: "Minor Arcana",
+        numeral: MINOR_RANK_NUMERALS[rankIndex],
         color: SUIT_COLORS[suit],
         slug: slugify(name),
         meanings: CARD_MEANINGS[name]
       });
-    }
+    });
   }
 
   return deck;
@@ -931,6 +946,20 @@ function animateCardPull() {
 
 let lastRoleOverride = null;
 
+function isMajorCard(card) {
+  return card.arcana === "Major Arcana" || card.arcana === "Custom Arcana";
+}
+
+function cardElement(card) {
+  if (isMajorCard(card)) {
+    return "major";
+  }
+  if (card.arcana === "Minor Arcana") {
+    return SUIT_ELEMENTS[card.name.split(" of ").pop()];
+  }
+  return "oracle";
+}
+
 function renderCardFace(card, roleOverride) {
   resetCardSecretBurn();
 
@@ -938,7 +967,7 @@ function renderCardFace(card, roleOverride) {
     lastRoleOverride = roleOverride;
   }
 
-  arcanaLabelEl.textContent = lastRoleOverride || card.type || card.arcana;
+  arcanaLabelEl.textContent = lastRoleOverride || card.numeral || card.type || card.arcana;
   cardTitleEl.textContent = card.name;
   cardSubtitleEl.textContent = card.subtitle || "";
   cardSubtitleEl.hidden = !card.subtitle;
@@ -950,6 +979,7 @@ function renderCardFace(card, roleOverride) {
     ? card.meanings[card.reversed ? 1 : 0]
     : card.meaning || "";
   cardArtEl.style.setProperty("--card-color", card.color);
+  cardArtEl.dataset.element = cardElement(card);
   cardArtEl.classList.toggle("is-reversed", card.reversed);
   cardFrontContentEl.classList.toggle("is-reversed", card.reversed);
   loadCardArt(card);
@@ -964,42 +994,91 @@ function renderCardFace(card, roleOverride) {
 // fire out of order off a single settling transition - showing a stale
 // card on top of a newer one, or leaving the reveal stuck mid-flip.
 let pendingFlipTransitionCallback = null;
+let pendingFlipFallbackTimer = null;
+// True while the card is turning back face-down (a transition, not a
+// keyframe flip). Opening a card mid-turn must reverse that transition
+// rather than restart a keyframe flip from 0deg, or the card would snap.
+let flipBackInFlight = false;
 
-cardEl.addEventListener("transitionend", (event) => {
-  if (event.target !== cardEl || event.propertyName !== "transform" || !pendingFlipTransitionCallback) {
-    return;
-  }
+function settlePendingFlip() {
+  clearTimeout(pendingFlipFallbackTimer);
+  pendingFlipFallbackTimer = null;
+  flipBackInFlight = false;
   const callback = pendingFlipTransitionCallback;
   pendingFlipTransitionCallback = null;
-  callback();
+  if (callback) {
+    callback();
+  }
+}
+
+cardEl.addEventListener("transitionend", (event) => {
+  if (event.target !== cardEl || event.propertyName !== "transform") {
+    return;
+  }
+  settlePendingFlip();
 });
 
-function onCardFlipTransitionEnd(callback) {
+// Opening flips are keyframe animations (see .draw-flip/.major-flip in
+// style.css), so they settle off animationend instead - handled in the
+// cardEl animationend listener further down. The fallback timer covers a
+// flip that never fires either event (a turn whose start and end
+// transforms happen to match runs no transition at all), so a reveal can
+// never hang waiting on one.
+function onCardFlipTransitionEnd(callback, fallbackMs = 1000) {
+  clearTimeout(pendingFlipFallbackTimer);
   pendingFlipTransitionCallback = callback;
+  pendingFlipFallbackTimer = setTimeout(settlePendingFlip, fallbackMs);
 }
 
 function cancelPendingReveal() {
+  clearTimeout(pendingFlipFallbackTimer);
+  pendingFlipFallbackTimer = null;
   pendingFlipTransitionCallback = null;
 }
 
-function triggerRevealFanfare() {
-  cardEl.classList.remove("revealing");
+function prefersReducedMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+// The Major Arcana omen: the room darkens and a star-chart halo blooms
+// behind the card (see .omen-veil/.major-halo). Ends on the halo's own
+// animationend, or immediately when the card is turned away early.
+function startMajorOmen() {
+  document.body.classList.add("major-omen");
+}
+
+function endMajorOmen() {
+  document.body.classList.remove("major-omen");
+}
+
+function stopFlipAnimations() {
+  cardEl.classList.remove("draw-flip", "major-flip", "revealing", "major-landing");
+  endMajorOmen();
+}
+
+function triggerRevealFanfare(isMajor = false) {
+  cardEl.classList.remove("revealing", "major-landing");
   void cardEl.offsetWidth;
   cardEl.classList.add("revealing");
+  cardEl.classList.toggle("major-landing", isMajor);
 
   cardFrontContentEl.classList.remove("content-pending", "content-cascade");
   void cardFrontContentEl.offsetWidth;
   cardFrontContentEl.classList.add("content-cascade");
 }
 
-function openCard(card, roleOverride) {
+// ceremony: a fresh draw (not a search or history lookup), which gets
+// the full Major Arcana entrance when it lands on a Major.
+function openCard(card, roleOverride, ceremony = false) {
+  const midFlipBack = flipBackInFlight;
+  flipBackInFlight = false;
+
   cardFrontContentEl.classList.remove("content-cascade");
   cardFrontContentEl.classList.add("content-pending");
   renderCardFace(card, roleOverride);
   animateCardPull();
   flipBtn.hidden = !activeDeck.allowReversed;
-  cardEl.classList.add("flipped");
-  isFlipped = true;
+  stopFlipAnimations();
 
   if (isArchetypesActive()) {
     hintEl.textContent = "";
@@ -1007,35 +1086,56 @@ function openCard(card, roleOverride) {
     hintEl.textContent = "Tap anywhere to draw again";
   }
 
-  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (prefersReducedMotion) {
-    triggerRevealFanfare();
-  } else {
-    onCardFlipTransitionEnd(triggerRevealFanfare);
-  }
-}
+  const isMajor = ceremony && isMajorCard(card);
 
-function revealCard(card, roleOverride) {
-  if (!isFlipped) {
-    openCard(card, roleOverride);
+  if (prefersReducedMotion()) {
+    cardEl.classList.add("flipped");
+    isFlipped = true;
+    triggerRevealFanfare(isMajor);
     return;
   }
 
-  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (midFlipBack) {
+    // Still turning face-down from the previous card: let the running
+    // transition reverse smoothly back up instead of snapping to 0deg.
+    cardEl.classList.add("flipped");
+    isFlipped = true;
+    onCardFlipTransitionEnd(() => triggerRevealFanfare(isMajor));
+    return;
+  }
+
+  // Commit the face-down pose first so the keyframe flip starts from it.
+  void cardEl.offsetWidth;
+  cardEl.classList.add("flipped", isMajor ? "major-flip" : "draw-flip");
+  isFlipped = true;
+  if (isMajor) {
+    startMajorOmen();
+  }
+  onCardFlipTransitionEnd(() => triggerRevealFanfare(isMajor), isMajor ? 2600 : 1500);
+}
+
+function revealCard(card, roleOverride, ceremony = false) {
+  if (!isFlipped) {
+    openCard(card, roleOverride, ceremony);
+    return;
+  }
+
+  stopFlipAnimations();
   cardEl.classList.remove("flipped");
   isFlipped = false;
 
-  if (prefersReducedMotion) {
-    openCard(card, roleOverride);
+  if (prefersReducedMotion()) {
+    openCard(card, roleOverride, ceremony);
   } else {
-    onCardFlipTransitionEnd(() => openCard(card, roleOverride));
+    flipBackInFlight = true;
+    onCardFlipTransitionEnd(() => openCard(card, roleOverride, ceremony));
   }
 }
 
 function showCard(card) {
   currentCard = { ...card };
   currentSpreadPositionIndex = null;
-  revealCard(currentCard, null);
+  revealCard(currentCard, null, true);
   addToHistory({ ...card });
 }
 
@@ -1142,7 +1242,11 @@ function closeMenuIfCompact() {
 function clearCardDisplay() {
   resetCardSecretBurn();
   cancelPendingReveal();
+  stopFlipAnimations();
 
+  if (isFlipped && !prefersReducedMotion()) {
+    flipBackInFlight = true;
+  }
   cardEl.classList.remove("flipped");
   isFlipped = false;
 
@@ -1154,6 +1258,7 @@ function clearCardDisplay() {
   orientationLabelEl.classList.remove("is-reversed");
   cardDescriptionEl.textContent = "";
   cardArtEl.classList.remove("is-reversed");
+  delete cardArtEl.dataset.element;
   cardFrontContentEl.classList.remove("is-reversed");
   cardArtImgEl.onload = null;
   cardArtImgEl.onerror = null;
@@ -1271,8 +1376,8 @@ function playCardSecretBurn() {
   cardSecretTextEl.textContent = message;
   cardFrontEl.classList.add("card-secret-burning");
 
-  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const duration = prefersReducedMotion ? 1 : SECRET_BURN_DURATION_MS;
+  const reduceMotion = prefersReducedMotion();
+  const duration = reduceMotion ? 1 : SECRET_BURN_DURATION_MS;
   const startTime = performance.now();
   const { x: originX, y: originY } = SECRET_BURN_ORIGIN;
   let lastEmberTime = startTime - SECRET_EMBER_INTERVAL_MS;
@@ -1291,7 +1396,7 @@ function playCardSecretBurn() {
     burnGlowEl.style.opacity = String(glowFade * 0.95);
     burnGlowEl.style.background = `radial-gradient(circle at ${originX}% ${originY}%, transparent ${Math.max(0, radius - 12)}%, rgba(255, 178, 90, 0.95) ${radius}%, rgba(255, 90, 20, 0.42) ${radius + 7}%, transparent ${radius + 18}%)`;
 
-    if (!prefersReducedMotion && t < 0.92 && now - lastEmberTime > SECRET_EMBER_INTERVAL_MS) {
+    if (!reduceMotion && t < 0.92 && now - lastEmberTime > SECRET_EMBER_INTERVAL_MS) {
       lastEmberTime = now;
       spawnEmber(radius);
     }
@@ -1424,7 +1529,8 @@ function prepareSpreadClosed() {
   spreadOpened = false;
 
   cardFrontEl.classList.remove("is-open");
-  cardEl.classList.remove("shuffling", "revealing");
+  cardEl.classList.remove("shuffling");
+  stopFlipAnimations();
   cardFrontContentEl.classList.remove("content-pending", "content-cascade");
   arcanaLabelEl.textContent = "";
   cardTitleEl.textContent = "";
@@ -1435,6 +1541,7 @@ function prepareSpreadClosed() {
   orientationLabelEl.classList.remove("is-reversed");
   cardDescriptionEl.textContent = "";
   cardArtEl.classList.remove("is-reversed");
+  delete cardArtEl.dataset.element;
   cardFrontContentEl.classList.remove("is-reversed");
   cardArtImgEl.onload = null;
   cardArtImgEl.onerror = null;
@@ -1743,7 +1850,7 @@ function startShuffleShake() {
 
 shuffleBtn.addEventListener("click", () => {
   const wasFlipped = isFlipped;
-  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const reduceMotion = prefersReducedMotion();
 
   if (isArchetypesActive()) {
     resetSpreadPositions();
@@ -1754,7 +1861,7 @@ shuffleBtn.addEventListener("click", () => {
 
   reseedRandom();
 
-  if (wasFlipped && !prefersReducedMotion) {
+  if (wasFlipped && !reduceMotion) {
     onCardFlipTransitionEnd(startShuffleShake);
   } else {
     startShuffleShake();
@@ -1795,10 +1902,16 @@ flipBtn.addEventListener("click", (event) => {
 });
 
 cardEl.addEventListener("animationend", (event) => {
-  if (event.animationName === "shuffle-shake") {
+  const name = event.animationName;
+  if (event.target === cardEl && (name === "draw-flip" || name === "major-flip")) {
+    cardEl.classList.remove("draw-flip", "major-flip");
+    settlePendingFlip();
+  } else if (name === "shuffle-shake") {
     cardEl.classList.remove("shuffling");
-  } else if (event.animationName === "reveal-pop") {
-    cardEl.classList.remove("revealing");
+  } else if (name === "reveal-flash-burst" || name === "major-flash") {
+    // Keyed off the aura (the longest part of the reveal), not the
+    // shorter reveal-pop, so the gold glow is never cut off mid-fade.
+    cardEl.classList.remove("revealing", "major-landing");
   }
 });
 
@@ -1807,7 +1920,121 @@ cardSlotEl.addEventListener("animationend", (event) => {
     cardSlotEl.classList.remove("pulling");
   } else if (event.animationName === "shuffle-slot-glow") {
     cardSlotEl.classList.remove("shuffle-fan");
+  } else if (event.animationName === "major-halo") {
+    endMajorOmen();
   }
+});
+
+// The halo's star-chart ring: 72 degree ticks (every 30deg longer, one
+// per sign) and 12 plotted stars between them.
+(function buildMajorHalo() {
+  const ticksEl = document.querySelector(".major-halo-ticks");
+  const starsEl = document.querySelector(".major-halo-stars");
+  if (!ticksEl || !starsEl) {
+    return;
+  }
+
+  const point = (radius, angle) =>
+    `${(50 + radius * Math.cos(angle)).toFixed(2)} ${(50 + radius * Math.sin(angle)).toFixed(2)}`;
+
+  let ticks = "";
+  for (let k = 0; k < 72; k++) {
+    const angle = (k * Math.PI) / 36;
+    ticks += `M${point(45, angle)}L${point(k % 6 === 0 ? 39 : 42, angle)}`;
+  }
+  ticksEl.innerHTML = `<path d="${ticks}"/>`;
+
+  starsEl.innerHTML = Array.from({ length: 12 }, (_, k) => {
+    const [cx, cy] = point(40.5, (k * Math.PI) / 6 + Math.PI / 12).split(" ");
+    return `<circle cx="${cx}" cy="${cy}" r="${k % 3 === 0 ? 1.1 : 0.7}"/>`;
+  }).join("");
+})();
+
+// ---- Foil tilt ----
+// The card leans toward the pointer with a moving glare (--tilt-* and
+// --glare-* on the slot drive .card-tilt and .foil-glare in style.css).
+// A mouse or pen tilts it on hover; a finger tilts it only while pressed,
+// so page scrolling on touch is never blocked.
+
+const TILT_MAX_X_DEG = 7;
+const TILT_MAX_Y_DEG = 9;
+const TILT_PROPERTIES = ["--tilt-x", "--tilt-y", "--glare-x", "--glare-y", "--tilt-o"];
+
+let tiltTouchId = null;
+let tiltFrame = null;
+let tiltPoint = null;
+
+function applyTilt() {
+  tiltFrame = null;
+  if (!tiltPoint) {
+    return;
+  }
+
+  const { x, y } = tiltPoint;
+  cardSlotEl.style.setProperty("--tilt-x", `${((0.5 - y) * 2 * TILT_MAX_X_DEG).toFixed(2)}deg`);
+  cardSlotEl.style.setProperty("--tilt-y", `${((x - 0.5) * 2 * TILT_MAX_Y_DEG).toFixed(2)}deg`);
+  cardSlotEl.style.setProperty("--glare-x", `${(x * 100).toFixed(1)}%`);
+  cardSlotEl.style.setProperty("--glare-y", `${(y * 100).toFixed(1)}%`);
+  cardSlotEl.style.setProperty("--tilt-o", "1");
+}
+
+function trackTilt(event) {
+  const rect = cardSlotEl.getBoundingClientRect();
+  if (!rect.width || !rect.height) {
+    return;
+  }
+
+  tiltPoint = {
+    x: Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width)),
+    y: Math.min(1, Math.max(0, (event.clientY - rect.top) / rect.height))
+  };
+  cardSlotEl.classList.add("is-tilting");
+  if (tiltFrame === null) {
+    tiltFrame = requestAnimationFrame(applyTilt);
+  }
+}
+
+function resetTilt() {
+  tiltPoint = null;
+  tiltTouchId = null;
+  if (tiltFrame !== null) {
+    cancelAnimationFrame(tiltFrame);
+    tiltFrame = null;
+  }
+  cardSlotEl.classList.remove("is-tilting");
+  TILT_PROPERTIES.forEach((name) => cardSlotEl.style.removeProperty(name));
+}
+
+cardSlotEl.addEventListener("pointermove", (event) => {
+  if (prefersReducedMotion()) {
+    return;
+  }
+  if (event.pointerType === "touch" && event.pointerId !== tiltTouchId) {
+    return;
+  }
+  trackTilt(event);
+});
+
+cardSlotEl.addEventListener("pointerdown", (event) => {
+  if (event.pointerType !== "touch" || prefersReducedMotion()) {
+    return;
+  }
+  tiltTouchId = event.pointerId;
+  trackTilt(event);
+});
+
+cardSlotEl.addEventListener("pointerleave", (event) => {
+  if (event.pointerType !== "touch") {
+    resetTilt();
+  }
+});
+
+["pointerup", "pointercancel"].forEach((eventName) => {
+  cardSlotEl.addEventListener(eventName, (event) => {
+    if (event.pointerType === "touch") {
+      resetTilt();
+    }
+  });
 });
 
 deckSelect.value = initialDeckKey;
