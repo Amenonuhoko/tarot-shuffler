@@ -967,7 +967,10 @@ function setCardDescription(text) {
 
 cardDescriptionEl.addEventListener("scroll", updateDescriptionOverflow, { passive: true });
 if (document.fonts && document.fonts.ready) {
-  document.fonts.ready.then(updateDescriptionOverflow);
+  document.fonts.ready.then(() => {
+    updateDescriptionOverflow();
+    fitCardTitle();
+  });
 }
 
 let lastRoleOverride = null;
@@ -984,6 +987,18 @@ function cardElement(card) {
     return SUIT_ELEMENTS[card.name.split(" of ").pop()];
   }
   return "oracle";
+}
+
+// A single long word (Deco's wide caps on "CONTEMPLATION") can't wrap,
+// so shrink the plate's type just enough to fit instead of clipping it.
+function fitCardTitle() {
+  cardTitleEl.style.fontSize = "";
+  const overflow = cardTitleEl.scrollWidth - cardTitleEl.clientWidth;
+  if (overflow > 1) {
+    const size = parseFloat(getComputedStyle(cardTitleEl).fontSize);
+    const fitted = size * (cardTitleEl.clientWidth / cardTitleEl.scrollWidth) * 0.98;
+    cardTitleEl.style.fontSize = `${Math.max(size * 0.72, fitted).toFixed(2)}px`;
+  }
 }
 
 function renderCardFace(card, roleOverride) {
@@ -1006,6 +1021,7 @@ function renderCardFace(card, roleOverride) {
     : card.meaning || "");
   cardArtEl.style.setProperty("--card-color", card.color);
   cardArtEl.dataset.element = cardElement(card);
+  fitCardTitle();
   cardArtEl.classList.toggle("is-reversed", card.reversed);
   cardFrontContentEl.classList.toggle("is-reversed", card.reversed);
   loadCardArt(card);
@@ -1110,7 +1126,9 @@ let turnFaceSwapped = false;
 let turnSwapTimer = null;
 
 function stopFlipAnimations() {
-  cardEl.classList.remove(...TURN_CLASSES, "revealing", "major-landing");
+  // .shuffling too: a draw during the shuffle's shake ends the shake
+  // (it would otherwise win the cascade and hold the flip back).
+  cardEl.classList.remove(...TURN_CLASSES, "revealing", "major-landing", "shuffling");
   endMajorOmen();
   turnInFlight = false;
   turnFaceSwapped = false;
@@ -1131,6 +1149,29 @@ function triggerRevealFanfare(isMajor = false) {
   cardFrontContentEl.classList.add("content-cascade");
 
   surgeSigil();
+}
+
+// Stops whatever keyframe turn or reveal is running without the card
+// jumping. Removing a running animation together with .flipped starts no
+// transition at all - the card snapped face-down in one frame and sat
+// still until a fallback timer fired. So pin the live pose inline first;
+// the caller then removes .flipped and clears the inline pose in the same
+// step, and the plain transition runs from where the card really was.
+function pinTurnPose() {
+  const { transform, translate } = getComputedStyle(cardEl);
+  cardEl.style.transform = transform;
+  cardEl.style.translate = translate;
+  stopFlipAnimations();
+  void cardEl.offsetWidth;
+}
+
+function releaseTurnPose() {
+  cardEl.style.transform = "";
+  cardEl.style.translate = "";
+}
+
+function cardTransformTransitionRunning() {
+  return cardEl.getAnimations().some((animation) => animation.transitionProperty === "transform");
 }
 
 // Renders the card about to be revealed while it's still hidden:
@@ -1164,7 +1205,8 @@ function landTurn() {
 // Face-down to face-up. ceremony: a fresh draw (not a search or history
 // lookup), which gets the full Major Arcana entrance on a Major.
 function openCard(card, roleOverride, ceremony = false) {
-  const midFlipBack = flipBackInFlight;
+  // Only trust the flag while the turn back really is running.
+  const midFlipBack = flipBackInFlight && cardTransformTransitionRunning();
   flipBackInFlight = false;
 
   stopFlipAnimations();
@@ -1360,13 +1402,16 @@ function closeMenuIfCompact() {
 function clearCardDisplay() {
   resetCardSecretBurn();
   cancelPendingReveal();
-  stopFlipAnimations();
+  pinTurnPose();
 
-  if (isFlipped && !prefersReducedMotion()) {
-    flipBackInFlight = true;
-  }
+  // Hide the face as it turns away, so the placeholder text set below
+  // never shows on the way down.
+  cardFrontContentEl.classList.remove("content-cascade");
+  cardFrontContentEl.classList.add("content-pending");
   cardEl.classList.remove("flipped");
+  releaseTurnPose();
   isFlipped = false;
+  flipBackInFlight = !prefersReducedMotion() && cardTransformTransitionRunning();
 
   arcanaLabelEl.textContent = "Major Arcana";
   cardTitleEl.textContent = "\u2014";
@@ -1647,8 +1692,7 @@ function prepareSpreadClosed() {
   spreadOpened = false;
 
   cardFrontEl.classList.remove("is-open");
-  cardEl.classList.remove("shuffling");
-  stopFlipAnimations();
+  pinTurnPose();
   cardFrontContentEl.classList.remove("content-pending", "content-cascade");
   arcanaLabelEl.textContent = "";
   cardTitleEl.textContent = "";
@@ -1672,7 +1716,9 @@ function prepareSpreadClosed() {
   lastRoleOverride = null;
 
   cardEl.classList.remove("flipped");
+  releaseTurnPose();
   isFlipped = false;
+  flipBackInFlight = !prefersReducedMotion() && cardTransformTransitionRunning();
 
   renderSpreadCircles();
   hintEl.textContent = `Tap to begin ${currentSpread().name}`;
@@ -1980,7 +2026,8 @@ shuffleBtn.addEventListener("click", () => {
 
   reseedRandom();
 
-  if (wasFlipped && !reduceMotion) {
+  // Wait for the card to turn face-down only if it really is turning.
+  if (wasFlipped && !reduceMotion && flipBackInFlight) {
     onCardFlipTransitionEnd(startShuffleShake);
   } else {
     startShuffleShake();
@@ -2406,6 +2453,7 @@ function stopTerminalRain() {
 
 window.addEventListener("resize", () => {
   updateDescriptionOverflow();
+  fitCardTitle();
   if (terminalRainFrame) {
     resizeTerminalRain();
   }
