@@ -797,6 +797,7 @@ const cardEl = document.getElementById("card");
 const cardFrontEl = document.getElementById("cardFront");
 const cardFrontContentEl = document.getElementById("cardFrontContent");
 const spreadCirclesEl = document.getElementById("spreadCircles");
+const motifSigilEl = document.getElementById("motifSigil");
 const arcanaLabelEl = document.getElementById("arcanaLabel");
 const cardTitleEl = document.getElementById("cardTitle");
 const cardSubtitleEl = document.getElementById("cardSubtitle");
@@ -1128,6 +1129,8 @@ function triggerRevealFanfare(isMajor = false) {
   cardFrontContentEl.classList.remove("content-pending", "content-cascade");
   void cardFrontContentEl.offsetWidth;
   cardFrontContentEl.classList.add("content-cascade");
+
+  surgeSigil();
 }
 
 // Renders the card about to be revealed while it's still hidden:
@@ -2407,6 +2410,44 @@ window.addEventListener("resize", () => {
     resizeTerminalRain();
   }
 });
+
+// The sigil lives in the fixed backdrop layer, so it can't follow the
+// card through layout on its own. Pin its center to the card slot's
+// center whenever anything could move the slot.
+function placeSigil() {
+  const rect = cardSlotEl.getBoundingClientRect();
+  motifSigilEl.style.setProperty("--sigil-x", `${rect.left + rect.width / 2}px`);
+  motifSigilEl.style.setProperty("--sigil-y", `${rect.top + rect.height / 2}px`);
+}
+
+let sigilPlaceFrame = null;
+function schedulePlaceSigil() {
+  if (sigilPlaceFrame) return;
+  sigilPlaceFrame = requestAnimationFrame(() => {
+    sigilPlaceFrame = null;
+    placeSigil();
+  });
+}
+
+window.addEventListener("resize", schedulePlaceSigil);
+window.addEventListener("scroll", schedulePlaceSigil, { passive: true });
+if (typeof ResizeObserver === "function") {
+  const sigilObserver = new ResizeObserver(schedulePlaceSigil);
+  sigilObserver.observe(document.body);
+  sigilObserver.observe(document.querySelector(".table"));
+  sigilObserver.observe(cardSlotEl);
+}
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(schedulePlaceSigil);
+}
+placeSigil();
+
+// On every reveal the sigil flares and swells for a moment.
+function surgeSigil() {
+  motifSigilEl.classList.remove("is-surging");
+  void motifSigilEl.offsetWidth;
+  motifSigilEl.classList.add("is-surging");
+}
 
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
