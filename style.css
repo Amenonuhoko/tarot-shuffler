@@ -342,9 +342,15 @@ body {
   gap: 14px;
 }
 
+/* contain: layout promises the browser nothing in here can move the
+   page around it. Without it, the Major halo growing past the slot's
+   edges made Chrome re-rasterize far more than the halo on every frame
+   (about 2.4s of raster work per Major draw; about 0.14s with it). It
+   doesn't clip anything - the halo still blooms beyond the card. */
 .card-slot {
   position: relative;
   perspective: 1200px;
+  contain: layout;
   width: min(300px, calc(100vw - 40px));
   aspect-ratio: 3 / 5;
 }
@@ -399,8 +405,8 @@ body {
   width: 200%;
   height: 200%;
   background:
-    radial-gradient(circle at 50% 50%, rgba(255, 250, 235, 0.2), rgba(255, 250, 235, 0.06) 16%, transparent 30%),
-    linear-gradient(115deg, transparent 38%, color-mix(in srgb, var(--lavender) 14%, transparent) 46%, color-mix(in srgb, var(--gold) 16%, transparent) 50%, rgba(220, 130, 210, 0.1) 54%, transparent 62%);
+    radial-gradient(circle at 50% 50%, rgba(255, 250, 235, 0.1), rgba(255, 250, 235, 0.03) 16%, transparent 30%),
+    linear-gradient(115deg, transparent 38%, color-mix(in srgb, var(--lavender) 7%, transparent) 46%, color-mix(in srgb, var(--gold) 8%, transparent) 50%, rgba(220, 130, 210, 0.05) 54%, transparent 62%);
   transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
@@ -436,12 +442,15 @@ body {
 }
 
 /* -- Shuffle fanfare: a riffle/bridge shuffle. Ten ghost cards behind
-   the real one split out to alternating sides in a staggered cascade,
-   interleave, split again the other way, then all square up at the
-   same instant the real card taps down - busy, then suddenly in
-   order. Per-card --side/--spread/--tilt/--lift vary each arc; the
-   duration shrinks by each card's delay so every ghost lands on the
-   same beat. -- */
+   the real one split out to alternating sides - the left half of the
+   deck first, the right half a beat later - interleave, split again
+   the other way, then all square up at the same instant the real card
+   taps down: busy, then suddenly in order. Per-card --side/--spread/
+   --tilt/--lift vary each arc. Exactly two start times on purpose:
+   every distinct start re-layers the slot and re-rasterizes it, so ten
+   staggered starts cost ~8x the raster work of two waves. The second
+   wave runs shorter by its delay so every ghost lands on the same
+   beat. -- */
 
 .deck-stack {
   position: absolute;
@@ -468,19 +477,24 @@ body {
   animation: shuffle-slot-glow 1.45s ease-out;
 }
 
-.deck-card:nth-child(1)  { --side: -1; --spread: 40px; --tilt: 17deg; --lift: -17px; --delay: 0s; }
-.deck-card:nth-child(2)  { --side: 1;  --spread: 44px; --tilt: 19deg; --lift: -13px; --delay: 0.035s; }
-.deck-card:nth-child(3)  { --side: -1; --spread: 33px; --tilt: 13deg; --lift: -21px; --delay: 0.07s; }
-.deck-card:nth-child(4)  { --side: 1;  --spread: 37px; --tilt: 15deg; --lift: -9px;  --delay: 0.105s; }
-.deck-card:nth-child(5)  { --side: -1; --spread: 47px; --tilt: 21deg; --lift: -11px; --delay: 0.14s; }
-.deck-card:nth-child(6)  { --side: 1;  --spread: 30px; --tilt: 11deg; --lift: -19px; --delay: 0.175s; }
-.deck-card:nth-child(7)  { --side: -1; --spread: 36px; --tilt: 16deg; --lift: -7px;  --delay: 0.21s; }
-.deck-card:nth-child(8)  { --side: 1;  --spread: 42px; --tilt: 18deg; --lift: -16px; --delay: 0.245s; }
-.deck-card:nth-child(9)  { --side: -1; --spread: 28px; --tilt: 10deg; --lift: -13px; --delay: 0.28s; }
-.deck-card:nth-child(10) { --side: 1;  --spread: 34px; --tilt: 14deg; --lift: -22px; --delay: 0.315s; }
+.deck-card:nth-child(1)  { --side: -1; --spread: 40px; --tilt: 17deg; --lift: -17px; }
+.deck-card:nth-child(2)  { --side: 1;  --spread: 44px; --tilt: 19deg; --lift: -13px; }
+.deck-card:nth-child(3)  { --side: -1; --spread: 33px; --tilt: 13deg; --lift: -21px; }
+.deck-card:nth-child(4)  { --side: 1;  --spread: 37px; --tilt: 15deg; --lift: -9px; }
+.deck-card:nth-child(5)  { --side: -1; --spread: 47px; --tilt: 21deg; --lift: -11px; }
+.deck-card:nth-child(6)  { --side: 1;  --spread: 30px; --tilt: 11deg; --lift: -19px; }
+.deck-card:nth-child(7)  { --side: -1; --spread: 36px; --tilt: 16deg; --lift: -7px; }
+.deck-card:nth-child(8)  { --side: 1;  --spread: 42px; --tilt: 18deg; --lift: -16px; }
+.deck-card:nth-child(9)  { --side: -1; --spread: 28px; --tilt: 10deg; --lift: -13px; }
+.deck-card:nth-child(10) { --side: 1;  --spread: 34px; --tilt: 14deg; --lift: -22px; }
 
 .card-slot.shuffle-fan .deck-card {
-  animation: riffle-pass calc(1.3s - var(--delay)) cubic-bezier(0.32, 0, 0.2, 1) var(--delay) both;
+  animation: riffle-pass 1.3s cubic-bezier(0.32, 0, 0.2, 1) both;
+}
+
+.card-slot.shuffle-fan .deck-card:nth-child(even) {
+  animation-duration: 1.21s;
+  animation-delay: 0.09s;
 }
 
 @keyframes riffle-pass {
@@ -536,10 +550,13 @@ body {
   animation: draw-flip 0.82s cubic-bezier(0.3, 0.05, 0.2, 1);
 }
 
+/* Pixel, not percentage, offsets in every keyframe that moves the
+   card: a percentage translate makes Chrome re-rasterize the moving
+   layer every frame instead of once. */
 @keyframes draw-flip {
   0% { transform: translateY(0) translateZ(0) rotateY(0deg) rotateZ(0deg); }
-  18% { transform: translateY(-2%) translateZ(18px) rotateY(10deg) rotateZ(-1.2deg); }
-  55% { transform: translateY(-3%) translateZ(46px) rotateY(115deg) rotateZ(-0.6deg); }
+  18% { transform: translateY(-10px) translateZ(18px) rotateY(10deg) rotateZ(-1.2deg); }
+  55% { transform: translateY(-15px) translateZ(46px) rotateY(115deg) rotateZ(-0.6deg); }
   100% { transform: translateY(0) translateZ(0) rotateY(180deg) rotateZ(0deg); }
 }
 
@@ -554,10 +571,10 @@ body {
 
 @keyframes major-flip {
   0% { transform: translateY(0) translateZ(0) rotateY(0deg) scale(1); }
-  16% { transform: translateY(1%) translateZ(-16px) rotateY(0deg) scale(0.985); }
-  25% { transform: translateY(0.5%) translateZ(-12px) rotateY(-5deg) scale(0.985); }
-  50% { transform: translateY(-3%) translateZ(40px) rotateY(84deg) scale(1.02); }
-  66% { transform: translateY(-3.5%) translateZ(48px) rotateY(96deg) scale(1.03); }
+  16% { transform: translateY(5px) translateZ(-16px) rotateY(0deg) scale(0.985); }
+  25% { transform: translateY(2px) translateZ(-12px) rotateY(-5deg) scale(0.985); }
+  50% { transform: translateY(-15px) translateZ(40px) rotateY(84deg) scale(1.02); }
+  66% { transform: translateY(-17px) translateZ(48px) rotateY(96deg) scale(1.03); }
   100% { transform: translateY(0) translateZ(0) rotateY(180deg) scale(1); }
 }
 
@@ -658,14 +675,19 @@ body {
    filled in by script.js) with light rays, blooming behind the card
    while it holds edge-on. Sits outside .card so the 3D flip can't
    flatten or clip it. -- */
+/* Centered with offsets rather than translate(-50%, -50%), so its
+   keyframes only scale and rotate - a percentage translate in moving
+   keyframes costs extra raster work. margin-top percentages resolve
+   against the slot's width, so -75% lifts it by half its own height. */
 .major-halo {
   position: absolute;
-  left: 50%;
+  left: -25%;
   top: 50%;
+  margin-top: -75%;
   z-index: 0;
   width: 150%;
   aspect-ratio: 1;
-  transform: translate(-50%, -50%) scale(0.6) rotate(0deg);
+  transform: scale(0.6) rotate(0deg);
   opacity: 0;
   pointer-events: none;
   color: var(--gold);
@@ -702,9 +724,9 @@ body.major-omen .major-halo {
 }
 
 @keyframes major-halo {
-  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5) rotate(-20deg); }
+  0% { opacity: 0; transform: scale(0.5) rotate(-20deg); }
   32% { opacity: 1; }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.15) rotate(24deg); }
+  100% { opacity: 0; transform: scale(1.15) rotate(24deg); }
 }
 
 /* The room darkens while a Major is drawn in, then lifts as the halo
@@ -1995,7 +2017,6 @@ body.major-omen .omen-veil {
     0 0 26px -8px rgba(255,140,210,0.45),
     0 0 34px -8px rgba(140,200,255,0.4),
     0 28px 60px -22px rgba(0,0,0,0.8);
-  backdrop-filter: blur(10px);
   isolation: isolate;
 }
 
@@ -2060,7 +2081,6 @@ body.major-omen .omen-veil {
   color: #ffffff;
   background: var(--description-bg);
   border-color: rgba(255,255,255,0.28);
-  backdrop-filter: blur(6px);
 }
 
 [data-theme="holo"] .btn,
@@ -2215,7 +2235,7 @@ body.major-omen .omen-veil {
 }
 
 [data-theme="terminal"] .foil-glare-spot {
-  background: radial-gradient(circle at 50% 50%, rgba(182, 255, 212, 0.18), transparent 30%);
+  background: radial-gradient(circle at 50% 50%, rgba(182, 255, 212, 0.09), transparent 30%);
 }
 
 [data-theme="terminal"] .deck-selector span::before {
