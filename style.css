@@ -1363,14 +1363,18 @@ body.major-omen .omen-veil {
   transition: opacity 0.3s ease;
 }
 
+/* The star's glow is constant and only its color pulses: pulsing the
+   glow (a text-shadow) re-laid out the description and the art beside
+   it on every frame. */
 .card-description.has-more::after {
   opacity: 1;
+  text-shadow: 0 0 6px color-mix(in srgb, var(--gold) 35%, transparent);
   animation: description-more-pulse 2.4s ease-in-out infinite;
 }
 
 @keyframes description-more-pulse {
-  0%, 100% { color: var(--gold-dim); text-shadow: none; }
-  50% { color: var(--gold); text-shadow: 0 0 6px color-mix(in srgb, var(--gold) 60%, transparent); }
+  0%, 100% { color: var(--gold-dim); }
+  50% { color: var(--gold); }
 }
 
 .hint {
@@ -2097,15 +2101,12 @@ body.major-omen .omen-veil {
 
 /* -- Holographic Foil: dark opal glass, card and page as one surface -- */
 
+/* The opal light drifts on the backdrop layer (see .motif-veil under
+   Theme atmospheres) - sliding these gradients across the page
+   background repainted the whole viewport on every frame, the single
+   largest cost on the page. */
 [data-theme="holo"] body {
-  background-image:
-    radial-gradient(circle at 20% 20%, rgba(255,140,210,0.24), transparent 42%),
-    radial-gradient(circle at 80% 15%, rgba(120,200,255,0.24), transparent 42%),
-    radial-gradient(circle at 25% 85%, rgba(255,230,150,0.18), transparent 46%),
-    radial-gradient(circle at 85% 80%, rgba(150,255,205,0.2), transparent 46%),
-    radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 60%);
-  background-size: 220% 220%, 220% 220%, 220% 220%, 220% 220%, 100% 100%;
-  animation: holo-bg-drift 26s ease-in-out infinite;
+  background-image: radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 60%);
 }
 
 [data-theme="holo"] .card-face {
@@ -2114,7 +2115,7 @@ body.major-omen .omen-veil {
     linear-gradient(115deg, rgba(255,140,210,0.42), rgba(150,190,255,0.42), rgba(255,230,150,0.36), rgba(150,255,205,0.42), rgba(255,140,210,0.42)),
     var(--surface);
   background-size: 200% 200%, 300% 300%, 100% 100%;
-  animation: holo-shift 9s ease infinite;
+  background-position: 0% 0%, 0% 50%, 0 0;
   border: 1px solid rgba(255,255,255,0.4);
   box-shadow:
     0 0 0 1px rgba(255,255,255,0.08),
@@ -2124,30 +2125,74 @@ body.major-omen .omen-veil {
   isolation: isolate;
 }
 
-[data-theme="holo"] .card-front::after {
+/* The foil's slow color drift, as a crossfade: this layer holds the
+   same foil halfway through its drift and fades in and out over the
+   face's own. Sliding the gradients themselves repainted both faces
+   of the turning card on every frame. */
+[data-theme="holo"] .card-face::before {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: -1;
   border-radius: inherit;
-  background: linear-gradient(115deg, transparent 42%, rgba(255,255,255,0.55) 49%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.55) 51%, transparent 58%);
-  background-size: 320% 320%;
-  background-position: 165% -65%;
-  mix-blend-mode: overlay;
+  background:
+    linear-gradient(120deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.02) 35%, rgba(255,255,255,0.10) 55%, rgba(255,255,255,0.02) 100%),
+    linear-gradient(115deg, rgba(255,140,210,0.42), rgba(150,190,255,0.42), rgba(255,230,150,0.36), rgba(150,255,205,0.42), rgba(255,140,210,0.42)),
+    var(--surface);
+  background-size: 200% 200%, 300% 300%, 100% 100%;
+  background-position: 100% 100%, 100% 50%, 0 0;
+  opacity: 0;
   pointer-events: none;
+  animation: holo-sheen 9s ease-in-out infinite;
+}
+
+@keyframes holo-sheen {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+/* The glint rides inside the glare layer, which already clips to the
+   card, so it slides across as a transform - it used to slide a
+   gradient's position, repainting the face on every frame. Same band,
+   same path, same timing. The glare layer stays shown in Holo and its
+   pointer spot fades in and out instead. Overlay blending can't reach
+   the face from inside that layer, so the band is a plain, fainter
+   white. */
+[data-theme="holo"] .foil-glare {
+  opacity: 1;
+}
+
+[data-theme="holo"] .foil-glare-spot {
+  opacity: 0;
+  transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease;
+}
+
+[data-theme="holo"] .card-slot.is-tilting .foil-glare-spot {
+  opacity: 1;
+  transition: transform 0.12s linear, opacity 0.3s ease;
+}
+
+[data-theme="holo"] .card-front .foil-glare::before {
+  content: "";
+  position: absolute;
+  left: -110%;
+  top: -110%;
+  width: 320%;
+  height: 320%;
+  background: linear-gradient(115deg, transparent 42%, rgba(255,255,255,0.3) 49%, rgba(255,255,255,0.42) 50%, rgba(255,255,255,0.3) 51%, transparent 58%);
   opacity: 0;
 }
 
-[data-theme="holo"] .card-front.glinting::after {
+[data-theme="holo"] .card-front.glinting .foil-glare::before {
   animation: holo-glint-sweep 3.4s cubic-bezier(0.3, 0.65, 0.4, 1) 1;
 }
 
 @keyframes holo-glint-sweep {
-  0% { background-position: 165% -65%; opacity: 0; }
+  0% { transform: translate(-79%, 79%); opacity: 0; }
   12% { opacity: 1; }
-  38% { background-position: 50% 50%; }
-  58% { background-position: 50% 50%; }
+  38%, 58% { transform: none; }
   90% { opacity: 1; }
-  100% { background-position: -65% 165%; opacity: 0; }
+  100% { transform: translate(79%, -79%); opacity: 0; }
 }
 
 [data-theme="holo"] .card-title {
@@ -2207,18 +2252,6 @@ body.major-omen .omen-veil {
   border-color: rgba(255,255,255,0.6);
 }
 
-@keyframes holo-shift {
-  0% { background-position: 0% 0%, 0% 50%, 0 0; }
-  50% { background-position: 100% 100%, 100% 50%, 0 0; }
-  100% { background-position: 0% 0%, 0% 50%, 0 0; }
-}
-
-@keyframes holo-bg-drift {
-  0% { background-position: 0% 0%, 100% 0%, 0% 100%, 100% 100%, 0 0; }
-  50% { background-position: 100% 100%, 0% 100%, 100% 0%, 0% 0%, 0 0; }
-  100% { background-position: 0% 0%, 100% 0%, 0% 100%, 100% 100%, 0 0; }
-}
-
 @keyframes holo-text {
   0% { background-position: 0% 0%; }
   100% { background-position: 300% 0%; }
@@ -2246,55 +2279,59 @@ body.major-omen .omen-veil {
   z-index: 1;
 }
 
+/* The scanlines roll on the backdrop layer (see .motif-veil under
+   Theme atmospheres); rolling them through the page background
+   repainted the whole viewport on every frame. */
 [data-theme="terminal"] body {
   background-image:
-    repeating-linear-gradient(0deg, rgba(34,255,127,0.05) 0px, rgba(34,255,127,0.05) 1px, transparent 1px, transparent 3px),
     radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(0,0,0,0.55) 100%),
     radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 55%);
-  animation: terminal-scanline-roll 6s linear infinite;
-}
-
-@keyframes terminal-scanline-roll {
-  0% { background-position: 0 0, 0 0, 0 0; }
-  100% { background-position: 0 12px, 0 0, 0 0; }
 }
 
 [data-theme="terminal"] .card-face {
   border: 1px solid var(--gold);
   box-shadow: 0 0 0 1px rgba(34,255,127,0.25), 0 0 30px rgba(34,255,127,0.3);
-  animation: terminal-card-glitch 7s linear infinite;
 }
 
-@keyframes terminal-card-glitch {
-  0%, 95%, 100% {
-    box-shadow: 0 0 0 1px rgba(34,255,127,0.25), 0 0 30px rgba(34,255,127,0.3);
-  }
-  96% {
-    box-shadow: 3px 0 0 rgba(255,59,48,0.4), -3px 0 0 rgba(0,229,255,0.4), 0 0 0 1px rgba(34,255,127,0.25), 0 0 30px rgba(34,255,127,0.3);
-  }
-  97.5% {
-    box-shadow: -2px 0 0 rgba(255,59,48,0.4), 2px 0 0 rgba(0,229,255,0.4), 0 0 0 1px rgba(34,255,127,0.25), 0 0 30px rgba(34,255,127,0.3);
-  }
+/* The card's chromatic glitch: a red/cyan fringe drawn once on its own
+   layer, which blinks in and jumps sides. It used to animate the faces'
+   box-shadow, repainting the turning card on every frame. A child of
+   the card itself, so it turns with both faces. */
+[data-theme="terminal"] .card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-shadow: 3px 0 0 rgba(255,59,48,0.4), -3px 0 0 rgba(0,229,255,0.4);
+  opacity: 0;
+  pointer-events: none;
+  animation: terminal-glitch 7s steps(1, end) infinite;
 }
 
+@keyframes terminal-glitch {
+  0%, 95.9% { opacity: 0; transform: none; }
+  96% { opacity: 1; transform: none; }
+  97.5% { opacity: 1; transform: scaleX(-1); }
+  99%, 100% { opacity: 0; transform: none; }
+}
+
+/* The scan bar rides the top of a card-sized layer that slides down,
+   so the sweep is a transform rather than a moving `top` (which laid
+   out and repainted the card on every frame). */
 [data-theme="terminal"] .card-front::after {
   content: "";
   position: absolute;
-  left: 0;
-  right: 0;
-  top: -10px;
-  height: 10px;
-  background: linear-gradient(180deg, transparent 0%, rgba(34,255,127,0.1) 35%, rgba(210,255,225,0.8) 50%, rgba(34,255,127,0.1) 65%, transparent 100%);
+  inset: 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(34,255,127,0.1) 35%, rgba(210,255,225,0.8) 50%, rgba(34,255,127,0.1) 65%, transparent 100%) 0 0 / 100% 10px no-repeat;
   pointer-events: none;
   z-index: 2;
+  transform: translateY(-10px);
   animation: terminal-scan-sweep 3.6s cubic-bezier(0.3, 0, 0.7, 1) infinite;
 }
 
 @keyframes terminal-scan-sweep {
-  0% { top: -10px; }
-  88% { top: 100%; }
-  88.5% { top: -10px; }
-  100% { top: -10px; }
+  0% { transform: translateY(-10px); }
+  88% { transform: translateY(100%); }
+  88.5%, 100% { transform: translateY(-10px); }
 }
 
 [data-theme="terminal"] .card-front::before {
@@ -2311,7 +2348,7 @@ body.major-omen .omen-veil {
 }
 
 [data-theme="terminal"] .card-title {
-  text-shadow: 2px 0 var(--lavender), -2px 0 #00e5ff;
+  text-shadow: 2px 0 #ff4d8d, -2px 0 #00e5ff;
   animation: terminal-flicker 4s infinite;
 }
 
@@ -2377,10 +2414,12 @@ body.major-omen .omen-veil {
   color: var(--ink-dim);
 }
 
+/* A jolt sideways rather than a widening split: animating text-shadow
+   laid out and repainted the card on every frame. */
 @keyframes terminal-flicker {
-  0%, 92%, 100% { opacity: 1; text-shadow: 2px 0 #ff4d8d, -2px 0 #00e5ff; }
-  93% { opacity: 0.65; text-shadow: 4px 0 #ff4d8d, -4px 0 #00e5ff; }
-  95% { opacity: 1; text-shadow: -2px 0 #ff4d8d, 2px 0 #00e5ff; }
+  0%, 92%, 100% { opacity: 1; transform: none; }
+  93% { opacity: 0.65; transform: translateX(2px); }
+  95% { opacity: 1; transform: translateX(-1px); }
 }
 
 @keyframes terminal-blink {
@@ -2393,20 +2432,6 @@ body.major-omen .omen-veil {
 [data-theme="deco"] body {
   position: relative;
   overflow-x: hidden;
-}
-
-[data-theme="deco"] body::before {
-  content: "";
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  width: 150vmax;
-  height: 150vmax;
-  background: repeating-conic-gradient(from 0deg, rgba(232,195,104,0.16) 0deg 3deg, transparent 3deg 11deg);
-  transform: translate(-50%, -50%);
-  animation: deco-spin 140s linear infinite;
-  pointer-events: none;
-  z-index: 0;
 }
 
 [data-theme="deco"] body::after {
@@ -2429,7 +2454,6 @@ body.major-omen .omen-veil {
   border: 4px solid;
   border-image: linear-gradient(135deg, #fff6da 0%, #f0cb6e 20%, #a8842f 40%, #f0cb6e 55%, #fff6da 68%, #a8842f 82%, #f0cb6e 100%) 1;
   box-shadow: none;
-  filter: drop-shadow(0 0 22px rgba(240, 203, 110, 0.45)) drop-shadow(0 22px 40px rgba(0, 0, 0, 0.8));
 }
 
 [data-theme="deco"] .card-front::before,
@@ -2536,11 +2560,6 @@ body.major-omen .omen-veil {
   color: var(--gold);
 }
 
-@keyframes deco-spin {
-  0% { transform: translate(-50%, -50%) rotate(0deg); }
-  100% { transform: translate(-50%, -50%) rotate(360deg); }
-}
-
 @keyframes deco-shimmer {
   0% { background-position: 0% 0%; }
   100% { background-position: 250% 0%; }
@@ -2564,16 +2583,6 @@ body.major-omen .omen-veil {
 [data-theme="bloodmoon"] .card-face {
   border: 1.5px solid var(--gold);
   box-shadow: 0 0 0 1px rgba(241,243,247,0.3), 0 0 14px -5px rgba(241,243,247,0.5), 0 0 26px -10px rgba(163,16,44,0.65), 0 20px 42px -22px rgba(0,0,0,0.85);
-  animation: bloodmoon-rim 6s ease-in-out infinite;
-}
-
-@keyframes bloodmoon-rim {
-  0%, 100% {
-    box-shadow: 0 0 0 1px rgba(241,243,247,0.3), 0 0 14px -5px rgba(241,243,247,0.5), 0 0 26px -10px rgba(163,16,44,0.65), 0 20px 42px -22px rgba(0,0,0,0.85);
-  }
-  50% {
-    box-shadow: 0 0 0 1.5px rgba(241,243,247,0.55), 0 0 18px -3px rgba(241,243,247,0.55), 0 0 26px -10px rgba(163,16,44,0.65), 0 20px 42px -22px rgba(0,0,0,0.85);
-  }
 }
 
 [data-theme="bloodmoon"] .card-front::before,
@@ -2606,26 +2615,21 @@ body.major-omen .omen-veil {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: bloodmoon-glint 6s linear infinite, bloodmoon-title-flash 6s ease-in-out infinite;
+  animation: bloodmoon-glint 6s linear infinite;
 }
 
 [data-theme="bloodmoon"] .card-front-content.content-cascade > .card-title {
-  animation-name: bloodmoon-glint, bloodmoon-title-flash, content-reveal;
-  animation-duration: 6s, 6s, 0.65s;
-  animation-timing-function: linear, ease-in-out, ease-out;
-  animation-iteration-count: infinite, infinite, 1;
-  animation-fill-mode: none, none, backwards;
-  animation-delay: 0s, 0s, 0.13s;
+  animation-name: bloodmoon-glint, content-reveal;
+  animation-duration: 6s, 0.65s;
+  animation-timing-function: linear, ease-out;
+  animation-iteration-count: infinite, 1;
+  animation-fill-mode: none, backwards;
+  animation-delay: 0s, 0.13s;
 }
 
 @keyframes bloodmoon-glint {
   0% { background-position: 0% 0%; }
   100% { background-position: 260% 0%; }
-}
-
-@keyframes bloodmoon-title-flash {
-  0%, 100% { text-shadow: none; }
-  50% { text-shadow: 0 0 10px rgba(255,255,255,0.35); }
 }
 
 /* The crescents are Blood Moon's corner ornaments. */
@@ -2818,15 +2822,15 @@ body.major-omen .omen-veil {
    card lands - cost extra raster work each time. */
 /* Listed after each wheel's turn so the turn keeps running when the
    surge is added (animations are matched by name). */
-:root:not([data-theme]) .motif-sigil.is-surging .sigil-spin-rim {
+:root:not([data-theme]) .mystic-motif.is-surging .sigil-spin-rim {
   animation: sigil-turn 360s linear infinite, sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
-:root:not([data-theme]) .motif-sigil.is-surging .sigil-spin-zodiac {
+:root:not([data-theme]) .mystic-motif.is-surging .sigil-spin-zodiac {
   animation: sigil-turn 240s linear infinite reverse, sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
-:root:not([data-theme]) .motif-sigil.is-surging .sigil-spin-planets {
+:root:not([data-theme]) .mystic-motif.is-surging .sigil-spin-planets {
   animation: sigil-turn 120s linear infinite, sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
@@ -2857,14 +2861,14 @@ body.major-omen .omen-veil {
   to { transform: translate3d(2.5%, -1.5%, 0) scale(1.08); }
 }
 
-:root:not([data-theme]) .motif-stars,
-:root:not([data-theme]) .motif-stars::after {
+:is(:root:not([data-theme]), [data-theme="holo"], [data-theme="bloodmoon"]) .motif-stars,
+:is(:root:not([data-theme]), [data-theme="holo"], [data-theme="bloodmoon"]) .motif-stars::after {
   display: block;
   opacity: 0.6;
   animation: mystic-twinkle 4.8s ease-in-out infinite alternate;
 }
 
-:root:not([data-theme]) .motif-stars {
+:is(:root:not([data-theme]), [data-theme="holo"], [data-theme="bloodmoon"]) .motif-stars {
   background-image:
     radial-gradient(1.6px 1.6px at 9% 20%, #fff, transparent),
     radial-gradient(1.2px 1.2px at 27% 33%, var(--gold), transparent),
@@ -2880,7 +2884,7 @@ body.major-omen .omen-veil {
     radial-gradient(1.3px 1.3px at 90% 66%, var(--gold), transparent);
 }
 
-:root:not([data-theme]) .motif-stars::after {
+:is(:root:not([data-theme]), [data-theme="holo"], [data-theme="bloodmoon"]) .motif-stars::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -2918,7 +2922,7 @@ body.major-omen .omen-veil {
    the bottom of the slot's own stacking context (perspective creates
    one), so the deck stack and the card always paint above it. */
 
-:root:not([data-theme]) .card-slot::before {
+.card-slot::before {
   content: "";
   position: absolute;
   inset: -12% -28%;
@@ -2941,8 +2945,8 @@ body.major-omen .omen-veil {
    on the frame. :not(:empty) keeps them from floating alone while the
    reveal briefly clears the hint. */
 
-:root:not([data-theme]) .hint:not(:empty)::before,
-:root:not([data-theme]) .hint:not(:empty)::after {
+:is(:root:not([data-theme]), [data-theme="deco"], [data-theme="holo"]) .hint:not(:empty)::before,
+:is(:root:not([data-theme]), [data-theme="deco"], [data-theme="holo"]) .hint:not(:empty)::after {
   content: "";
   display: inline-block;
   width: 5px;
@@ -3042,6 +3046,373 @@ body.major-omen .omen-veil {
   opacity: 0;
 }
 
+/* ================================================================
+   THEME ATMOSPHERES
+   Mystic's upgrade, carried into every other theme in its own
+   language: a motif pinned behind the card that flares on each reveal
+   (.motif-halo, the sigil's counterpart), a drifting atmosphere, a
+   pool of light beneath the card, a breathing glow once it's face up,
+   and the same compositor-only rule - every moving part animates only
+   transform or opacity, and everything else is drawn once.
+   ================================================================ */
+
+/* The halo sits at the card's center (script.js sets --sigil-x/y and
+   --card-w on the motif layer) as a zero-size anchor; each part is
+   centered on it with offsets, so its keyframes hold nothing but a
+   rotation, a scale or an opacity. --halo-size is per theme, and a
+   part can override it for itself. */
+.motif-halo {
+  position: absolute;
+  left: var(--sigil-x, 50%);
+  top: var(--sigil-y, 50%);
+  width: 0;
+  height: 0;
+  display: none;
+  --halo-size: calc(var(--card-w, 300px) * 2.4);
+}
+
+[data-theme] .motif-halo {
+  display: block;
+}
+
+.halo-glow,
+.halo-ring,
+.halo-spin,
+.halo-ping {
+  position: absolute;
+  left: calc(var(--halo-size) / -2);
+  top: calc(var(--halo-size) / -2);
+  width: var(--halo-size);
+  height: var(--halo-size);
+  border-radius: 50%;
+  display: none;
+}
+
+/* The aura breathes; the ring and the turning part rest at the sigil's
+   62% and flare with its surge (so neither ever breathes and surges at
+   once); the ping only shows during a surge. */
+.halo-glow {
+  animation: halo-breathe 12s ease-in-out infinite;
+}
+
+.halo-ring,
+.halo-spin {
+  opacity: 0.62;
+}
+
+.halo-spin {
+  will-change: transform;
+  animation: halo-turn var(--halo-turn, 120s) linear infinite;
+}
+
+.halo-ping {
+  opacity: 0;
+}
+
+[data-theme] .mystic-motif.is-surging .halo-ring {
+  animation: sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+[data-theme] .mystic-motif.is-surging .halo-spin {
+  animation: halo-turn var(--halo-turn, 120s) linear infinite, sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+@keyframes halo-turn {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes halo-breathe {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 1; }
+}
+
+/* Breathing glow once the card is face up (see .card-glow above). */
+@keyframes theme-card-glow {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+/* -- Holo: a prismatic halo - a rainbow ring like a halo round the
+   moon, with glints of light orbiting it - over drifting opal light
+   and a scatter of glitter. -- */
+
+[data-theme="holo"] .motif-halo {
+  --halo-size: calc(var(--card-w, 300px) * 2.5);
+  --halo-turn: 90s;
+}
+
+[data-theme="holo"] .halo-glow {
+  display: block;
+  background: radial-gradient(closest-side, rgba(217, 200, 255, 0.13), rgba(140, 200, 255, 0.06) 55%, transparent 80%);
+}
+
+[data-theme="holo"] .halo-ring {
+  display: block;
+  background: radial-gradient(closest-side, transparent 79%, rgba(255, 120, 190, 0.34) 82%, rgba(255, 226, 150, 0.3) 85%, rgba(150, 255, 205, 0.3) 88%, rgba(140, 200, 255, 0.34) 91%, rgba(190, 150, 255, 0.24) 94%, transparent 98%);
+}
+
+[data-theme="holo"] .halo-spin {
+  display: block;
+  background:
+    radial-gradient(2.5px 2.5px at 72.25% 11.5%, #fff, transparent),
+    radial-gradient(14px 14px at 72.25% 11.5%, rgba(255, 210, 245, 0.45), transparent),
+    radial-gradient(2px 2px at 88.5% 72.25%, #fff, transparent),
+    radial-gradient(12px 12px at 88.5% 72.25%, rgba(190, 230, 255, 0.45), transparent),
+    radial-gradient(2.5px 2.5px at 11.5% 72.25%, #fff, transparent),
+    radial-gradient(14px 14px at 11.5% 72.25%, rgba(200, 255, 225, 0.45), transparent),
+    radial-gradient(2px 2px at 24.5% 13.6%, #fff, transparent),
+    radial-gradient(12px 12px at 24.5% 13.6%, rgba(255, 235, 180, 0.45), transparent),
+    radial-gradient(2px 2px at 42.3% 93.8%, #fff, transparent),
+    radial-gradient(12px 12px at 42.3% 93.8%, rgba(220, 200, 255, 0.45), transparent);
+}
+
+/* Overscan wider than the drift, so an edge never comes into view. */
+[data-theme="holo"] .motif-veil {
+  display: block;
+  inset: -30%;
+}
+
+[data-theme="holo"] .motif-veil::before,
+[data-theme="holo"] .motif-veil::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  animation: holo-opal-drift 26s ease-in-out infinite alternate;
+}
+
+[data-theme="holo"] .motif-veil::before {
+  background:
+    radial-gradient(circle at 22% 22%, rgba(255, 140, 210, 0.24), transparent 64%),
+    radial-gradient(circle at 26% 82%, rgba(255, 230, 150, 0.18), transparent 66%);
+}
+
+[data-theme="holo"] .motif-veil::after {
+  background:
+    radial-gradient(circle at 80% 18%, rgba(120, 200, 255, 0.24), transparent 64%),
+    radial-gradient(circle at 82% 80%, rgba(150, 255, 205, 0.2), transparent 66%);
+  animation-direction: alternate-reverse;
+}
+
+@keyframes holo-opal-drift {
+  from { transform: translate3d(-14%, -10%, 0); }
+  to { transform: translate3d(14%, 10%, 0); }
+}
+
+/* :root matches the specificity of the shared star field's :is(). */
+:root[data-theme="holo"] .motif-stars,
+:root[data-theme="holo"] .motif-stars::after {
+  animation-name: holo-glitter;
+}
+
+@keyframes holo-glitter {
+  from { opacity: 0.05; }
+  to { opacity: 0.7; }
+}
+
+[data-theme="holo"] .card-slot::before {
+  background: radial-gradient(closest-side, rgba(255, 160, 220, 0.14), rgba(140, 200, 255, 0.1) 45%, transparent 100%);
+}
+
+[data-theme="holo"] .card-glow {
+  display: block;
+  box-shadow: 0 0 24px rgba(255, 140, 210, 0.4), 0 0 44px rgba(140, 200, 255, 0.32);
+  animation: theme-card-glow 7s ease-in-out infinite;
+}
+
+:root[data-theme="holo"] .hint:not(:empty)::before,
+:root[data-theme="holo"] .hint:not(:empty)::after {
+  background: linear-gradient(135deg, #ff9ad5, #a1c4fd 55%, #a1ffce);
+}
+
+/* -- Terminal: a targeting reticle locked on the card, a radar sweep
+   turning inside it and a ping on every reveal, over rolling
+   scanlines. -- */
+
+[data-theme="terminal"] .motif-halo {
+  --halo-size: calc(var(--card-w, 300px) * 2.3);
+  --halo-turn: 12s;
+}
+
+[data-theme="terminal"] .halo-glow {
+  display: block;
+  background: radial-gradient(closest-side, rgba(34, 255, 127, 0.07), transparent 75%);
+}
+
+[data-theme="terminal"] .halo-ring {
+  display: block;
+  border-radius: 0;
+  background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-100 -100 200 200' fill='none' stroke='%2322ff7f'><circle r='97' stroke-width='1.6' stroke-dasharray='0.35 3.036' opacity='0.8'/><circle r='92.5' stroke-width='0.3'/><circle r='99.4' stroke-width='0.2' opacity='0.5'/><circle r='80' stroke-width='0.25' stroke-dasharray='5 3' opacity='0.55'/><path d='M0-99.5V-85M0 85V99.5M-99.5 0H-85M85 0H99.5' stroke-width='0.5'/><path d='M-58-64h-6v6M58-64h6v6M-58 64h-6v-6M58 64h6v-6' stroke-width='0.4' opacity='0.7'/></svg>") center / 100% 100% no-repeat;
+}
+
+/* The sweep's bright edge leads as it turns clockwise. */
+[data-theme="terminal"] .halo-spin {
+  display: block;
+  background: conic-gradient(from 0deg, transparent 0deg 280deg, rgba(34, 255, 127, 0.05) 320deg, rgba(34, 255, 127, 0.2) 358deg, rgba(182, 255, 212, 0.45) 359.5deg, transparent 360deg);
+}
+
+[data-theme="terminal"] .halo-ping {
+  display: block;
+  background: radial-gradient(closest-side, transparent 90%, rgba(34, 255, 127, 0.5) 94%, transparent 98%);
+}
+
+[data-theme="terminal"] .mystic-motif.is-surging .halo-ping {
+  animation: terminal-ping 1.8s cubic-bezier(0.2, 0.6, 0.3, 1);
+}
+
+@keyframes terminal-ping {
+  0% { transform: scale(0.45); opacity: 0.9; }
+  100% { transform: scale(1.12); opacity: 0; }
+}
+
+[data-theme="terminal"] .motif-veil {
+  display: block;
+  inset: -12px 0 0;
+  background: repeating-linear-gradient(0deg, rgba(34, 255, 127, 0.05) 0, rgba(34, 255, 127, 0.05) 1px, transparent 1px, transparent 3px);
+  animation: terminal-scanline-roll 6s steps(12) infinite;
+}
+
+@keyframes terminal-scanline-roll {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(0, 12px, 0); }
+}
+
+[data-theme="terminal"] .card-slot::before {
+  background: radial-gradient(closest-side, rgba(34, 255, 127, 0.13), rgba(34, 255, 127, 0.05) 45%, transparent 100%);
+}
+
+[data-theme="terminal"] .card-glow {
+  display: block;
+  box-shadow: 0 0 34px rgba(34, 255, 127, 0.38);
+  animation: theme-card-glow 5s ease-in-out infinite;
+}
+
+/* -- Blood Moon: the card stands before the eclipsed moon itself, a
+   dark copper disc whose silver-red corona flares on each reveal, with
+   mist drifting across it and a few cold stars. -- */
+
+[data-theme="bloodmoon"] .motif-halo {
+  --halo-size: calc(var(--card-w, 300px) * 2.15);
+}
+
+[data-theme="bloodmoon"] .halo-glow {
+  display: block;
+  background: radial-gradient(circle at 38% 34%, rgba(122, 22, 36, 0.36), rgba(78, 10, 22, 0.32) 42%, rgba(30, 4, 10, 0.55) 76%, rgba(16, 3, 7, 0.7) 100%);
+  box-shadow: 0 0 70px 6px rgba(163, 16, 44, 0.16);
+  animation: none;
+}
+
+[data-theme="bloodmoon"] .halo-ring {
+  display: block;
+  background: radial-gradient(closest-side, transparent 93%, rgba(163, 16, 44, 0.34) 96.5%, rgba(241, 243, 247, 0.32) 98.6%, rgba(163, 16, 44, 0.26) 99.4%, transparent 100%);
+}
+
+[data-theme="bloodmoon"] .motif-veil {
+  display: block;
+  inset: -10% -30%;
+  background:
+    radial-gradient(60% 8% at 30% 36%, rgba(120, 18, 34, 0.14), transparent 70%),
+    radial-gradient(52% 7% at 72% 57%, rgba(96, 14, 28, 0.12), transparent 70%),
+    radial-gradient(70% 9% at 46% 77%, rgba(70, 10, 22, 0.14), transparent 70%);
+  animation: bloodmoon-mist 70s ease-in-out infinite alternate;
+}
+
+@keyframes bloodmoon-mist {
+  from { transform: translate3d(-7%, 0, 0); }
+  to { transform: translate3d(7%, -1.5%, 0); }
+}
+
+:root[data-theme="bloodmoon"] .motif-stars,
+:root[data-theme="bloodmoon"] .motif-stars::after {
+  animation-name: bloodmoon-twinkle;
+}
+
+@keyframes bloodmoon-twinkle {
+  from { opacity: 0.04; }
+  to { opacity: 0.45; }
+}
+
+[data-theme="bloodmoon"] .card-slot::before {
+  background: radial-gradient(closest-side, rgba(163, 16, 44, 0.24), rgba(90, 8, 24, 0.1) 45%, transparent 100%);
+}
+
+/* The rim's slow brightening, which used to animate the faces'
+   box-shadow, now breathes on its own layer. */
+[data-theme="bloodmoon"] .card-glow {
+  display: block;
+  box-shadow: 0 0 0 1.5px rgba(241, 243, 247, 0.55), 0 0 18px -3px rgba(241, 243, 247, 0.55);
+  opacity: 0;
+  animation: bloodmoon-rim 6s ease-in-out infinite;
+}
+
+@keyframes bloodmoon-rim {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+/* Brushed silver, as Mystic's controls are brushed gold. */
+[data-theme="bloodmoon"] .btn-secondary,
+[data-theme="bloodmoon"] .menu-toggle,
+[data-theme="bloodmoon"] .donate-link,
+[data-theme="bloodmoon"] .deck-selector select,
+[data-theme="bloodmoon"] .search-btn,
+[data-theme="bloodmoon"] .flip-btn {
+  background-image: linear-gradient(180deg, rgba(241, 243, 247, 0.07), rgba(241, 243, 247, 0) 60%);
+  box-shadow: inset 0 1px 0 rgba(241, 243, 247, 0.14), 0 10px 22px -14px rgba(0, 0, 0, 0.85);
+}
+
+/* -- Deco: the sunburst, now centered on the card, with a jeweled
+   double ring round it; both flare on each reveal. -- */
+
+[data-theme="deco"] .motif-halo {
+  --halo-size: calc(var(--card-w, 300px) * 2.3);
+  --halo-turn: 140s;
+}
+
+[data-theme="deco"] .halo-glow {
+  display: block;
+  background: radial-gradient(closest-side, rgba(240, 203, 110, 0.12), rgba(240, 203, 110, 0.04) 50%, transparent 75%);
+}
+
+[data-theme="deco"] .halo-ring {
+  display: block;
+  border-radius: 0;
+  background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-100 -100 200 200' fill='none' stroke='%23e8c368'><defs><path id='d' d='M0-99.4L2.3-95.5L0-91.6L-2.3-95.5Z' fill='%23e8c368' stroke='none'/></defs><circle r='97.5' stroke-width='0.5'/><circle r='93.5' stroke-width='0.25'/><circle r='88.5' stroke-width='0.22' stroke-dasharray='0.8 2.2'/><use href='%23d'/><use href='%23d' transform='rotate(45)'/><use href='%23d' transform='rotate(90)'/><use href='%23d' transform='rotate(135)'/><use href='%23d' transform='rotate(180)'/><use href='%23d' transform='rotate(225)'/><use href='%23d' transform='rotate(270)'/><use href='%23d' transform='rotate(315)'/></svg>") center / 100% 100% no-repeat;
+}
+
+/* Large enough to reach every corner of the screen from the card. */
+[data-theme="deco"] .halo-spin {
+  --halo-size: 150vmax;
+  display: block;
+  border-radius: 0;
+  background: repeating-conic-gradient(from 0deg, rgba(232, 195, 104, 0.26) 0deg 3deg, transparent 3deg 11deg);
+}
+
+[data-theme="deco"] .card-slot::before {
+  background: radial-gradient(closest-side, rgba(240, 203, 110, 0.18), rgba(240, 203, 110, 0.06) 45%, transparent 100%);
+}
+
+/* Deco's glow follows the octagon, so it can't be a box-shadow; it was
+   a drop-shadow filter on both faces, recomputed by the GPU on every
+   frame. Now it's drawn once as an image - the octagon's gold glow and
+   shadow with the card cut out of the middle - on a layer that turns
+   with the card and shows from both sides. */
+[data-theme="deco"] .card-glow {
+  display: block;
+  inset: -60px;
+  border-radius: 0;
+  transform: translateZ(-1px);
+  -webkit-backface-visibility: visible;
+  backface-visibility: visible;
+  background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 420 620' preserveAspectRatio='none'><defs><filter id='b' x='-50%' y='-50%' width='200%' height='200%'><feGaussianBlur stdDeviation='11'/></filter><filter id='s' x='-50%' y='-50%' width='200%' height='200%'><feGaussianBlur stdDeviation='20'/></filter><mask id='m'><rect width='420' height='620' fill='white'/><path d='M80 60H340L360 80V540L340 560H80L60 540V80Z' fill='black'/></mask></defs><g mask='url(%23m)'><path d='M80 60H340L360 80V540L340 560H80L60 540V80Z' transform='translate(0 22)' fill='black' fill-opacity='0.8' filter='url(%23s)'/><path d='M80 60H340L360 80V540L340 560H80L60 540V80Z' fill='rgb(240,203,110)' fill-opacity='0.45' filter='url(%23b)'/></g></svg>") center / 100% 100% no-repeat;
+  animation: deco-card-glow 7s ease-in-out infinite;
+}
+
+@keyframes deco-card-glow {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .card, .card.shuffling, .card.revealing, .reveal-flash, .card.revealing .reveal-flash,
   .reveal-flash::before, .card.revealing .reveal-flash::before,
@@ -3051,18 +3422,19 @@ body.major-omen .omen-veil {
   .card.draw-flip, .card.major-flip, .card.redraw-turn, .card.major-redraw, .major-halo, .omen-veil,
   .card.revealing.major-landing .reveal-flash, .card.revealing.major-landing .reveal-flash::before,
   .history-row-enter, .card-search-input.not-found,
-  [data-theme="holo"] body, [data-theme="holo"] .card-face, [data-theme="holo"] .card-front::after, [data-theme="holo"] .card-title,
+  [data-theme="holo"] body, [data-theme="holo"] .card-face, [data-theme="holo"] .card-title, .foil-glare::before,
   [data-theme="terminal"] body, [data-theme="terminal"] .card-face, [data-theme="terminal"] .card-front::after, [data-theme="terminal"] .card-title, [data-theme="terminal"] .hint::after,
-  [data-theme="deco"] body::before, [data-theme="deco"] .card-title,
+  [data-theme="deco"] .card-title,
   [data-theme="bloodmoon"] .card-face, [data-theme="bloodmoon"] .card-title, [data-theme="bloodmoon"] .hint::after,
   :root:not([data-theme]) .motif-sigil,
   :root:not([data-theme]) .sigil-breath,
   :root:not([data-theme]) .sigil-layer,
   .sigil-spin, .sigil-aura,
-  :root:not([data-theme]) .motif-veil,
-  :root:not([data-theme]) .motif-stars,
-  :root:not([data-theme]) .motif-stars::after,
-  :root:not([data-theme]) .card-slot::before,
+  .motif-veil, .motif-veil::before, .motif-veil::after,
+  .motif-stars, .motif-stars::after,
+  .halo-glow, .halo-ring, .halo-spin, .halo-ping,
+  .card::after, .card-face::before,
+  .card-slot::before,
   :root:not([data-theme]) .card-front,
   .card-description.has-more::after,
   .mystic-frame, .mystic-frame-inner,

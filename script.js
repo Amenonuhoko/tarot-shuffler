@@ -797,7 +797,7 @@ const cardEl = document.getElementById("card");
 const cardFrontEl = document.getElementById("cardFront");
 const cardFrontContentEl = document.getElementById("cardFrontContent");
 const spreadCirclesEl = document.getElementById("spreadCircles");
-const motifSigilEl = document.getElementById("motifSigil");
+const motifLayerEl = document.getElementById("motifLayer");
 const arcanaLabelEl = document.getElementById("arcanaLabel");
 const cardTitleEl = document.getElementById("cardTitle");
 const cardSubtitleEl = document.getElementById("cardSubtitle");
@@ -2472,13 +2472,15 @@ window.addEventListener("resize", () => {
   }
 });
 
-// The sigil lives in the fixed backdrop layer, so it can't follow the
-// card through layout on its own. Pin its center to the card slot's
-// center whenever anything could move the slot.
+// The sigil (and every other theme's halo) lives in the fixed backdrop
+// layer, so it can't follow the card through layout on its own. Pin its
+// center to the card slot's center, and hand it the card's width to
+// size itself by, whenever anything could move the slot.
 function placeSigil() {
   const rect = cardSlotEl.getBoundingClientRect();
-  motifSigilEl.style.setProperty("--sigil-x", `${rect.left + rect.width / 2}px`);
-  motifSigilEl.style.setProperty("--sigil-y", `${rect.top + rect.height / 2}px`);
+  motifLayerEl.style.setProperty("--sigil-x", `${rect.left + rect.width / 2}px`);
+  motifLayerEl.style.setProperty("--sigil-y", `${rect.top + rect.height / 2}px`);
+  motifLayerEl.style.setProperty("--card-w", `${rect.width}px`);
 }
 
 let sigilPlaceFrame = null;
@@ -2503,11 +2505,11 @@ if (document.fonts && document.fonts.ready) {
 }
 placeSigil();
 
-// On every reveal the sigil flares and swells for a moment.
+// On every reveal the sigil (or the theme's halo) flares for a moment.
 function surgeSigil() {
-  motifSigilEl.classList.remove("is-surging");
-  void motifSigilEl.offsetWidth;
-  motifSigilEl.classList.add("is-surging");
+  motifLayerEl.classList.remove("is-surging");
+  void motifLayerEl.offsetWidth;
+  motifLayerEl.classList.add("is-surging");
 }
 
 document.addEventListener("visibilitychange", () => {

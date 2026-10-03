@@ -1,10 +1,10 @@
-const CACHE_NAME = "tarot-pull-v14";
+const CACHE_NAME = "tarot-pull-v15";
 
 const ASSETS = [
   "./",
   "./index.html",
-  "./style.css?v=20261004",
-  "./script.js?v=20261004",
+  "./style.css?v=20261005",
+  "./script.js?v=20261005",
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png"
