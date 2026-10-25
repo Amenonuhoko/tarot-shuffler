@@ -2558,13 +2558,7 @@ function buildTerminalRainGlyphs() {
   }));
 }
 
-// Light mode draws the rain at one canvas pixel per CSS pixel: the
-// figures are soft-focused anyway, and the canvas has a quarter of the
-// pixels to fill and composite on a 2x screen.
 function terminalRainScale() {
-  if (document.documentElement.classList.contains("perf-lite")) {
-    return 1;
-  }
   return Math.min(window.devicePixelRatio || 1, 2);
 }
 
@@ -2573,7 +2567,6 @@ function resizeTerminalRain() {
     return;
   }
   // Drawn at device resolution (capped at 2x) so the figures stay crisp.
-  // The sprites keep the scale they were built at, and are scaled to fit.
   const scale = terminalRainScale();
   terminalRainCanvas.width = Math.round(window.innerWidth * scale);
   terminalRainCanvas.height = Math.round(window.innerHeight * scale);
@@ -2650,18 +2643,12 @@ function redrawTerminalRainCell(col, drop, cell) {
 // The rain moves in whole-glyph steps every 55-220ms, so drawing it on
 // every frame showed nothing new half the time. At 30 frames a second
 // the steps keep the pace they had at 60 (four and fourteen 60Hz frames).
-// Light mode (see the end of the file) draws 15 a second: the opening
-// rush keeps its pace and the steady fall runs about 15% slower.
 const TERMINAL_RAIN_FRAME_MS = 1000 / 30;
-const TERMINAL_RAIN_LITE_FRAME_MS = 1000 / 15;
 
 function drawTerminalRain(now) {
   terminalRainFrame = requestAnimationFrame(drawTerminalRain);
-  const frameMs = document.documentElement.classList.contains("perf-lite")
-    ? TERMINAL_RAIN_LITE_FRAME_MS
-    : TERMINAL_RAIN_FRAME_MS;
   // A little slack, so frames a few ms early on the screen's beat still count.
-  if (terminalRainLastTime && now - terminalRainLastTime < frameMs - 4) {
+  if (terminalRainLastTime && now - terminalRainLastTime < TERMINAL_RAIN_FRAME_MS - 4) {
     return;
   }
 
@@ -2872,94 +2859,3 @@ document.addEventListener("click", (event) => {
 });
 
 applyTheme(loadStoredTheme());
-
-// ---- Light mode for slower phones ----
-// index.html turns it on up front for phones that report little memory.
-// Any other device gets its frame rate checked twice after it opens; if
-// it can't keep up both times, light mode goes on and is remembered for
-// next time (?lite=0 keeps it off).
-const LITE_STORAGE_KEY = "tarotPullLite";
-const LITE_PROBE_FRAMES = 90;
-const LITE_PROBE_SLOW_FRAME_MS = 25;
-const LITE_PROBE_SLOW_SHARE = 0.2;
-const LITE_PROBE_DELAYS_MS = [3000, 8000];
-
-function liteModeSettled() {
-  if (document.documentElement.classList.contains("perf-lite")) {
-    return true;
-  }
-  try {
-    return localStorage.getItem(LITE_STORAGE_KEY) === "0";
-  } catch (err) {
-    return false;
-  }
-}
-
-function enableLiteMode() {
-  document.documentElement.classList.add("perf-lite");
-  try {
-    localStorage.setItem(LITE_STORAGE_KEY, "1");
-  } catch (err) {}
-}
-
-// Reports whether a fifth or more of the next 90 frames ran late.
-// A gap of half a second means the page was hidden, not slow, so the
-// count starts over.
-function probeFramePacing(onDone) {
-  const gaps = [];
-  let last = 0;
-  function step(now) {
-    if (last) {
-      const gap = now - last;
-      if (gap > 500) {
-        gaps.length = 0;
-      } else {
-        gaps.push(gap);
-      }
-    }
-    last = now;
-    if (gaps.length < LITE_PROBE_FRAMES) {
-      requestAnimationFrame(step);
-      return;
-    }
-    const slow = gaps.filter((gap) => gap > LITE_PROBE_SLOW_FRAME_MS).length;
-    onDone(slow / gaps.length >= LITE_PROBE_SLOW_SHARE);
-  }
-  requestAnimationFrame(step);
-}
-
-// Probes run after the page opens and again after each theme change
-// (some themes cost far more than others); a newer run replaces an
-// older one.
-let liteProbeRun = 0;
-
-function probeForLiteMode(round = 0, run = ++liteProbeRun) {
-  if (liteModeSettled() || prefersReducedMotion()) {
-    return;
-  }
-  setTimeout(() => {
-    if (run !== liteProbeRun) {
-      return;
-    }
-    probeFramePacing((slow) => {
-      if (!slow || run !== liteProbeRun) {
-        return;
-      }
-      if (round + 1 < LITE_PROBE_DELAYS_MS.length) {
-        probeForLiteMode(round + 1, run);
-      } else {
-        enableLiteMode();
-      }
-    });
-  }, LITE_PROBE_DELAYS_MS[round]);
-}
-
-themeOptionEls.forEach((option) => {
-  option.addEventListener("click", () => probeForLiteMode());
-});
-
-if (document.readyState === "complete") {
-  probeForLiteMode();
-} else {
-  window.addEventListener("load", () => probeForLiteMode(), { once: true });
-}
