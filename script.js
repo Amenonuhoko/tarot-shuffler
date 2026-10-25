@@ -698,7 +698,11 @@ const DECKS = {
     name: "Archetypes",
     cards: buildArchetypesDeck(),
     allowReversed: false
-  }
+  },
+  // Not cards at all: the Magic Ask Ball die takes the card's place (see
+  // "Dice mode" below). An empty deck keeps the card code harmless if
+  // anything reaches it while the die is showing.
+  dice: { name: "Magic Ask Ball", cards: [], allowReversed: false }
 };
 
 // Spreads from the Archetype Deck guidebook. "pool" restricts a position to
@@ -1387,6 +1391,11 @@ function setMenuOpen(open) {
   isMenuOpen = open;
   historyPanel.hidden = !open;
   menuToggle.setAttribute("aria-expanded", String(open));
+  // In dice mode this menu holds the die's settings and stats, which only
+  // render while they can be seen.
+  if (open && isDiceActive() && window.TarotDice) {
+    window.TarotDice.refreshStats();
+  }
 }
 
 function toggleMenu() {
@@ -1921,10 +1930,84 @@ menuToggle.addEventListener("click", (event) => {
   toggleMenu();
 });
 
+// ---- Dice mode ----
+// "Magic Ask Ball" in the deck picker swaps the card for a 3D die
+// (dice.js, ported from the standalone Magic Ask Ball app). It needs
+// three.js, so neither script loads until the dice are first picked.
+// Tap rolls at random; on a phone, hold the screen and shake to roll, or
+// tilt to look around the die and hold still to settle on the face
+// toward you.
+
+const THREE_URL = "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js";
+const DICE_SCRIPT_URL = "dice.js?v=20261025";
+const diceTrayEl = document.getElementById("diceTray");
+const diceStatusEl = document.getElementById("dice-status");
+let diceLoad = null;
+
+function isDiceActive() {
+  return deckSelect.value === "dice";
+}
+
+function loadScript(src, crossOrigin) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = src;
+    if (crossOrigin) {
+      script.crossOrigin = "anonymous";
+    }
+    script.onload = resolve;
+    script.onerror = () => reject(new Error(`Couldn't load ${src}`));
+    document.head.appendChild(script);
+  });
+}
+
+function loadDice() {
+  if (!diceLoad) {
+    diceLoad = loadScript(THREE_URL, true).then(() => loadScript(DICE_SCRIPT_URL));
+    // Let a later visit to the dice try again (e.g. back online).
+    diceLoad.catch(() => {
+      diceLoad = null;
+    });
+  }
+  return diceLoad;
+}
+
+function enterDiceMode() {
+  document.body.classList.add("is-dice-mode");
+  shuffleBtn.textContent = "Roll";
+  hintEl.textContent = "Tap to roll, or hold and shake";
+  loadDice().then(() => {
+    if (isDiceActive()) {
+      window.TarotDice.activate();
+    }
+  }).catch(() => {
+    diceStatusEl.textContent = "Couldn't load the 3D dice library.";
+  });
+}
+
+function exitDiceMode() {
+  document.body.classList.remove("is-dice-mode");
+  shuffleBtn.textContent = "Shuffle";
+  if (window.TarotDice) {
+    window.TarotDice.deactivate();
+  }
+}
+
+// A settled roll flares the background sigil, the same as a card reveal.
+diceTrayEl.addEventListener("dice-reveal", () => {
+  surgeSigil();
+});
+
 deckSelect.addEventListener("change", () => {
   activeDeck = DECKS[deckSelect.value];
   saveDeckKey(deckSelect.value);
   resetReading();
+
+  if (isDiceActive()) {
+    enterDiceMode();
+  } else {
+    exitDiceMode();
+  }
 
   if (isArchetypesActive()) {
     startSpread(0);
@@ -1993,6 +2076,15 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  // Only a real tap rolls: a hold-and-shake or a drag around the die also
+  // ends in a click, and has already done its own thing.
+  if (isDiceActive()) {
+    if (window.TarotDice && window.TarotDice.consumeTap()) {
+      window.TarotDice.roll();
+    }
+    return;
+  }
+
   if (isArchetypesActive()) {
     if (!spreadOpened) {
       openSpreadFace();
@@ -2013,6 +2105,13 @@ function startShuffleShake() {
 }
 
 shuffleBtn.addEventListener("click", () => {
+  if (isDiceActive()) {
+    if (window.TarotDice) {
+      window.TarotDice.roll();
+    }
+    return;
+  }
+
   const wasFlipped = isFlipped;
   const reduceMotion = prefersReducedMotion();
   suspendTilt(wasFlipped ? 2000 : 1500);
@@ -2287,6 +2386,9 @@ if (isArchetypesActive()) {
 } else {
   updateBodySpreadClasses();
 }
+if (isDiceActive()) {
+  enterDiceMode();
+}
 renderMenuPanel();
 setMenuOpen(wideLayoutQuery.matches);
 
@@ -2476,7 +2578,8 @@ window.addEventListener("resize", () => {
 // card through layout on its own. Pin its center to the card slot's
 // center whenever anything could move the slot.
 function placeSigil() {
-  const rect = cardSlotEl.getBoundingClientRect();
+  const anchorEl = isDiceActive() ? document.getElementById("dice-stage") : cardSlotEl;
+  const rect = anchorEl.getBoundingClientRect();
   motifSigilEl.style.setProperty("--sigil-x", `${rect.left + rect.width / 2}px`);
   motifSigilEl.style.setProperty("--sigil-y", `${rect.top + rect.height / 2}px`);
 }
@@ -2497,6 +2600,7 @@ if (typeof ResizeObserver === "function") {
   sigilObserver.observe(document.body);
   sigilObserver.observe(document.querySelector(".table"));
   sigilObserver.observe(cardSlotEl);
+  sigilObserver.observe(diceTrayEl);
 }
 if (document.fonts && document.fonts.ready) {
   document.fonts.ready.then(schedulePlaceSigil);
@@ -2556,6 +2660,10 @@ function applyTheme(themeValue) {
 
   renderHistory();
   saveTheme(themeValue);
+
+  if (window.TarotDice) {
+    window.TarotDice.applyTheme();
+  }
 }
 
 themeToggleEl.addEventListener("click", (event) => {

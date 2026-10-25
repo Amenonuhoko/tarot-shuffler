@@ -1,10 +1,17 @@
-const CACHE_NAME = "tarot-pull-v14";
+const CACHE_NAME = "tarot-pull-v15";
+
+// The dice mode's three.js build. Cross-origin, so it isn't precached
+// with the app (most visits never open the dice); it's kept once it has
+// been fetched, so the dice also work offline after their first use.
+const THREE_URL = "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js";
 
 const ASSETS = [
   "./",
   "./index.html",
-  "./style.css?v=20261004",
-  "./script.js?v=20261004",
+  "./style.css?v=20261025",
+  "./dice.css?v=20261025",
+  "./script.js?v=20261025",
+  "./dice.js?v=20261025",
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png"
@@ -40,7 +47,8 @@ self.addEventListener("fetch", (event) => {
   // support).
   event.respondWith(
     fetch(event.request, { cache: "no-store" }).then(response => {
-      if (response.ok && event.request.url.startsWith(self.location.origin)) {
+      const cacheable = event.request.url.startsWith(self.location.origin) || event.request.url === THREE_URL;
+      if (response.ok && cacheable) {
         const clone = response.clone();
         caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
       }

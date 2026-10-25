@@ -14,6 +14,8 @@ Tarot Pull is a digital card-shuffler for people who want to do a quick reading 
 - **Choose a deck** — pick between:
   - **Tarot of the Divine**, the traditional 78-card tarot deck (Major and Minor Arcana), with a meaning for both upright and reversed draws.
   - **Oracle of the Divine**, a custom 60-card deck with its own artwork and meanings.
+  - **Archetypes**, with guided spreads from the Archetype Deck guidebook.
+  - **Magic Ask Ball**, a 3D die instead of a card (d4 to d20). The d20 answers yes/no questions, from "Resoundingly yes" to "Resoundingly no". Tap to roll. On a phone you can also hold the screen and shake, or tilt to look around the die and hold still to settle on the face toward you.
 - **Shuffle** — reset the deck and start a new reading whenever you like.
 - **Flip a card** — toggle a drawn card between upright and reversed to see how the meaning changes (available on decks that support reversed cards).
 - **Search for a specific card** — already know which card you want to look up? Type its name and it'll show it to you directly.
@@ -44,6 +46,8 @@ python3 -m http.server 8000
 ```
 
 Then visit `http://localhost:8000`.
+
+The dice mode lives in `dice.js` and `dice.css`, ported from the standalone [Magic Ask Ball](https://github.com/Amenonuhoko/magic-ask-ball) app. It loads three.js r128 from jsdelivr, and only when the dice are first picked. Each theme sets the die's colors, numeral font, material and lights through the `--die-*` custom properties at the top of `dice.css`.
 
 Card artwork goes in `images/`, named after the card's slug (for example `images/the-fool.webp`). Add each file to the `CARD_ART` list near the top of `script.js` (`"the-fool": "webp"`); cards that aren't listed show the placeholder and never request an image.
 
