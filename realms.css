@@ -1,10 +1,11 @@
 /* ================================================================
    REALMS (realms.js)
-   One mystical tradition per theme, built around the card. realms.js
-   pins --cx/--cy (card centre), --cw/--ch (card size), --top/--left on
-   both layers whenever the card moves, so everything here is placed
-   relative to the card. Motion is transform/opacity on its own layer,
-   except the deco gate's tiers, which only animate during a reveal.
+   One mystical tradition per theme. Each is a painted scene with its
+   light running live on top (a WebGL pass), plus a few pieces built
+   around the card. realms.js pins --cx/--cy (card centre), --cw/--ch
+   (card size), --top/--left on the card layers whenever the card moves,
+   so those pieces are placed relative to the card. Motion is
+   transform/opacity on its own layer.
    ================================================================ */
 
 .realm {
@@ -17,6 +18,87 @@
 
 .realm-front {
   z-index: 2;
+}
+
+/* ---- The painted scene: painting, live light, and a scrim that keeps
+   the header and controls readable. It sits first in the page, under
+   every other layer. ---- */
+
+.realm-scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: none;
+  overflow: hidden;
+  pointer-events: none;
+  transform-origin: 50% 38%;
+  will-change: transform;
+  animation: realm-drift 48s ease-in-out infinite alternate;
+}
+
+.realm-scene[data-scene]:not([data-scene=""]) {
+  display: block;
+}
+
+/* A slow push-in, like a camera settling on the scene. The light canvas
+   is mapped to the painting and scales with it. */
+@keyframes realm-drift {
+  from { transform: scale(1); }
+  to { transform: scale(1.05); }
+}
+
+.realm-painting,
+.realm-light,
+.realm-scrim {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.realm-painting {
+  background: center / cover no-repeat;
+  opacity: 0;
+  transition: opacity 1.1s ease;
+}
+
+.realm-light {
+  display: block;
+  opacity: 0;
+  transition: opacity 1.6s ease 0.3s;
+}
+
+.realm-scene.is-loaded .realm-painting,
+.realm-scene.is-loaded .realm-light {
+  opacity: 1;
+}
+
+.realm-scrim {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.5), transparent 16%, transparent 66%, rgba(0, 0, 0, 0.62)),
+    radial-gradient(ellipse 120% 90% at 50% 45%, transparent 55%, rgba(0, 0, 0, 0.55));
+}
+
+.realm-scene[data-scene="terminal"] .realm-scrim {
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.22) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 16%, transparent 66%, rgba(0, 0, 0, 0.65)),
+    radial-gradient(ellipse 120% 90% at 50% 45%, transparent 50%, rgba(0, 0, 0, 0.6));
+}
+
+/* The painting replaces each theme's own CSS backdrop. */
+[data-theme="deco"] body:has(> .realm-scene.is-loaded)::before,
+[data-theme="deco"] body:has(> .realm-scene.is-loaded)::after {
+  content: none;
+}
+
+[data-theme="terminal"] body:has(> .realm-scene.is-loaded) {
+  animation: none;
+}
+
+/* The hint sits straight on the painting, without a panel behind it. */
+body:has(> .realm-scene.is-loaded) .hint {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 0 14px rgba(0, 0, 0, 0.85);
 }
 
 /* ---- Card-back emblems: each theme's own seal in place of the
@@ -66,87 +148,6 @@
 
 /* ---- Holographic Foil: the Seven Rays ---- */
 
-.holo-cube {
-  position: absolute;
-  left: var(--cx);
-  top: var(--cy);
-  width: min(1100px, 150vmin);
-  aspect-ratio: 1;
-  translate: -50% -50%;
-  opacity: 0.5;
-  will-change: transform;
-  animation: realm-turn 300s linear infinite;
-}
-
-.holo-cube svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.holo-cube-inner {
-  width: min(560px, 76vmin);
-  opacity: 0.4;
-  animation-duration: 180s;
-  animation-direction: reverse;
-}
-
-@keyframes realm-turn {
-  to { transform: rotate(360deg); }
-}
-
-/* Light enters from the upper left, the card is the prism, and the seven
-   rays fan out to the lower right. */
-.holo-ray,
-.holo-beam {
-  position: absolute;
-  left: var(--cx);
-  top: var(--cy);
-  width: 160vmax;
-  height: 56px;
-  margin-top: -28px;
-  transform-origin: 0 50%;
-  transform: rotate(var(--a));
-  clip-path: polygon(0 48%, 100% 0, 100% 100%, 0 52%);
-  will-change: opacity;
-}
-
-.holo-ray {
-  background: linear-gradient(90deg, var(--ray) 0%, color-mix(in srgb, var(--ray) 45%, transparent) 30%, transparent 80%);
-  opacity: 0.13;
-  transition: opacity 1.2s ease;
-}
-
-.holo-ray.is-chosen {
-  opacity: 0.55;
-}
-
-.holo-beam {
-  --a: 225deg;
-  height: 26px;
-  margin-top: -13px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.25) 35%, transparent 75%);
-  opacity: 0.12;
-}
-
-.realm-holo.is-dispersing .holo-beam {
-  animation: holo-beam 2s cubic-bezier(0.2, 0.7, 0.3, 1);
-}
-
-.realm-holo.is-dispersing .holo-ray {
-  animation: holo-disperse 2.6s cubic-bezier(0.2, 0.7, 0.3, 1) calc(0.25s + var(--i) * 70ms) backwards;
-}
-
-@keyframes holo-beam {
-  0% { opacity: 0.12; }
-  12% { opacity: 0.85; }
-}
-
-@keyframes holo-disperse {
-  0% { opacity: 0; }
-  20% { opacity: 0.9; }
-}
-
 .holo-caption {
   position: absolute;
   left: var(--cx);
@@ -171,25 +172,6 @@
 }
 
 /* ---- Glitch Terminal: digital geomancy and chaos ---- */
-
-.geo-bifurcation {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100vw;
-  height: 30vh;
-  opacity: 0.2;
-}
-
-.geo-attractor,
-.geo-attractor-head {
-  position: absolute;
-  left: var(--cx);
-  top: var(--cy);
-  width: min(100vw, 760px);
-  aspect-ratio: 1 / 1.05;
-  translate: -50% -50%;
-}
 
 .geo-eq {
   position: absolute;
@@ -278,63 +260,6 @@
 
 /* ---- Blood Moon: the Crimson Cathedral ---- */
 
-.rose-light,
-.rose-window,
-.rose-flare {
-  position: absolute;
-  left: var(--cx);
-  top: var(--cy);
-  width: max(calc(var(--ch) * 1.5), min(1000px, 140vmin));
-  aspect-ratio: 1;
-  translate: -50% -50%;
-  border-radius: 50%;
-}
-
-.rose-light {
-  width: max(calc(var(--ch) * 1.85), min(1240px, 172vmin));
-  background: radial-gradient(circle, rgba(255, 90, 80, 0.4), rgba(160, 14, 36, 0.22) 42%, transparent 66%);
-  will-change: opacity;
-  animation: rose-breathe 9s ease-in-out infinite alternate;
-}
-
-.rose-window {
-  opacity: 0.6;
-  will-change: opacity;
-  animation: rose-glass 13s ease-in-out infinite alternate;
-}
-
-.rose-window svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.rose-flare {
-  background: radial-gradient(circle, rgba(255, 210, 190, 0.55), rgba(255, 60, 70, 0.3) 38%, transparent 70%);
-  opacity: 0;
-  will-change: opacity;
-}
-
-@keyframes rose-breathe {
-  from { opacity: 0.35; }
-  to { opacity: 0.7; }
-}
-
-@keyframes rose-glass {
-  from { opacity: 0.5; }
-  to { opacity: 0.7; }
-}
-
-.realm-bloodmoon.is-flooding .rose-flare {
-  animation: rose-flood 3.6s cubic-bezier(0.2, 0.7, 0.3, 1);
-}
-
-@keyframes rose-flood {
-  0% { opacity: 0; }
-  18% { opacity: 1; }
-  100% { opacity: 0; }
-}
-
 .briar {
   position: absolute;
   width: clamp(92px, calc(var(--cw) * 0.44), 156px);
@@ -412,172 +337,14 @@
   100% { opacity: 0; }
 }
 
-/* ---- Art Deco Luxe: the Temple of Ra ---- */
-
-.ra-pylon-wrap {
-  position: absolute;
-  top: calc(var(--top) - var(--ch) * 0.08);
-  height: calc(var(--ch) * 1.16);
-  aspect-ratio: 100 / 360;
-}
-
-.ra-pylon-wrap svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.ra-left {
-  left: calc(var(--left) + 18px);
-  translate: -100% 0;
-}
-
-.ra-right {
-  left: calc(var(--left) + var(--cw) - 18px);
-}
-
-.ra-pylon {
-  fill: #15110a;
-}
-
-.ra-tier {
-  fill: url(#raGold);
-  opacity: 0.35;
-}
-
-.realm-deco.is-rising .ra-tier {
-  animation: ra-tier 2.4s ease-out calc(var(--i) * 0.13s);
-}
-
-@keyframes ra-tier {
-  0% { opacity: 0.35; }
-  30% { opacity: 1; }
-  100% { opacity: 0.35; }
-}
-
-/* The winged sun, in the gap above the card. */
-.ra-sun {
-  position: absolute;
-  left: var(--cx);
-  top: calc(var(--top) - 24px);
-  width: min(calc(var(--cw) * 1.3), 420px);
-  height: 52px;
-  translate: -50% -50%;
-}
-
-.ra-wing {
-  position: absolute;
-  top: 0;
-  width: 50%;
-  height: 100%;
-  transform: scaleX(0.62);
-  will-change: transform;
-}
-
-.ra-wing svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.ra-wing-left {
-  right: 50%;
-  margin-right: 8px;
-  transform-origin: 100% 50%;
-}
-
-.ra-wing-left svg {
-  transform: scaleX(-1);
-}
-
-.ra-wing-right {
-  left: 50%;
-  margin-left: 8px;
-  transform-origin: 0 50%;
-}
-
-.ra-feather-row {
-  fill: url(#raGold);
-  stroke: #6b5216;
-  stroke-width: 0.6;
-}
-
-.ra-feather-lines {
-  stroke: #5a4410;
-  stroke-width: 0.8;
-}
-
-.realm-deco.is-rising .ra-wing {
-  animation: ra-unfold 1.6s cubic-bezier(0.2, 0.8, 0.25, 1) forwards;
-}
-
-@keyframes ra-unfold {
-  0% { transform: scaleX(0.62); }
-  60% { transform: scaleX(1.04); }
-  100% { transform: scaleX(1); }
-}
-
-.ra-disc {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 30px;
-  height: 30px;
-  margin: -15px 0 0 -15px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #fff6da, #e8c368 45%, #a8501f 100%);
-  box-shadow: 0 0 16px rgba(255, 200, 90, 0.55);
-}
-
-.ra-disc::after {
-  content: "";
-  position: absolute;
-  inset: -26px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 220, 140, 0.75), transparent 65%);
-  opacity: 0;
-  will-change: opacity;
-}
-
-.realm-deco.is-rising .ra-disc::after {
-  animation: ra-flare 2.4s ease-out;
-}
-
-@keyframes ra-flare {
-  0% { opacity: 0; }
-  25% { opacity: 1; }
-  100% { opacity: 0; }
-}
-
-.ra-uraeus {
-  position: absolute;
-  top: 50%;
-  width: 6px;
-  height: 15px;
-  margin-top: -9px;
-  border-radius: 50% 50% 30% 30%;
-  background: linear-gradient(#fff6da, #c9a24a);
-}
-
-.ra-uraeus-left { left: calc(50% - 22px); }
-.ra-uraeus-right { left: calc(50% + 16px); }
-
 @media (prefers-reduced-motion: reduce) {
-  .holo-cube,
-  .rose-light,
-  .rose-window {
+  .realm-scene {
     animation: none;
   }
 
   .realm-holo.is-dispersing *,
-  .realm-bloodmoon.is-flooding *,
-  .realm-front.is-flooding *,
-  .realm-deco.is-rising * {
+  .realm-front.is-flooding * {
     animation-duration: 0.01ms !important;
-  }
-
-  .realm-deco.is-rising .ra-wing {
-    transform: scaleX(1);
   }
 }
 
@@ -632,12 +399,6 @@
   opacity: 0.7;
 }
 
-[data-theme="holo"] .holo-beam {
-  height: 34px;
-  margin-top: -17px;
-  opacity: 0.18;
-}
-
 [data-theme="holo"] .holo-caption {
   font-size: 0.72rem;
 }
@@ -646,7 +407,7 @@
 
 [data-theme="terminal"] .terminal-rain {
   filter: none;
-  opacity: 0.72;
+  opacity: 0.42;
 }
 
 .geo-head {
@@ -750,40 +511,8 @@
   opacity: 0.6;
 }
 
-/* ---- Temple of Ra: cloisonne wings, rearing cobras, a lapis sky of
-   five-pointed stars in the art window ---- */
-
-.ra-feather-row {
-  fill: var(--stone, #1f4aa8);
-  stroke: #e8c368;
-  stroke-width: 1.1;
-}
-
-.ra-feather-lines {
-  stroke: #e8c368;
-  stroke-width: 1;
-}
-
-.ra-disc {
-  background: radial-gradient(circle at 40% 35%, #ffd8a0, #d4652a 50%, #7e2410 100%);
-  box-shadow: 0 0 0 2px #e8c368, 0 0 18px rgba(255, 170, 80, 0.55);
-}
-
-.ra-uraei {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 60px;
-  height: 32px;
-  margin: -16px 0 0 -30px;
-  fill: url(#raGold);
-  stroke: #6b5216;
-  stroke-width: 0.8;
-}
-
-.ra-uraeus {
-  display: none;
-}
+/* ---- Temple of Ra: a lapis sky of five-pointed stars in the art
+   window ---- */
 
 [data-theme="deco"] .card-art,
 [data-theme="deco"] .card-art[data-element] {

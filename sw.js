@@ -1,4 +1,4 @@
-const CACHE_NAME = "tarot-pull-v19";
+const CACHE_NAME = "tarot-pull-v20";
 
 // The dice mode's three.js build. Cross-origin, so it isn't precached
 // with the app (most visits never open the dice); it's kept once it has
@@ -11,8 +11,8 @@ const ASSETS = [
   "./style.css?v=20261025-2",
   "./dice.css?v=20261025",
   "./script.js?v=20261025-4",
-  "./realms.css?v=20261025-2",
-  "./realms.js?v=20261025-2",
+  "./realms.css?v=20261025-3",
+  "./realms.js?v=20261025-3",
   "./dice.js?v=20261025",
   "./manifest.json",
   "./icons/icon-192.png",

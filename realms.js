@@ -1,22 +1,21 @@
 // ---- Realms ----
-// Each theme besides Mystic Violet is its own mystical tradition, built
+// Each theme besides Mystic Violet is its own mystical tradition: a
+// painted scene (realms/<theme>-portrait|landscape.webp) whose light runs
+// live on top in a WebGL pass and answers each reveal, plus pieces built
 // around the card:
 //
-//   Holographic Foil  The Seven Rays: an iridescent Metatron's cube turns
-//                     behind the card, which disperses light into the
-//                     seven rays of the Theosophists; each card's ray is
-//                     named on reveal.
-//   Glitch Terminal   Digital geomancy and chaos: a Lorenz attractor
-//                     traces itself behind the card over the logistic
-//                     map's bifurcation, and each reveal runs a real
-//                     geomantic cast, seeded by the logistic map, in the
-//                     card's art window.
-//   Blood Moon        The Crimson Cathedral: a gothic rose window glows
-//                     behind the card, briars hold its corners, and red
-//                     light floods through the glass on reveal.
-//   Art Deco Luxe     The Temple of Ra: a gilded pylon gateway frames the
-//                     card under a winged sun disc that spreads its wings
-//                     on reveal while the gate lights tier by tier.
+//   Holographic Foil  The Seven Rays: light falls through a prism into
+//                     the seven rays of the Theosophists; each card's ray
+//                     colours the light and is named on reveal.
+//   Glitch Terminal   Digital geomancy and chaos: a phosphor temple of
+//                     figures under the Lorenz and logistic equations, and
+//                     each reveal runs a real geomantic cast, seeded by the
+//                     logistic map, in the card's art window.
+//   Blood Moon        The Crimson Cathedral: the card stands in a stone
+//                     arch under the rose window, briars hold its corners,
+//                     and light through the glass floods it on reveal.
+//   Art Deco Luxe     The Temple of Ra: a gilded gateway under the sun,
+//                     whose rays flare on reveal.
 //
 // Every theme also gets its own emblem on the card back. Only the active
 // theme's realm exists in the page; the rest are built when chosen.
@@ -122,23 +121,18 @@
 
   const holo = {
     build() {
-      back.innerHTML = `
-        <div class="holo-cube holo-cube-outer">${metatronSvg("holoSpectrumA", 80)}</div>
-        <div class="holo-cube holo-cube-inner">${metatronSvg("holoSpectrumB", 80)}</div>
-        <span class="holo-beam"></span>
-        ${SEVEN_RAYS.map((ray, i) => `<span class="holo-ray" style="--i: ${i}; --ray: ${ray.color}; --a: ${20 + i * 4}deg"></span>`).join("")}
-        <p class="holo-caption"></p>`;
+      back.innerHTML = '<p class="holo-caption"></p>';
     },
     reveal({ card }) {
       if (!card) return;
       const index = rayFor(card);
       const ray = SEVEN_RAYS[index];
-      back.querySelectorAll(".holo-ray").forEach((el, i) => el.classList.toggle("is-chosen", i === index));
       const caption = back.querySelector(".holo-caption");
       caption.textContent = `Ray ${NUMERALS[index]} · ${ray.name}`;
       caption.style.color = ray.color;
       // The card's art window takes on its ray (see realms.css).
       cardSlot.style.setProperty("--ray", ray.color);
+      light.surgeColor = hexToRgb(ray.color);
       restart(back, "is-dispersing");
     },
     unmount() {
@@ -200,141 +194,19 @@
     }).join("")}</svg>`;
   }
 
-  function lorenzPoints(steps) {
-    let x = 0.1;
-    let y = 0;
-    let z = 0;
-    const dt = 0.005;
-    const points = [];
-    for (let i = 0; i < steps + 300; i++) {
-      const dx = 10 * (y - x);
-      const dy = x * (28 - z) - y;
-      const dz = x * y - (8 / 3) * z;
-      x += dx * dt;
-      y += dy * dt;
-      z += dz * dt;
-      if (i >= 300) points.push([x, z]);
-    }
-    return points;
-  }
-
   const terminal = {
-    frame: null,
     build() {
       back.innerHTML = `
-        <canvas class="geo-bifurcation"></canvas>
-        <canvas class="geo-attractor"></canvas>
-        <canvas class="geo-attractor-head"></canvas>
         <pre class="geo-eq geo-eq-lorenz">dx/dt = σ(y − x)
 dy/dt = x(ρ − z) − y
 dz/dt = xy − βz
 σ=10  ρ=28  β=8/3</pre>
         <pre class="geo-eq geo-eq-logistic">xₙ₊₁ = r·xₙ(1 − xₙ)
 δ = 4.669201609…</pre>`;
-      this.draw();
-      this.start();
-    },
-    draw() {
-      const ratio = Math.min(window.devicePixelRatio || 1, 1.5);
-      // The bifurcation of the logistic map, along the foot of the screen.
-      const bif = back.querySelector(".geo-bifurcation");
-      const bw = Math.round(window.innerWidth * ratio);
-      const bh = Math.round(window.innerHeight * 0.3 * ratio);
-      bif.width = bw;
-      bif.height = bh;
-      const bctx = bif.getContext("2d");
-      const image = bctx.createImageData(bw, bh);
-      for (let px = 0; px < bw; px++) {
-        const r = 2.8 + (1.2 * px) / bw;
-        let x = 0.5;
-        for (let i = 0; i < 200; i++) x = r * x * (1 - x);
-        for (let i = 0; i < 140; i++) {
-          x = r * x * (1 - x);
-          const py = Math.round((1 - x) * (bh - 1));
-          const o = (py * bw + px) * 4;
-          image.data[o] = 34;
-          image.data[o + 1] = 255;
-          image.data[o + 2] = 127;
-          image.data[o + 3] = Math.min(255, image.data[o + 3] + 70);
-        }
-      }
-      bctx.putImageData(image, 0, 0);
-
-      // The Lorenz attractor, drawn once; a live point traces it on top.
-      const att = back.querySelector(".geo-attractor");
-      const head = back.querySelector(".geo-attractor-head");
-      const size = att.getBoundingClientRect();
-      [att, head].forEach((c) => {
-        c.width = Math.round(size.width * ratio);
-        c.height = Math.round(size.height * ratio);
-      });
-      const actx = att.getContext("2d");
-      this.project = ([x, z]) => [
-        att.width / 2 + (x / 22) * (att.width * 0.46),
-        att.height * 0.96 - (z / 52) * (att.height * 0.9)
-      ];
-      actx.strokeStyle = "rgba(34, 255, 127, 0.3)";
-      actx.lineWidth = 0.8 * ratio;
-      actx.beginPath();
-      lorenzPoints(16000).forEach((p, i) => {
-        const [px, py] = this.project(p);
-        if (i) actx.lineTo(px, py);
-        else actx.moveTo(px, py);
-      });
-      actx.stroke();
-      this.headCtx = head.getContext("2d");
-      this.headCanvas = head;
-      this.state = { x: 1, y: 1, z: 1 };
-      this.trail = [];
-      this.ratio = ratio;
-    },
-    start() {
-      if (reduceMotion.matches || this.frame) return;
-      const step = () => {
-        this.frame = requestAnimationFrame(step);
-        const s = this.state;
-        for (let k = 0; k < 4; k++) {
-          const dt = 0.004;
-          const dx = 10 * (s.y - s.x);
-          const dy = s.x * (28 - s.z) - s.y;
-          const dz = s.x * s.y - (8 / 3) * s.z;
-          s.x += dx * dt;
-          s.y += dy * dt;
-          s.z += dz * dt;
-          this.trail.push(this.project([s.x, s.z]));
-        }
-        if (this.trail.length > 160) this.trail.splice(0, this.trail.length - 160);
-        const ctx = this.headCtx;
-        ctx.clearRect(0, 0, this.headCanvas.width, this.headCanvas.height);
-        ctx.lineWidth = 1.4 * this.ratio;
-        for (let i = 1; i < this.trail.length; i++) {
-          ctx.strokeStyle = `rgba(160, 255, 200, ${(i / this.trail.length) * 0.8})`;
-          ctx.beginPath();
-          ctx.moveTo(this.trail[i - 1][0], this.trail[i - 1][1]);
-          ctx.lineTo(this.trail[i][0], this.trail[i][1]);
-          ctx.stroke();
-        }
-        const [hx, hy] = this.trail[this.trail.length - 1];
-        ctx.fillStyle = "rgba(220, 255, 235, 0.95)";
-        ctx.beginPath();
-        ctx.arc(hx, hy, 2.4 * this.ratio, 0, Math.PI * 2);
-        ctx.fill();
-      };
-      this.frame = requestAnimationFrame(step);
-    },
-    stop() {
-      if (this.frame) cancelAnimationFrame(this.frame);
-      this.frame = null;
     },
     unmount() {
-      this.stop();
       clearTimeout(this.castTimer);
       clearInterval(this.scrambleTimer);
-    },
-    relayout() {
-      this.stop();
-      this.draw();
-      this.start();
     },
     reveal({ card }) {
       if (!card || !geoScreen) return;
@@ -523,11 +395,7 @@ dz/dt = xy − βz
 
   const bloodmoon = {
     build() {
-      back.innerHTML = `
-        <span class="rose-light"></span>
-        <div class="rose-window">${roseWindowSvg("roseWindow")}</div>
-        <span class="rose-flare"></span>
-        <div class="gothic-arch">${archSvg()}</div>`;
+      back.innerHTML = `<div class="gothic-arch">${archSvg()}</div>`;
       front.innerHTML = `
         ${["tl", "tr", "bl", "br"].map((corner) => `<div class="briar briar-${corner}">${briarSvg()}</div>`).join("")}
         <div class="rose-cast">
@@ -546,76 +414,10 @@ dz/dt = xy − βz
 
   // ---- Art Deco Luxe: the Temple of Ra ----
 
-  // Small hieroglyphs for the pylons' panels: eye, djed, was, scarab.
-  const GLYPHS = [
-    '<path d="M-7,0 Q0,-6 7,0 Q0,5 -7,0 Z M7,0 L10,0 M-1,3 L-2,8 M2,3 Q4,8 7,7"/><circle r="2" stroke="none" fill="url(#raGold)"/>',
-    '<path d="M0,-9 L0,9 M-5,-6 L5,-6 M-5,-3 L5,-3 M-5,0 L5,0 M-4,9 L4,9"/>',
-    '<path d="M0,-9 L0,9 M0,-9 L5,-7 M-3,9 L0,6 L3,9"/>',
-    '<ellipse cx="0" cy="1" rx="5" ry="6.5"/><path d="M0,-5.5 L0,7.5 M-5,-2 L-9,-5 M5,-2 L9,-5 M-5,4 L-9,7 M5,4 L9,7 M-2,-7 L-3,-9 M2,-7 L3,-9"/>'
-  ];
-
-  function pylonSvg() {
-    const tiers = Array.from({ length: 6 }, (_, i) => {
-      const y = 330 - i * 52;
-      const inset = 6 + i * 3;
-      return `<rect class="ra-tier" style="--i: ${i}" x="${inset}" y="${y}" width="${100 - inset * 2}" height="9"/>`;
-    }).join("");
-    return `<svg viewBox="0 0 100 360" preserveAspectRatio="xMidYMid meet">
-      <defs>
-        <linearGradient id="raGold" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#fff6da"/><stop offset="0.3" stop-color="#e8c368"/><stop offset="0.6" stop-color="#8f7328"/><stop offset="1" stop-color="#e8c368"/>
-        </linearGradient>
-      </defs>
-      <path class="ra-pylon" d="M14,26 L86,26 L96,356 L4,356 Z"/>
-      <path d="M10,26 L90,26 L98,10 C80,14 20,14 2,10 Z" fill="url(#raGold)"/>
-      <path d="M12,26 L88,26" stroke="#fff6da" stroke-width="1.4"/>
-      <path d="M11,30 L89,30" stroke="url(#raGold)" stroke-width="2.4" stroke-dasharray="3 2"/>
-      <g class="ra-tiers">${tiers}</g>
-      <g fill="none" stroke="url(#raGold)" stroke-width="2.2" stroke-linecap="round">
-        <ellipse cx="50" cy="78" rx="9" ry="12"/>
-        <path d="M50,90 L50,132 M36,98 L64,98"/>
-      </g>
-      <rect x="34" y="150" width="32" height="132" rx="2" fill="#0d0a05" stroke="url(#raGold)" stroke-width="1"/>
-      <g fill="none" stroke="url(#raGold)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-        ${GLYPHS.map((glyph, i) => `<g transform="translate(50 ${168 + i * 32})">${glyph}</g>`).join("")}
-      </g>
-      <path d="M14,20 L86,20 L96,356 L4,356 Z" fill="none" stroke="url(#raGold)" stroke-width="1.6"/>
-    </svg>`;
-  }
-
-  // Cloisonne wings: gold cells set with lapis, carnelian and turquoise,
-  // one stone per row of feathers.
-  function wingSvg() {
-    const rows = [[0, 26, 190, 10, "#1f4aa8"], [9, 22, 164, 9, "#b0442a"], [17, 18, 132, 8, "#2aa198"]];
-    const feathers = rows.map(([y0, depth, length, count, stone], r) => {
-      const strokes = Array.from({ length: count }, (_, k) => {
-        const x = 22 + ((length - 22) * (k + 1)) / (count + 1);
-        return `<path d="M${x.toFixed(1)},${(y0 - 2 - (x / length) * 10).toFixed(1)} L${(x + 6).toFixed(1)},${(y0 + depth * 0.6 - (x / length) * 12).toFixed(1)}"/>`;
-      }).join("");
-      return `<path class="ra-feather-row" style="--r: ${r}; --stone: ${stone}" d="M18,${y0 - 6} C80,${y0 - 14} 140,${y0 - 20} ${length},${y0 - 22} C${length - 18},${y0 - 6} ${length - 40},${y0 + depth * 0.5} 18,${y0 + depth * 0.7} Z"/>
-        <g class="ra-feather-lines">${strokes}</g>`;
-    }).join("");
-    return `<svg viewBox="0 -30 200 70">${feathers}</svg>`;
-  }
-
+  // The gate, the winged sun and the sunburst are all in the painting; the
+  // sun's light (see the scene below) answers the reveal.
   const deco = {
-    build() {
-      back.innerHTML = `
-        <div class="ra-pylon-wrap ra-left">${pylonSvg()}</div>
-        <div class="ra-pylon-wrap ra-right">${pylonSvg()}</div>
-        <div class="ra-sun">
-          <div class="ra-wing ra-wing-left">${wingSvg()}</div>
-          <div class="ra-wing ra-wing-right">${wingSvg()}</div>
-          <span class="ra-disc"></span>
-          <svg class="ra-uraei" viewBox="-30 -16 60 32" aria-hidden="true">
-            <path d="M-17,14 C-19,8 -21,2 -19,-4 C-18,-9 -13,-11 -11,-7 C-9,-3 -11,1 -14,2 L-14,14" />
-            <path d="M17,14 C19,8 21,2 19,-4 C18,-9 13,-11 11,-7 C9,-3 11,1 14,2 L14,14" />
-          </svg>
-        </div>`;
-    },
-    reveal() {
-      restart(back, "is-rising");
-    }
+    build() {}
   };
 
   // ---- Card-back emblems ----
@@ -674,6 +476,317 @@ dz/dt = xy − βz
     });
   }
 
+  // ---- Painted scenes and their light ----
+  // Light sources are fractions of each painting (x across, y down), so
+  // they're placed on the painting however the screen crops it.
+
+  const SCENES = {
+    bloodmoon: { mode: 0, color: [0.95, 0.16, 0.2], portrait: { src: [0.5, 0.115], aux: [0.055, 0.47] }, landscape: { src: [0.5, 0.17], aux: [0.085, 0.37] } },
+    deco: { mode: 1, color: [1, 0.74, 0.36], portrait: { src: [0.5, 0.166], aux: [0, 0] }, landscape: { src: [0.5, 0.29], aux: [0, 0] } },
+    holo: { mode: 2, color: [1, 1, 1], portrait: { src: [0.5, 0.12], aux: [0.12, 0] }, landscape: { src: [0.52, 0.26], aux: [0.16, 0] } },
+    terminal: { mode: 3, flare: 0.45, color: [0.13, 1, 0.5], portrait: { src: [0.5, 0.1], aux: [0, 0] }, landscape: { src: [0.5, 0.2], aux: [0, 0] } }
+  };
+  const PAINTING_SIZE = { portrait: [1152, 2048], landscape: [2048, 1152] };
+  const portraitQuery = window.matchMedia("(orientation: portrait)");
+
+  const scene = document.createElement("div");
+  scene.className = "realm-scene";
+  scene.setAttribute("aria-hidden", "true");
+  scene.innerHTML = '<div class="realm-painting"></div><canvas class="realm-light"></canvas><span class="realm-scrim"></span>';
+  document.body.prepend(scene);
+  const painting = scene.querySelector(".realm-painting");
+
+  function hexToRgb(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
+  }
+
+  function orientation() {
+    return portraitQuery.matches ? "portrait" : "landscape";
+  }
+
+  // Shows the painting for the active theme and orientation, fading it in
+  // once it has loaded rather than letting it pop in.
+  let paintingUrl = "";
+  function showPainting() {
+    if (!activeKey || !SCENES[activeKey]) return;
+    const url = `realms/${activeKey}-${orientation()}.webp`;
+    if (url === paintingUrl) return;
+    paintingUrl = url;
+    scene.classList.remove("is-loaded");
+    const img = new Image();
+    img.onload = () => {
+      if (paintingUrl !== url) return;
+      painting.style.backgroundImage = `url("${url}")`;
+      scene.classList.add("is-loaded");
+    };
+    img.src = url;
+  }
+
+  const VERTEX_SHADER = `
+    attribute vec2 aPos;
+    varying vec2 vUv;
+    void main() {
+      vUv = aPos * 0.5 + 0.5;
+      gl_Position = vec4(aPos, 0.0, 1.0);
+    }`;
+
+  // One pass per frame, modes per realm. It outputs light only (premultiplied,
+  // alpha = brightness), so the painting shows through everywhere else.
+  const FRAGMENT_SHADER = `
+    precision mediump float;
+    varying vec2 vUv;
+    uniform vec2 uRes;
+    uniform float uTime;
+    uniform float uMode;
+    uniform float uSurge;
+    uniform vec2 uSrc;
+    uniform vec2 uAux;
+    uniform vec3 uColor;
+    uniform vec3 uSurgeColor;
+
+    float hash(vec2 p) {
+      p = fract(p * vec2(123.34, 456.21));
+      p += dot(p, p + 45.32);
+      return fract(p.x * p.y);
+    }
+
+    float noise(vec2 p) {
+      vec2 i = floor(p);
+      vec2 f = fract(p);
+      float a = hash(i);
+      float b = hash(i + vec2(1.0, 0.0));
+      float c = hash(i + vec2(0.0, 1.0));
+      float d = hash(i + vec2(1.0, 1.0));
+      vec2 u = f * f * (3.0 - 2.0 * f);
+      return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+    }
+
+    float fbm(vec2 p) {
+      float v = 0.0;
+      float a = 0.5;
+      for (int i = 0; i < 4; i++) {
+        v += a * noise(p);
+        p = p * 2.03 + 1.7;
+        a *= 0.5;
+      }
+      return v;
+    }
+
+    // Twinkling points on a jittered grid; density is the share of cells lit.
+    float twinkles(vec2 p, float scale, float density, float speed) {
+      vec2 g = p * scale;
+      vec2 id = floor(g);
+      vec2 f = fract(g) - 0.5;
+      float h = hash(id);
+      if (h > density) return 0.0;
+      vec2 o = (vec2(hash(id + 3.7), hash(id + 9.1)) - 0.5) * 0.6;
+      float d = length(f - o);
+      float tw = pow(0.5 + 0.5 * sin(uTime * speed * (0.6 + h * 2.0) + h * 61.0), 8.0);
+      return exp(-d * d * 160.0) * tw;
+    }
+
+    vec3 spectrum(float x) {
+      x = clamp(x, 0.0, 1.0) * 0.85;
+      return clamp(vec3(abs(x * 6.0 - 3.0) - 1.0, 2.0 - abs(x * 6.0 - 2.0), 2.0 - abs(x * 6.0 - 4.0)), 0.0, 1.0);
+    }
+
+    void main() {
+      float aspect = uRes.x / uRes.y;
+      vec2 p = vec2(vUv.x * aspect, vUv.y);
+      vec2 s = vec2(uSrc.x * aspect, uSrc.y);
+      vec2 d = p - s;
+      float r = length(d);
+      float a = atan(d.y, d.x);
+      float t = uTime;
+      vec3 col = vec3(0.0);
+
+      if (uMode < 0.5) {
+        // Cathedral: shafts of red light fall from the rose window through
+        // incense haze, motes drift in them, candles breathe at the sides.
+        float down = smoothstep(0.05, 0.6, -d.y / max(r, 0.001));
+        float n = noise(vec2(a * 9.0, t * 0.1)) * 0.65 + noise(vec2(a * 23.0 + 3.1, -t * 0.07)) * 0.35;
+        float shafts = smoothstep(0.42, 0.85, n) * down * exp(-r * 1.2);
+        shafts *= 0.55 + 0.45 * fbm(p * 2.5 + vec2(t * 0.02, -t * 0.035));
+        float motes = twinkles(p + vec2(sin(t * 0.07) * 0.02, t * 0.006), 60.0, 0.12, 1.3) * smoothstep(0.02, 0.2, shafts);
+        float window = exp(-r * r * 26.0) * (0.55 + 0.12 * sin(t * 0.6));
+        vec2 c1 = vec2(uAux.x * aspect, uAux.y);
+        vec2 c2 = vec2((1.0 - uAux.x) * aspect, uAux.y);
+        float candles = exp(-dot(p - c1, p - c1) * 120.0) * (0.7 + 0.3 * noise(vec2(t * 7.0, 0.0)))
+                      + exp(-dot(p - c2, p - c2) * 120.0) * (0.7 + 0.3 * noise(vec2(t * 6.3, 4.0)));
+        col = uColor * (shafts * 0.5 + window * 0.4) * (1.0 + uSurge * 2.2)
+            + vec3(1.0, 0.62, 0.32) * candles * 0.28
+            + vec3(1.0, 0.7, 0.62) * motes * 0.7;
+      } else if (uMode < 1.5) {
+        // Temple: the sun disc breathes, its rays turn slowly, gold leaf glints.
+        float spokes = pow(0.5 + 0.5 * sin(a * 24.0 + t * 0.12), 7.0) * exp(-r * 1.5);
+        float glow = exp(-r * r * 40.0) * (0.75 + 0.2 * sin(t * 0.8));
+        float halo = exp(-r * 2.6) * 0.25;
+        float glints = twinkles(p, 38.0, 0.16, 1.1) + twinkles(p + 7.3, 64.0, 0.1, 1.7) * 0.7;
+        col = uColor * (spokes * 0.32 + glow * 0.55 + halo) * (1.0 + uSurge * 2.4)
+            + vec3(1.0, 0.9, 0.62) * glints * 0.85;
+      } else if (uMode < 2.5) {
+        // Seven Rays: pulses of white light run down the beam into the prism,
+        // the spectrum fans out shimmering, glass shards catch the colours.
+        vec2 b0 = vec2(uAux.x * aspect, uAux.y);
+        vec2 dir = normalize(s - b0);
+        vec2 bp = p - b0;
+        float along = clamp(dot(bp, dir), 0.0, length(s - b0));
+        float off = length(bp - dir * along);
+        float pulse = pow(0.5 + 0.5 * sin(along * 22.0 - t * 2.4), 10.0);
+        float beam = exp(-off * off * 3000.0) * (0.25 + 0.9 * pulse);
+        float base = atan(dir.y, dir.x);
+        float da = mod(a - base + 3.14159, 6.28318) - 3.14159;
+        float spread = 0.42;
+        float inFan = smoothstep(-0.05, 0.03, da + spread * 0.5) * (1.0 - smoothstep(-0.03, 0.05, da - spread * 0.5));
+        float flow = 0.55 + 0.45 * pow(0.5 + 0.5 * sin(r * 16.0 - t * 1.8), 3.0);
+        float fan = inFan * flow * exp(-r * 1.1) * step(0.0, dot(d, dir));
+        vec3 rainbow = spectrum((da + spread * 0.5) / spread) * fan;
+        float prism = exp(-r * r * 90.0) * (0.7 + 0.3 * sin(t * 1.4));
+        float shard = twinkles(p, 30.0, 0.14, 1.2);
+        vec3 sparkle = spectrum(fract(hash(floor(p * 30.0)) + t * 0.05)) * shard;
+        col = vec3(1.0) * (beam * 0.6 + prism * 0.6) * (1.0 + uSurge * 2.0)
+            + rainbow * 0.38 * (1.0 + uSurge * 1.5)
+            + uSurgeColor * prism * uSurge * 1.4
+            + sparkle * 0.7;
+      } else {
+        // Geomancy: the attractor's phosphor breathes, a scan band rolls down,
+        // data fog drifts along the floor, the tube flickers.
+        float glow = exp(-r * r * 7.0) * (0.35 + 0.2 * sin(t * 1.1));
+        float band = exp(-pow((vUv.y - (1.0 - fract(t * 0.05))) * 14.0, 2.0)) * 0.1;
+        float fog = fbm(vec2(p.x * 3.0 + t * 0.05, p.y * 6.0 - t * 0.08)) * smoothstep(0.45, 0.0, vUv.y) * 0.16;
+        float flicker = 1.0 + 0.05 * (noise(vec2(t * 24.0, 0.0)) - 0.5);
+        float bits = twinkles(p + vec2(0.0, -t * 0.03), 48.0, 0.08, 2.4) * 0.5;
+        col = uColor * (glow + band + fog + bits) * flicker * (1.0 + uSurge * 2.2);
+      }
+
+      col = clamp(col, 0.0, 1.0);
+      gl_FragColor = vec4(col, max(col.r, max(col.g, col.b)));
+    }`;
+
+  // Drawn at half resolution (light is soft, and that quarters the fill
+  // cost on a phone), paused while the page is hidden, a still frame for
+  // reduced motion.
+  const light = {
+    canvas: scene.querySelector(".realm-light"),
+    gl: null,
+    u: {},
+    frame: null,
+    surge: 0,
+    surgeColor: [1, 1, 1],
+    lastAt: 0,
+    failed: false,
+    src: [0.5, 0.2],
+    aux: [0, 0],
+
+    init() {
+      if (this.gl || this.failed) return Boolean(this.gl);
+      const gl = this.canvas.getContext("webgl", { alpha: true, premultipliedAlpha: true, antialias: false, depth: false, stencil: false });
+      if (!gl) {
+        this.failed = true;
+        return false;
+      }
+      const compile = (type, source) => {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        return shader;
+      };
+      const program = gl.createProgram();
+      gl.attachShader(program, compile(gl.VERTEX_SHADER, VERTEX_SHADER));
+      gl.attachShader(program, compile(gl.FRAGMENT_SHADER, FRAGMENT_SHADER));
+      gl.linkProgram(program);
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        this.failed = true;
+        return false;
+      }
+      gl.useProgram(program);
+      const buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      const aPos = gl.getAttribLocation(program, "aPos");
+      gl.enableVertexAttribArray(aPos);
+      gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+      ["uRes", "uTime", "uMode", "uSurge", "uSrc", "uAux", "uColor", "uSurgeColor"].forEach((name) => {
+        this.u[name] = gl.getUniformLocation(program, name);
+      });
+      this.canvas.addEventListener("webglcontextlost", (event) => {
+        event.preventDefault();
+        this.stop();
+        this.gl = null;
+        this.failed = true;
+      });
+      this.gl = gl;
+      return true;
+    },
+
+    // Light positions follow the painting through background-size: cover.
+    place() {
+      const config = SCENES[activeKey];
+      if (!config) return;
+      const orient = orientation();
+      const [iw, ih] = PAINTING_SIZE[orient];
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const scale = Math.max(vw / iw, vh / ih);
+      const dw = iw * scale;
+      const dh = ih * scale;
+      const toUv = ([u, v]) => [((vw - dw) / 2 + u * dw) / vw, 1 - ((vh - dh) / 2 + v * dh) / vh];
+      this.src = toUv(config[orient].src);
+      this.aux = toUv(config[orient].aux);
+      const ratio = Math.min(window.devicePixelRatio || 1, 2) * 0.5;
+      this.canvas.width = Math.max(1, Math.round(vw * ratio));
+      this.canvas.height = Math.max(1, Math.round(vh * ratio));
+    },
+
+    draw(now) {
+      const gl = this.gl;
+      const config = SCENES[activeKey];
+      if (!gl || !config) return;
+      gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+      gl.uniform2f(this.u.uRes, this.canvas.width, this.canvas.height);
+      gl.uniform1f(this.u.uTime, now / 1000);
+      gl.uniform1f(this.u.uMode, config.mode);
+      gl.uniform1f(this.u.uSurge, this.surge);
+      gl.uniform2f(this.u.uSrc, this.src[0], this.src[1]);
+      gl.uniform2f(this.u.uAux, this.aux[0], this.aux[1]);
+      gl.uniform3fv(this.u.uColor, config.color);
+      gl.uniform3fv(this.u.uSurgeColor, this.surgeColor);
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    },
+
+    start() {
+      if (!this.init() || !SCENES[activeKey]) return;
+      this.place();
+      if (reduceMotion.matches) {
+        this.draw(20000);
+        return;
+      }
+      if (this.frame) return;
+      this.lastAt = 0;
+      const step = (now) => {
+        this.frame = requestAnimationFrame(step);
+        const dt = this.lastAt ? Math.min((now - this.lastAt) / 1000, 0.1) : 0;
+        this.lastAt = now;
+        this.surge *= Math.exp(-dt / 1.1);
+        this.draw(now);
+      };
+      this.frame = requestAnimationFrame(step);
+    },
+
+    stop() {
+      if (this.frame) cancelAnimationFrame(this.frame);
+      this.frame = null;
+    },
+
+    flare(strength) {
+      const scale = (SCENES[activeKey] && SCENES[activeKey].flare) || 1;
+      this.surge = Math.min(1.6, this.surge + strength * scale);
+    }
+  };
+
   // ---- Mounting and anchoring ----
 
   const REALMS = { holo, terminal, bloodmoon, deco };
@@ -708,11 +821,21 @@ dz/dt = xy − βz
     front.className = "realm realm-front";
     activeKey = key;
     active = REALMS[key] || null;
-    if (!active) return;
+    scene.dataset.scene = active ? key : "";
+    if (!active) {
+      light.stop();
+      painting.style.backgroundImage = "";
+      paintingUrl = "";
+      scene.classList.remove("is-loaded");
+      return;
+    }
     back.classList.add(`realm-${key}`);
     front.classList.add(`realm-${key}`);
     anchor();
     active.build();
+    light.surgeColor = [1, 1, 1];
+    showPainting();
+    light.start();
   }
 
   let relayoutTimer = null;
@@ -720,7 +843,10 @@ dz/dt = xy − βz
     anchor();
     clearTimeout(relayoutTimer);
     relayoutTimer = setTimeout(() => {
-      if (active && active.relayout) active.relayout();
+      if (!active) return;
+      showPainting();
+      light.place();
+      if (reduceMotion.matches) light.start();
     }, 200);
   }
 
@@ -740,13 +866,15 @@ dz/dt = xy − βz
   new MutationObserver(mount).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
 
   document.addEventListener("tarot:reveal", (event) => {
-    if (active && active.reveal) active.reveal(event.detail || {});
+    const detail = event.detail || {};
+    if (active && active.reveal) active.reveal(detail);
+    if (active) light.flare(detail.major ? 1.3 : 0.9);
   });
 
   document.addEventListener("visibilitychange", () => {
-    if (activeKey !== "terminal") return;
-    if (document.hidden) terminal.stop();
-    else terminal.start();
+    if (!active) return;
+    if (document.hidden) light.stop();
+    else light.start();
   });
 
   mount();

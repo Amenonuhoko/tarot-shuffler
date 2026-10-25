@@ -49,11 +49,11 @@ Then visit `http://localhost:8000`.
 
 The dice mode lives in `dice.js` and `dice.css`, ported from the standalone [Magic Ask Ball](https://github.com/Amenonuhoko/magic-ask-ball) app. It loads three.js r128 from jsdelivr, and only when the dice are first picked. Each theme sets the die's colors, numeral font, material and lights through the `--die-*` custom properties at the top of `dice.css`.
 
-Each theme other than Mystic Violet is its own mystical tradition, built in `realms.js` and `realms.css` around the card, with its own card-back emblem:
+Each theme other than Mystic Violet is its own mystical tradition, built in `realms.js` and `realms.css`, with its own card-back emblem. Each one is a painted scene (`realms/<theme>-portrait.webp` and `-landscape.webp`) with its light running live on top in a small WebGL pass that flares on every reveal; light sources are set per painting in `SCENES` in `realms.js`.
 
 - Holographic Foil is the Seven Rays.
 - Glitch Terminal is digital geomancy and chaos mathematics, with a real geomantic shield chart cast on every reveal.
-- Blood Moon is a crimson cathedral rose window.
+- Blood Moon is a crimson cathedral under a rose window.
 - Art Deco is the Temple of Ra.
 
 Card artwork goes in `images/`, named after the card's slug (for example `images/the-fool.webp`). Add each file to the `CARD_ART` list near the top of `script.js` (`"the-fool": "webp"`); cards that aren't listed show the placeholder and never request an image.
