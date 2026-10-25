@@ -49,12 +49,21 @@ Then visit `http://localhost:8000`.
 
 The dice mode lives in `dice.js` and `dice.css`, ported from the standalone [Magic Ask Ball](https://github.com/Amenonuhoko/magic-ask-ball) app. It loads three.js r128 from jsdelivr, and only when the dice are first picked. Each theme sets the die's colors, numeral font, material and lights through the `--die-*` custom properties at the top of `dice.css`.
 
-Each theme other than Mystic Violet is its own mystical tradition, built in `realms.js` and `realms.css`, with its own card-back emblem. Each one is a painted scene (`realms/<theme>-portrait.webp` and `-landscape.webp`) with its light running live on top in a small WebGL pass that flares on every reveal; light sources are set per painting in `SCENES` in `realms.js`.
+Each theme other than Mystic Violet is its own mystical tradition, built in `realms.js` and `realms.css` the way Mystic is:
+- **Backdrop:** a painting (`realms/<theme>-portrait.webp` and `-landscape.webp`) that recedes behind the card, with its own light (window, sun, prism or attractor) on top as compositor layers.
+- **Sigil:** three wheels pinned to the card that turn against each other and surge on every reveal.
+- **Major halo:** the realm's own, in place of Mystic's star chart.
+- **Shuffle:** stirs the wheels.
+- **Card back:** each realm has its own emblem.
+
+The realms are:
 
 - Holographic Foil is the Seven Rays.
 - Glitch Terminal is digital geomancy and chaos mathematics, with a real geomantic shield chart cast on every reveal.
 - Blood Moon is a crimson cathedral under a rose window.
 - Art Deco is the Temple of Ra.
+
+Light sources are placed per painting in `SCENES` in `realms.js`. Every moving part animates only `transform` or `opacity`; see `docs/realms-plan.md` for the measurements behind that rule.
 
 Card artwork goes in `images/`, named after the card's slug (for example `images/the-fool.webp`). Add each file to the `CARD_ART` list near the top of `script.js` (`"the-fool": "webp"`); cards that aren't listed show the placeholder and never request an image.
 

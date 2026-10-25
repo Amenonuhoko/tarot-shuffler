@@ -1,21 +1,26 @@
 // ---- Realms ----
-// Each theme besides Mystic Violet is its own mystical tradition: a
-// painted scene (realms/<theme>-portrait|landscape.webp) whose light runs
-// live on top in a WebGL pass and answers each reveal, plus pieces built
-// around the card:
+// Each theme besides Mystic Violet is its own mystical tradition, built
+// the way Mystic is: a backdrop that recedes behind the card, a sigil of
+// three wheels pinned to the card that turn against each other, breathe
+// and surge on every reveal, a darkened room and a halo of the realm's
+// own for a Major, and a stir when the deck is shuffled. The backdrop is
+// a painting (realms/<theme>-portrait|landscape.webp) whose own light
+// (its window, sun, prism or attractor) lives on top as compositor
+// layers, so every moving part animates only transform or opacity.
 //
-//   Holographic Foil  The Seven Rays: light falls through a prism into
-//                     the seven rays of the Theosophists; each card's ray
-//                     colours the light and is named on reveal.
-//   Glitch Terminal   Digital geomancy and chaos: a phosphor temple of
-//                     figures under the Lorenz and logistic equations, and
-//                     each reveal runs a real geomantic cast, seeded by the
-//                     logistic map, in the card's art window.
-//   Blood Moon        The Crimson Cathedral: the card stands in a stone
-//                     arch under the rose window, briars hold its corners,
-//                     and light through the glass floods it on reveal.
-//   Art Deco Luxe     The Temple of Ra: a gilded gateway under the sun,
-//                     whose rays flare on reveal.
+//   Holographic Foil  The Seven Rays: a spectral wheel of the seven rays
+//                     of the Theosophists round Metatron's cube; each
+//                     card's ray lights its arc and is named on reveal.
+//   Glitch Terminal   Digital geomancy and chaos: the sixteen figures,
+//                     the 64 hexagrams in binary and a radar reticle;
+//                     each reveal pings and runs a real geomantic cast,
+//                     seeded by the logistic map, in the card's art window.
+//   Blood Moon        The Crimson Cathedral: a rose window of tracery,
+//                     jewel glass and a crown of thorns; light through the
+//                     glass falls across the card on reveal.
+//   Art Deco Luxe     The Temple of Ra: a stepped sunburst with the 36
+//                     decan stars, a band of cartouches and a lotus; the
+//                     sun's rays flare on reveal.
 //
 // Every theme also gets its own emblem on the card back. Only the active
 // theme's realm exists in the page; the rest are built when chosen.
@@ -27,23 +32,22 @@
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const motif = document.querySelector(".mystic-motif");
   const cardSlot = document.getElementById("cardSlot");
+  const cardEl = document.getElementById("card");
   const cardBack = document.getElementById("cardBack");
+  const cardFront = document.getElementById("cardFront");
   const cardArt = document.getElementById("cardArt");
   const cardTitle = document.getElementById("cardTitle");
+  const majorHalo = document.getElementById("majorHalo");
   if (!motif || !cardSlot) {
     return;
   }
 
-  // Behind the table, like the motif; and a front layer for the few
-  // things that sit over the card's edges.
+  // Behind the table with Mystic's motif: the sigil and the few pieces
+  // set around the card.
   const back = document.createElement("div");
   back.className = "realm";
   back.setAttribute("aria-hidden", "true");
-  const front = document.createElement("div");
-  front.className = "realm realm-front";
-  front.setAttribute("aria-hidden", "true");
   motif.after(back);
-  document.body.append(front);
 
   function hashString(text) {
     let h = 2166136261;
@@ -58,6 +62,21 @@
     el.classList.remove(className);
     void el.offsetWidth;
     el.classList.add(className);
+  }
+
+
+  // Polar coordinates with 0deg at the top, turning clockwise.
+  function polar(r, a) {
+    return [Math.cos((a - 90) * DEG) * r, Math.sin((a - 90) * DEG) * r];
+  }
+
+  function pt([x, y]) {
+    return `${x.toFixed(2)},${y.toFixed(2)}`;
+  }
+
+  // A clockwise arc of radius r from angle a0 to a1.
+  function arcPath(r, a0, a1) {
+    return `M${pt(polar(r, a0))} A${r},${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${pt(polar(r, a1))}`;
   }
 
   // ---- Holographic Foil: the Seven Rays ----
@@ -119,9 +138,10 @@
     </svg>`;
   }
 
+
   const holo = {
     build() {
-      back.innerHTML = '<p class="holo-caption"></p>';
+      back.insertAdjacentHTML("beforeend", '<p class="holo-caption"></p>');
     },
     reveal({ card }) {
       if (!card) return;
@@ -130,13 +150,18 @@
       const caption = back.querySelector(".holo-caption");
       caption.textContent = `Ray ${NUMERALS[index]} · ${ray.name}`;
       caption.style.color = ray.color;
-      // The card's art window takes on its ray (see realms.css).
+      // The card's art window and the sigil's aura take on its ray, and
+      // its arc on the rim lights (see realms.css).
       cardSlot.style.setProperty("--ray", ray.color);
-      light.surgeColor = hexToRgb(ray.color);
+      back.style.setProperty("--rs-tint", ray.color);
+      scene.style.setProperty("--rs-tint", ray.color);
+      back.querySelectorAll(".rs-ray").forEach((arc) => arc.classList.toggle("is-chosen", Number(arc.dataset.ray) === index));
       restart(back, "is-dispersing");
     },
     unmount() {
       cardSlot.style.removeProperty("--ray");
+      back.style.removeProperty("--rs-tint");
+      scene.style.removeProperty("--rs-tint");
     }
   };
 
@@ -196,13 +221,13 @@
 
   const terminal = {
     build() {
-      back.innerHTML = `
+      back.insertAdjacentHTML("beforeend", `
         <pre class="geo-eq geo-eq-lorenz">dx/dt = σ(y − x)
 dy/dt = x(ρ − z) − y
 dz/dt = xy − βz
 σ=10  ρ=28  β=8/3</pre>
         <pre class="geo-eq geo-eq-logistic">xₙ₊₁ = r·xₙ(1 − xₙ)
-δ = 4.669201609…</pre>`;
+δ = 4.669201609…</pre>`);
     },
     unmount() {
       clearTimeout(this.castTimer);
@@ -285,14 +310,6 @@ dz/dt = xy − βz
   const GLASS = ["#6e0a18", "#8e0f1f", "#4a0612", "#a8162e", "#2e0510", "#5c0a1c", "#7d0d22", "#3a0814"];
   const JEWELS = ["#101a3d", "#2a1240", "#c99a3a", "#18234f"];
 
-  function polar(r, a) {
-    return [Math.cos((a - 90) * DEG) * r, Math.sin((a - 90) * DEG) * r];
-  }
-
-  function pt([x, y]) {
-    return `${x.toFixed(2)},${y.toFixed(2)}`;
-  }
-
   // A pointed (lancet) pane from radius r0 to a tip at r1, `half` degrees
   // either side of angle a.
   function lancet(r0, r1, a, half) {
@@ -363,62 +380,33 @@ dz/dt = xy − βz
     </svg>`;
   }
 
-  // A thorned briar curling round one corner, with a dark rose.
-  function briarSvg() {
-    const thorns = [[16, 78, 200], [11, 60, 190], [12, 42, 170], [20, 28, 150], [33, 18, 125], [50, 12, 110], [68, 9, 100], [86, 7, 95]]
-      .map(([x, y, a]) => `<path d="M0,0 L9,-2.6 L0,3 Z" transform="translate(${x} ${y}) rotate(${a})"/>`).join("");
-    return `<svg viewBox="0 0 100 100" fill="none">
-      <path d="M2,99 C8,80 6,64 12,48 C18,32 30,20 48,13 C64,8 82,7 99,5" stroke="#3a0d14" stroke-width="4.4" stroke-linecap="round"/>
-      <path d="M12,48 C2,40 4,30 12,28" stroke="#3a0d14" stroke-width="2" stroke-linecap="round"/>
-      <path d="M48,13 C44,4 52,0 58,3" stroke="#3a0d14" stroke-width="2" stroke-linecap="round"/>
-      <g fill="#3a0d14">${thorns}</g>
-      <g transform="translate(24 30)">
-        <circle r="11" fill="#7a0b1c"/>
-        <path d="M0,-6 C5,-6 7,-1 4,3 C1,6 -5,5 -6,0 C-6,-4 -2,-6 1,-4 C4,-2 3,2 0,2" stroke="#2a0409" stroke-width="1.3"/>
-      </g>
-      <path d="M33,23 C38,18 44,20 42,26 C38,27 35,26 33,23 Z" fill="#2c1012"/>
-    </svg>`;
-  }
-
-  // A pointed stone arch the card stands in, like a lancet niche under
-  // the rose window. Stretched to the card, so its strokes don't scale.
-  function archSvg() {
-    const outer = "M3,610 L3,190 C3,96 70,34 152,4 C234,34 301,96 301,190 L301,610";
-    const inner = "M17,610 L17,196 C17,110 78,56 152,26 C226,56 287,110 287,196 L287,610";
-    return `<svg viewBox="0 0 304 612" preserveAspectRatio="none">
-      <path d="${outer} Z" fill="rgba(8, 3, 5, 0.62)"/>
-      <path d="${outer}" fill="none" stroke="#2b2124" stroke-width="9" vector-effect="non-scaling-stroke"/>
-      <path d="${outer}" fill="none" stroke="#4a3d41" stroke-width="2" vector-effect="non-scaling-stroke"/>
-      <path d="${inner}" fill="none" stroke="#9a9ca6" stroke-width="1" stroke-opacity="0.6" vector-effect="non-scaling-stroke"/>
-    </svg>`;
+  // Light through the glass, cast across the card for a moment. It lives
+  // on the card's face, so it turns with the card.
+  let roseCast = null;
+  if (cardFront) {
+    roseCast = document.createElement("div");
+    roseCast.className = "rose-cast";
+    roseCast.setAttribute("aria-hidden", "true");
+    roseCast.innerHTML = `
+      <span style="--x: 18%; --y: 8%; --w: 34%; --h: 46%; --c: #ff2a46; --r: -8deg"></span>
+      <span style="--x: 54%; --y: 4%; --w: 30%; --h: 40%; --c: #9a3cff; --r: 6deg"></span>
+      <span style="--x: 36%; --y: 38%; --w: 36%; --h: 44%; --c: #ff5a3a; --r: 2deg"></span>
+      <span style="--x: 8%; --y: 52%; --w: 26%; --h: 34%; --c: #ffbf4a; --r: -4deg"></span>
+      <span style="--x: 66%; --y: 50%; --w: 28%; --h: 38%; --c: #d8203c; --r: 9deg"></span>`;
+    cardFront.appendChild(roseCast);
   }
 
   const bloodmoon = {
-    build() {
-      back.innerHTML = `<div class="gothic-arch">${archSvg()}</div>`;
-      front.innerHTML = `
-        ${["tl", "tr", "bl", "br"].map((corner) => `<div class="briar briar-${corner}">${briarSvg()}</div>`).join("")}
-        <div class="rose-cast">
-          <span style="--x: 18%; --y: 8%; --w: 34%; --h: 46%; --c: #ff2a46; --r: -8deg"></span>
-          <span style="--x: 54%; --y: 4%; --w: 30%; --h: 40%; --c: #9a3cff; --r: 6deg"></span>
-          <span style="--x: 36%; --y: 38%; --w: 36%; --h: 44%; --c: #ff5a3a; --r: 2deg"></span>
-          <span style="--x: 8%; --y: 52%; --w: 26%; --h: 34%; --c: #ffbf4a; --r: -4deg"></span>
-          <span style="--x: 66%; --y: 50%; --w: 28%; --h: 38%; --c: #d8203c; --r: 9deg"></span>
-        </div>`;
-    },
-    reveal() {
-      restart(back, "is-flooding");
-      restart(front, "is-flooding");
+    reveal({ card }) {
+      if (card && roseCast) restart(roseCast, "is-flooding");
     }
   };
 
   // ---- Art Deco Luxe: the Temple of Ra ----
 
-  // The gate, the winged sun and the sunburst are all in the painting; the
-  // sun's light (see the scene below) answers the reveal.
-  const deco = {
-    build() {}
-  };
+  // The gate, the winged sun and the sunburst floor are the painting; the
+  // sun's rays answer the reveal (see the scene's lights below).
+  const deco = {};
 
   // ---- Card-back emblems ----
 
@@ -476,30 +464,373 @@ dz/dt = xy − βz
     });
   }
 
-  // ---- Painted scenes and their light ----
-  // Light sources are fractions of each painting (x across, y down), so
-  // they're placed on the painting however the screen crops it.
+  // ---- Sigils ----
+  // Each realm's counterpart to Mystic's sigil, on the same frame: a rim
+  // (viewBox ±300), a middle wheel (±250, 83.3% of the rim) and a hub
+  // (±152, 50.7%), turning at Mystic's speeds with the middle wheel
+  // reversed. Each wheel is drawn once with its glow; only its turn
+  // and its surge animate.
 
-  const SCENES = {
-    bloodmoon: { mode: 0, color: [0.95, 0.16, 0.2], portrait: { src: [0.5, 0.115], aux: [0.055, 0.47] }, landscape: { src: [0.5, 0.17], aux: [0.085, 0.37] } },
-    deco: { mode: 1, color: [1, 0.74, 0.36], portrait: { src: [0.5, 0.166], aux: [0, 0] }, landscape: { src: [0.5, 0.29], aux: [0, 0] } },
-    holo: { mode: 2, color: [1, 1, 1], portrait: { src: [0.5, 0.12], aux: [0.12, 0] }, landscape: { src: [0.52, 0.26], aux: [0.16, 0] } },
-    terminal: { mode: 3, flare: 0.45, color: [0.13, 1, 0.5], portrait: { src: [0.5, 0.1], aux: [0, 0] }, landscape: { src: [0.5, 0.2], aux: [0, 0] } }
+  function glowFilter(id, color) {
+    return `<filter id="${id}" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur in="SourceAlpha" stdDeviation="3" result="b"/><feFlood flood-color="${color}" flood-opacity="0.9"/><feComposite in2="b" operator="in" result="v"/><feGaussianBlur in="SourceGraphic" stdDeviation="0.8" result="g"/><feMerge><feMergeNode in="v"/><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
+  }
+
+  function wheel(id, radius, glow, body, defs = "") {
+    return `<svg class="rs-layer" viewBox="${-radius} ${-radius} ${radius * 2} ${radius * 2}" fill="none" stroke="currentColor">
+      <defs>${glowFilter(id, glow)}${defs}</defs><g filter="url(#${id})">${body}</g></svg>`;
+  }
+
+  // `count` ticks round a circle, `length` long across the line.
+  function tickRing(r, count, length, width) {
+    const period = (2 * Math.PI * r) / count;
+    return `<circle r="${r}" stroke-width="${length}" stroke-dasharray="${width} ${(period - width).toFixed(3)}" stroke-dashoffset="${(width / 2).toFixed(3)}"/>`;
+  }
+
+  // Text centered on the arc from a0 to a1 (clockwise, reading outward).
+  function arcText(id, r, a0, a1, text, size, spacing, className = "") {
+    return `<path id="${id}" d="${arcPath(r, a0, a1)}" stroke="none"/>
+      <text class="${className}" font-size="${size}" letter-spacing="${spacing}" text-anchor="middle" fill="currentColor" stroke="none"><textPath href="#${id}" startOffset="50%">${text}</textPath></text>`;
+  }
+
+  // A five-pointed star of outer radius s at (x, y).
+  function star(x, y, s, rotation = 0) {
+    const points = [];
+    for (let i = 0; i < 10; i++) {
+      const [px, py] = polar(i % 2 ? s * 0.42 : s, i * 36 + rotation);
+      points.push(pt([x + px, y + py]));
+    }
+    return `M${points.join(" L")} Z`;
+  }
+
+  // Metatron's cube: 13 circles and every line between their centers.
+  function metatronBody(size, stroke) {
+    const d = size * 0.375;
+    const r = size * 0.1875;
+    const centers = [[0, 0]];
+    [d, 2 * d].forEach((dist) => {
+      for (let i = 0; i < 6; i++) {
+        centers.push(polar(dist, i * 60));
+      }
+    });
+    const lines = [];
+    for (let i = 0; i < centers.length; i++) {
+      for (let j = i + 1; j < centers.length; j++) {
+        lines.push(`M${pt(centers[i])}L${pt(centers[j])}`);
+      }
+    }
+    const circles = centers.map(([x, y]) => `<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${r.toFixed(2)}"/>`).join("");
+    return `<path d="${lines.join("")}" stroke="${stroke}" stroke-width="${(size / 300).toFixed(2)}"/>
+      <g stroke="${stroke}" stroke-width="${(size / 180).toFixed(2)}">${circles}</g>`;
+  }
+
+  function heptagrams(r, width) {
+    const p = (step) => {
+      const pts = [];
+      for (let i = 0; i < 7; i++) pts.push(pt(polar(r, ((i * step) % 7) * (360 / 7))));
+      return `M${pts.join(" L")} Z`;
+    };
+    return `<path d="${p(2)}" stroke-width="${width * 0.5}" stroke-opacity="0.6"/><path d="${p(3)}" stroke-width="${width}"/>`;
+  }
+
+  const SIGILS = {
+    // Seven arcs in the rays' colours, numbered and named, round
+    // Metatron's cube, with the heptagram of the seven at the hub.
+    holo() {
+      const span = 360 / 7;
+      const rim = [
+        `<circle r="290" stroke-width="0.9"/><circle r="286.5" stroke-width="0.35"/>`,
+        tickRing(281, 360, 5, 0.45), tickRing(280, 70, 8, 0.8),
+        ...SEVEN_RAYS.map((ray, i) => {
+          const a0 = i * span + 1.6;
+          const a1 = (i + 1) * span - 1.6;
+          const [sx, sy] = polar(296, i * span);
+          return `<path class="rs-ray" data-ray="${i}" d="${arcPath(266, a0, a1)}" stroke="${ray.color}" stroke-width="7"/>
+            <path d="${arcPath(271.5, a0, a1)}${arcPath(260.5, a0, a1)}" stroke-width="0.6"/>
+            <path d="M${sx.toFixed(2)},${(sy - 7).toFixed(2)} L${(sx + 1.6).toFixed(2)},${(sy - 1.6).toFixed(2)} L${(sx + 7).toFixed(2)},${sy.toFixed(2)} L${(sx + 1.6).toFixed(2)},${(sy + 1.6).toFixed(2)} L${sx.toFixed(2)},${(sy + 7).toFixed(2)} L${(sx - 1.6).toFixed(2)},${(sy + 1.6).toFixed(2)} L${(sx - 7).toFixed(2)},${sy.toFixed(2)} L${(sx - 1.6).toFixed(2)},${(sy - 1.6).toFixed(2)} Z" fill="currentColor" stroke="none"/>
+            ${arcText(`rs-holo-name-${i}`, 247, a0, a1, `${NUMERALS[i]} · ${ray.name.toUpperCase()}`, 8.5, 1.1, "rs-text")}`;
+        }),
+        `<circle r="236" stroke-width="0.5"/><circle r="232.5" stroke-width="1.1"/>`
+      ].join("");
+      const mid = `<circle r="240" stroke-width="1.3" stroke-dasharray="0.01 3.4" stroke-linecap="round"/>
+        ${metatronBody(243, "url(#rs-holo-spectrum)")}`;
+      const midDefs = `<linearGradient id="rs-holo-spectrum" gradientUnits="userSpaceOnUse" x1="-240" y1="-240" x2="240" y2="240">${spectrumStops()}</linearGradient>`;
+      const vertices = SEVEN_RAYS.map((ray, i) => {
+        const [x, y] = polar(136, i * span);
+        return `<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="6" fill="#07060d" stroke="${ray.color}" stroke-width="1.2"/><circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="2.2" fill="${ray.color}" stroke="none"/>`;
+      }).join("");
+      const hub = `<circle r="146" stroke-dasharray="0.01 3.2" stroke-linecap="round" stroke-width="1.3"/>
+        ${heptagrams(136, 0.8)}<circle r="62" stroke-width="0.6"/><circle r="58" stroke-width="0.3"/>${vertices}`;
+      return { glow: "#a98bff", rim, mid, midDefs, hub };
+    },
+
+    // The sixteen figures with their names, ticking round like a clock;
+    // all 64 hexagrams as six rings of bits; a reticle with a sweep.
+    terminal() {
+      const rim = [
+        `<circle r="290" stroke-width="0.8" stroke-dasharray="44.6 1.5"/><circle r="286" stroke-width="0.35"/>`,
+        tickRing(280, 128, 6, 0.6), tickRing(279, 16, 12, 1.4),
+        ...FIGURES.map(([name, bits], k) => {
+          const a = k * 22.5 + 11.25;
+          const dots = [];
+          for (let row = 0; row < 4; row++) {
+            const r = 270 - row * 7.5;
+            const spread = (4.6 / r) / DEG;
+            ((bits >> (3 - row)) & 1 ? [0] : [-spread, spread]).forEach((da) => {
+              const [x, y] = polar(r, a + da);
+              dots.push(`<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="2.3"/>`);
+            });
+          }
+          return `<g fill="currentColor" stroke="none">${dots.join("")}</g>
+            ${arcText(`rs-geo-name-${k}`, 232, a - 10.5, a + 10.5, name, 7, 0.5, "rs-mono")}`;
+        }),
+        `<circle r="224" stroke-width="0.5"/><circle r="220" stroke-width="1" stroke-dasharray="2 3"/>`
+      ].join("");
+      // Shao Yong's binary order, the sequence Leibniz recognised as
+      // counting in base two: the bottom line on the innermost ring.
+      const lines = [];
+      for (let k = 0; k < 64; k++) {
+        const a = k * 5.625;
+        for (let line = 0; line < 6; line++) {
+          const r = 196 + line * 6.3;
+          if ((k >> line) & 1) {
+            lines.push(arcPath(r, a + 0.6, a + 5.025));
+          } else {
+            lines.push(arcPath(r, a + 0.6, a + 2.35), arcPath(r, a + 3.275, a + 5.025));
+          }
+        }
+      }
+      const mid = `<circle r="236" stroke-width="0.6"/><circle r="232" stroke-width="0.3" stroke-dasharray="1 2"/>
+        <path d="${lines.join("")}" stroke-width="2.2"/>
+        <circle r="188" stroke-width="0.6"/>${tickRing(183, 64, 5, 0.7)}`;
+      const brackets = [45, 135, 225, 315].map((a) => arcPath(146, a - 11, a + 11)).join("");
+      const cross = [0, 90, 180, 270].map((a) => `M${pt(polar(104, a))} L${pt(polar(150, a))}`).join("");
+      const bearings = [0, 90, 180, 270].map((a) => {
+        const [x, y] = polar(114, a + 6);
+        return `<text x="${x.toFixed(2)}" y="${y.toFixed(2)}" transform="rotate(${a + 6} ${x.toFixed(2)} ${y.toFixed(2)})" class="rs-mono" font-size="7" text-anchor="middle" dominant-baseline="central" fill="currentColor" stroke="none">${String(a).padStart(3, "0")}</text>`;
+      }).join("");
+      const hub = `<circle r="140" stroke-width="1"/><path d="${brackets}" stroke-width="2.6"/>
+        ${tickRing(131, 36, 6, 0.8)}<circle r="124" stroke-width="0.4" stroke-dasharray="1 3"/>
+        <path d="${cross}" stroke-width="0.8"/>${bearings}<circle r="62" stroke-width="0.6"/>`;
+      return { glow: "#22ff7f", rim, mid, hub };
+    },
+
+    // Gothic tracery and roundels in stone, twelve lancets of jewel
+    // glass, and a crown of thorns round the eclipsed moon.
+    bloodmoon() {
+      const scallops = [];
+      const trefoils = [];
+      const pinnacles = [];
+      for (let i = 0; i < 24; i++) {
+        const a = i * 15;
+        scallops.push(`${i ? "" : `M${pt(polar(258, a))}`} Q${pt(polar(281, a + 7.5))} ${pt(polar(258, a + 15))}`);
+        const [x, y] = polar(267, a + 7.5);
+        trefoils.push(`<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="4.2" stroke-width="0.6"/>`);
+        if (i % 2 === 0) {
+          pinnacles.push(`M${pt(polar(292, a - 2.2))} L${pt(polar(300, a))} L${pt(polar(292, a + 2.2))}`);
+        }
+      }
+      const roundels = [];
+      for (let i = 0; i < 48; i++) {
+        const [x, y] = polar(246, i * 7.5 + 3.75);
+        roundels.push(`<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="2.4" fill="${i % 2 ? "#c4202f" : "currentColor"}" fill-opacity="0.55" stroke="none"/>`);
+      }
+      const rim = `<circle r="292" stroke-width="1.6"/><circle r="287" stroke-width="0.5"/>
+        <path d="${pinnacles.join(" ")}" stroke-width="1.2" stroke-linejoin="round"/>
+        <path d="${scallops.join(" ")}" stroke-width="1.4"/>${trefoils.join("")}${roundels.join("")}
+        <circle r="238" stroke-width="1.6"/><circle r="234" stroke-width="0.5"/>`;
+      const petals = [];
+      const jewels = [];
+      for (let i = 0; i < 12; i++) {
+        const a = i * 30;
+        petals.push(`<path d="${lancet(132, 226, a, 12)}" fill="#c4202f" fill-opacity="0.07" stroke-width="0.9"/>
+          <path d="${lancet(146, 206, a, 6.5)}" stroke-width="0.45"/>`);
+        const [jx, jy] = polar(194, a);
+        const [tx, ty] = polar(214, a + 15);
+        jewels.push(`<circle cx="${jx.toFixed(2)}" cy="${jy.toFixed(2)}" r="7.5" stroke-width="0.6"/>
+          <circle cx="${tx.toFixed(2)}" cy="${ty.toFixed(2)}" r="6" fill="#c4202f" fill-opacity="0.35" stroke-width="0.6"/>`);
+      }
+      const mid = `<circle r="231" stroke-width="1.4"/>${petals.join("")}${jewels.join("")}<circle r="128" stroke-width="1.4"/>`;
+      const vine = (phase) => {
+        const pts = [];
+        for (let a = 0; a <= 360; a += 3) pts.push(pt(polar(138 + 5.5 * Math.sin((a * 8 + phase) * DEG), a)));
+        return `M${pts.join(" L")}`;
+      };
+      const thorns = [];
+      for (let i = 0; i < 48; i++) {
+        const a = i * 7.5 + 2;
+        const phase = i % 2 ? 180 : 0;
+        const r = 138 + 5.5 * Math.sin((a * 8 + phase) * DEG);
+        const out = i % 4 < 2 ? 10 : -9;
+        thorns.push(`M${pt(polar(r, a - 1.3))} L${pt(polar(r + out, a + 0.8))} L${pt(polar(r, a + 1.5))} Z`);
+      }
+      const roses = [];
+      for (let i = 0; i < 6; i++) {
+        const [x, y] = polar(138, i * 60 + 15);
+        roses.push(`<g transform="translate(${x.toFixed(2)} ${y.toFixed(2)})"><circle r="7.5" fill="#5a0814" stroke-width="0.7"/><path d="M0,-4 C3.4,-4 4.6,-0.6 2.6,2 C0.6,4 -3.4,3.4 -4,0 C-4,-2.6 -1.4,-4 0.6,-2.6 C2.6,-1.4 2,1.4 0,1.4" stroke="#24050b" stroke-width="1"/></g>`);
+      }
+      const hub = `<path d="${vine(0)}" stroke-width="1.7"/><path d="${vine(180)}" stroke-width="1.2"/>
+        <path d="${thorns.join(" ")}" fill="currentColor" stroke="none"/>${roses.join("")}
+        <circle r="118" stroke-width="0.5" stroke-dasharray="1 4"/>
+        <circle r="70" stroke-width="0.6"/><circle r="64" stroke="#c4202f" stroke-width="3" stroke-opacity="0.85"/>`;
+      return { glow: "#ff2a3c", rim, mid, hub };
+    },
+
+    // A stepped sunburst with the 36 decan stars, a band of cartouches
+    // with deco chevrons between them, and a lotus rosette.
+    deco() {
+      const crown = [];
+      for (let k = 0; k < 36; k++) {
+        const a = k * 10;
+        const tip = k % 2 ? 283 : 299;
+        const half = k % 2 ? 1.5 : 2;
+        crown.push(`M${pt(polar(261, a - half * 0.5))} L${pt(polar(272, a - half))} L${pt(polar(tip, a))} L${pt(polar(272, a + half))} L${pt(polar(261, a + half * 0.5))} Z`);
+      }
+      const stars = [];
+      for (let k = 0; k < 36; k++) {
+        const [x, y] = polar(241, k * 10 + 5);
+        stars.push(star(x, y, 6.2, k * 10 + 5));
+      }
+      const rim = `<path d="${crown.join(" ")}" fill="currentColor" fill-opacity="0.6" stroke="none"/>
+        <circle r="258" stroke-width="1.4"/><circle r="254" stroke-width="0.5"/>
+        <path d="${stars.join(" ")}" fill="currentColor" stroke="none"/>
+        <circle r="228" stroke-width="0.5"/><circle r="223.5" stroke-width="2.8" stroke-dasharray="0.9 4.2" stroke-linecap="round"/>`;
+      const GLYPHS = [
+        // ankh
+        '<ellipse cx="0" cy="-9" rx="4.6" ry="6"/><path d="M0,-3 L0,13 M-7,-1 L7,-1"/>',
+        // djed
+        '<path d="M-2.6,14 L-2.6,-11 M2.6,14 L2.6,-11 M-7,-12 L7,-12 M-7,-8 L7,-8 M-7,-4 L7,-4 M-5,14 L5,14"/>',
+        // was sceptre
+        '<path d="M0,14 L0,-11 L5,-13.5 L7.5,-10.5 M0,14 L-3,10.5 M0,14 L3,10.5"/>',
+        // wedjat eye
+        '<path d="M-9,-2 Q0,-9 9,-2 Q0,4 -9,-2 Z M-9,-7.5 Q0,-12.5 9,-7.5 M-2,3 L-4,12 M2,3 Q5,10 9,9"/><circle cx="0" cy="-2.6" r="2.4" fill="currentColor" stroke="none"/>',
+        // scarab under the sun
+        '<circle cx="0" cy="-12" r="2.8"/><ellipse cx="0" cy="3" rx="5" ry="7"/><circle cx="0" cy="-6" r="2.4"/><path d="M0,-4 L0,10 M-5,0 L-9,-3 M5,0 L9,-3 M-5,6 L-9,9 M5,6 L9,9"/>',
+        // feather of Ma'at
+        '<path d="M0,14 L0,-13 M0,-13 Q7,-7 5,4 Q3,10 0,12 M0,-8 L4,-5 M0,-3 L4.6,0 M0,2 L3.8,5"/>'
+      ];
+      const cartouches = [];
+      for (let k = 0; k < 12; k++) {
+        const a = k * 30;
+        const [x, y] = polar(190, a);
+        const [cx, cy] = polar(190, a + 15);
+        cartouches.push(`<g transform="translate(${x.toFixed(2)} ${y.toFixed(2)}) rotate(${a})">
+            <rect x="-12" y="-22" width="24" height="44" rx="12" stroke-width="1.2"/><path d="M-13,25 L13,25" stroke-width="2"/>
+            <g stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">${GLYPHS[k % GLYPHS.length]}</g></g>
+          <g transform="translate(${cx.toFixed(2)} ${cy.toFixed(2)}) rotate(${a + 15})"><path d="M-6,4 L0,-2 L6,4 M-6,10 L0,4 L6,10 M-6,-2 L0,-8 L6,-2" stroke-width="1.1"/></g>`);
+      }
+      const mid = `<circle r="232" stroke-width="1"/><circle r="228" stroke-width="0.4"/>${cartouches.join("")}
+        <circle r="158" stroke-width="1"/><circle r="154" stroke-width="0.4"/>`;
+      const petals = [];
+      for (let k = 0; k < 16; k++) {
+        const a = k * 22.5;
+        const b = a + 11.25;
+        petals.push(`<path d="M${pt(polar(72, b))} Q${pt(polar(96, b - 8))} ${pt(polar(114, b))} Q${pt(polar(96, b + 8))} ${pt(polar(72, b))} Z" fill="#1f4aa8" fill-opacity="0.16" stroke-width="0.7"/>`);
+      }
+      for (let k = 0; k < 16; k++) {
+        const a = k * 22.5;
+        petals.push(`<path d="M${pt(polar(72, a))} Q${pt(polar(108, a - 9.5))} ${pt(polar(138, a))} Q${pt(polar(108, a + 9.5))} ${pt(polar(72, a))} Z" fill="#1f4aa8" fill-opacity="0.24" stroke-width="1"/>
+          <path d="M${pt(polar(80, a))} L${pt(polar(128, a))}" stroke-width="0.5"/>`);
+      }
+      const hub = `<circle r="145" stroke-width="2.6" stroke-dasharray="0.9 4.4" stroke-linecap="round"/>${petals.join("")}
+        <circle r="66" stroke-width="1.2"/><circle r="62" stroke-width="0.5"/>`;
+      return { glow: "#ffb347", rim, mid, hub };
+    }
   };
+
+  function sigilMarkup(key) {
+    const s = SIGILS[key]();
+    return `<div class="realm-sigil">
+      <span class="rs-aura"></span><span class="rs-tint"></span>
+      <div class="rs-spin rs-spin-rim"><div class="rs-stir">${wheel(`rs-${key}-rim`, 300, s.glow, s.rim)}</div></div>
+      <div class="rs-spin rs-spin-mid"><div class="rs-stir">${wheel(`rs-${key}-mid`, 250, s.glow, s.mid, s.midDefs || "")}</div></div>
+      <div class="rs-spin rs-spin-hub"><div class="rs-stir">${wheel(`rs-${key}-hub`, 152, s.glow, s.hub)}</div></div>
+      <span class="rs-sweep"></span><span class="rs-ping"></span>
+    </div>`;
+  }
+
+  // ---- Major halos ----
+  // Each realm's own halo in place of Mystic's star chart, blooming
+  // behind the turning card the same way (.major-halo in style.css).
+
+  function rays(count, r0, longR, shortR, half, fill) {
+    const d = [];
+    for (let k = 0; k < count; k++) {
+      const a = (k * 360) / count;
+      const tip = k % 2 ? shortR : longR;
+      d.push(`M${pt(polar(r0, a - half))} L${pt(polar(tip, a))} L${pt(polar(r0, a + half))} Z`);
+    }
+    return `<path d="${d.join(" ")}" fill="${fill}"/>`;
+  }
+
+  function fade(id, color, from = 0.25) {
+    return `<radialGradient id="${id}" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="100"><stop offset="${from}" stop-color="${color}" stop-opacity="0.95"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></radialGradient>`;
+  }
+
+  const HALOS = {
+    holo: () => `<defs>${fade("rh-holo", "#ffffff")}</defs>
+      ${rays(56, 34, 99, 78, 0.9, "url(#rh-holo)")}
+      ${SEVEN_RAYS.map((ray, i) => `<path d="${arcPath(70, i * (360 / 7) + 1, (i + 1) * (360 / 7) - 1)}" stroke="${ray.color}" stroke-width="2.4" fill="none"/>`).join("")}
+      <circle r="76" fill="none" stroke="#fff" stroke-width="0.4"/><circle r="64" fill="none" stroke="#fff" stroke-width="0.3" stroke-dasharray="0.6 2"/>`,
+    terminal: () => `<g fill="none" stroke="#22ff7f">
+      <circle r="56" stroke-width="1"/><circle r="64" stroke-width="0.5" stroke-dasharray="2 2"/>
+      <circle r="80" stroke-width="1.6" stroke-dasharray="10 3"/><circle r="92" stroke-width="0.5"/>
+      ${tickRing(86, 72, 4, 0.5)}
+      <path d="${[45, 135, 225, 315].map((a) => arcPath(97, a - 9, a + 9)).join("")}" stroke-width="2.4"/>
+      <path d="${[0, 90, 180, 270].map((a) => `M${pt(polar(58, a))} L${pt(polar(100, a))}`).join("")}" stroke-width="0.6"/></g>`,
+    bloodmoon: () => `<defs>${fade("rh-blood", "#ff3a4c", 0.3)}</defs>
+      ${rays(36, 44, 99, 74, 2.2, "url(#rh-blood)")}
+      <circle r="52" fill="none" stroke="#c4202f" stroke-width="2"/>
+      <path d="${Array.from({ length: 24 }, (_, k) => `M${pt(polar(58, k * 15 - 3))} L${pt(polar(66, k * 15))} L${pt(polar(58, k * 15 + 3))}`).join(" ")}" fill="none" stroke="#c9c3c8" stroke-width="0.8"/>`,
+    deco: () => `<defs>${fade("rh-deco", "#ffd27a", 0.3)}</defs>
+      ${rays(48, 40, 99, 80, 1.6, "url(#rh-deco)")}
+      <circle r="60" fill="none" stroke="#e8c368" stroke-width="2.4" stroke-dasharray="0.8 3.6" stroke-linecap="round"/>
+      <circle r="54" fill="none" stroke="#e8c368" stroke-width="0.8"/>`
+  };
+
+  function showHalo(key) {
+    if (!majorHalo) return;
+    const old = majorHalo.querySelector(".realm-halo");
+    if (old) old.remove();
+    if (!HALOS[key]) return;
+    majorHalo.insertAdjacentHTML("beforeend", `<svg class="realm-halo" viewBox="-100 -100 200 200" aria-hidden="true">${HALOS[key]()}</svg>`);
+  }
+
+  // ---- The painted scene and its light ----
+  // The painting recedes behind a scrim that pools light round the card
+  // and the scene's own light source. That light lives on top as plain
+  // layers - glows, shafts, a ray fan, a beam - set on the painting by
+  // fractions of its size (x across, y down), so they stay on the window,
+  // sun, prism or attractor however the screen crops it.
+
   const PAINTING_SIZE = { portrait: [1152, 2048], landscape: [2048, 1152] };
   const portraitQuery = window.matchMedia("(orientation: portrait)");
+
+  const SCENES = {
+    bloodmoon: {
+      portrait: { src: [0.5, 0.11], candles: [[0.06, 0.45], [0.95, 0.45], [0.265, 0.575], [0.355, 0.575], [0.625, 0.575], [0.72, 0.575]] },
+      landscape: { src: [0.5, 0.18], candles: [[0.11, 0.44], [0.89, 0.44], [0.32, 0.53], [0.68, 0.53], [0.21, 0.5], [0.79, 0.5]] }
+    },
+    deco: {
+      portrait: { src: [0.5, 0.166], floor: [0.5, 0.95], torches: [[0.245, 0.7], [0.755, 0.7]] },
+      landscape: { src: [0.5, 0.19], floor: [0.5, 0.975], torches: [[0.105, 0.6], [0.895, 0.6]] }
+    },
+    holo: {
+      portrait: { src: [0.5, 0.125], from: [0.11, 0], to: [1.02, 0.33] },
+      landscape: { src: [0.5, 0.26], from: [0.16, 0], to: [1.01, 0.56] }
+    },
+    terminal: {
+      portrait: { src: [0.5, 0.11] },
+      landscape: { src: [0.5, 0.27] }
+    }
+  };
 
   const scene = document.createElement("div");
   scene.className = "realm-scene";
   scene.setAttribute("aria-hidden", "true");
-  scene.innerHTML = '<div class="realm-painting"></div><canvas class="realm-light"></canvas><span class="realm-scrim"></span>';
+  scene.innerHTML = '<div class="realm-painting"></div><span class="realm-scrim"></span><div class="realm-lights"></div>';
   document.body.prepend(scene);
   const painting = scene.querySelector(".realm-painting");
-
-  function hexToRgb(hex) {
-    const n = parseInt(hex.slice(1), 16);
-    return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
-  }
+  const lightsEl = scene.querySelector(".realm-lights");
 
   function orientation() {
     return portraitQuery.matches ? "portrait" : "landscape";
@@ -523,269 +854,139 @@ dz/dt = xy − βz
     img.src = url;
   }
 
-  const VERTEX_SHADER = `
-    attribute vec2 aPos;
-    varying vec2 vUv;
-    void main() {
-      vUv = aPos * 0.5 + 0.5;
-      gl_Position = vec4(aPos, 0.0, 1.0);
-    }`;
+  // The painting is background-size: cover, centered: map its fractions
+  // to the screen. w is the painting's width on screen.
+  function coverMap() {
+    const [pw, ph] = PAINTING_SIZE[orientation()];
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const scale = Math.max(vw / pw, vh / ph);
+    const ox = (vw - pw * scale) / 2;
+    const oy = (vh - ph * scale) / 2;
+    return {
+      at: ([fx, fy]) => [ox + fx * pw * scale, oy + fy * ph * scale],
+      w: pw * scale
+    };
+  }
 
-  // One pass per frame, modes per realm. It outputs light only (premultiplied,
-  // alpha = brightness), so the painting shows through everywhere else.
-  const FRAGMENT_SHADER = `
-    precision mediump float;
-    varying vec2 vUv;
-    uniform vec2 uRes;
-    uniform float uTime;
-    uniform float uMode;
-    uniform float uSurge;
-    uniform vec2 uSrc;
-    uniform vec2 uAux;
-    uniform vec3 uColor;
-    uniform vec3 uSurgeColor;
+  // A light centered at (x, y), `size` px across.
+  function lightAt(className, [x, y], size, style = "") {
+    return `<span class="${className}" style="left:${(x - size / 2).toFixed(1)}px;top:${(y - size / 2).toFixed(1)}px;width:${size.toFixed(1)}px;height:${size.toFixed(1)}px;${style}"></span>`;
+  }
 
-    float hash(vec2 p) {
-      p = fract(p * vec2(123.34, 456.21));
-      p += dot(p, p + 45.32);
-      return fract(p.x * p.y);
-    }
+  // A band from a to b, `width` px across; its children run along it.
+  function bandFrom(className, [ax, ay], [bx, by], width, inner = "") {
+    const length = Math.hypot(bx - ax, by - ay);
+    const angle = Math.atan2(by - ay, bx - ax) / DEG;
+    return `<span class="${className}" style="left:${ax.toFixed(1)}px;top:${(ay - width / 2).toFixed(1)}px;width:${length.toFixed(1)}px;height:${width.toFixed(1)}px;transform:rotate(${angle.toFixed(2)}deg)">${inner}</span>`;
+  }
 
-    float noise(vec2 p) {
-      vec2 i = floor(p);
-      vec2 f = fract(p);
-      float a = hash(i);
-      float b = hash(i + vec2(1.0, 0.0));
-      float c = hash(i + vec2(0.0, 1.0));
-      float d = hash(i + vec2(1.0, 1.0));
-      vec2 u = f * f * (3.0 - 2.0 * f);
-      return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
-    }
+  // Shapes of light drawn once, as one screen-sized SVG: shafts, beams
+  // and fans are polygons filled with gradients, so nothing is clipped
+  // or masked while it animates - only the whole layer's opacity moves.
+  function screenSvg(className, defs, body) {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    return `<svg class="${className}" width="${vw}" height="${vh}" viewBox="0 0 ${vw} ${vh}"><defs>${defs}</defs>${body}</svg>`;
+  }
 
-    float fbm(vec2 p) {
-      float v = 0.0;
-      float a = 0.5;
-      for (int i = 0; i < 4; i++) {
-        v += a * noise(p);
-        p = p * 2.03 + 1.7;
-        a *= 0.5;
-      }
-      return v;
-    }
+  // A tapered band from a (wa across) to b (wb across).
+  function taper([ax, ay], [bx, by], wa, wb) {
+    const length = Math.hypot(bx - ax, by - ay) || 1;
+    const nx = -(by - ay) / length;
+    const ny = (bx - ax) / length;
+    return [
+      [ax + nx * wa / 2, ay + ny * wa / 2], [bx + nx * wb / 2, by + ny * wb / 2],
+      [bx - nx * wb / 2, by - ny * wb / 2], [ax - nx * wa / 2, ay - ny * wa / 2]
+    ].map(pt).join(" ");
+  }
 
-    // Twinkling points on a jittered grid; density is the share of cells lit.
-    float twinkles(vec2 p, float scale, float density, float speed) {
-      vec2 g = p * scale;
-      vec2 id = floor(g);
-      vec2 f = fract(g) - 0.5;
-      float h = hash(id);
-      if (h > density) return 0.0;
-      vec2 o = (vec2(hash(id + 3.7), hash(id + 9.1)) - 0.5) * 0.6;
-      float d = length(f - o);
-      float tw = pow(0.5 + 0.5 * sin(uTime * speed * (0.6 + h * 2.0) + h * 61.0), 8.0);
-      return exp(-d * d * 160.0) * tw;
-    }
+  function linear(id, [ax, ay], [bx, by], stops) {
+    return `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${ax.toFixed(1)}" y1="${ay.toFixed(1)}" x2="${bx.toFixed(1)}" y2="${by.toFixed(1)}">${stops.map(([o, c]) => `<stop offset="${o}" stop-color="${c}"/>`).join("")}</linearGradient>`;
+  }
 
-    vec3 spectrum(float x) {
-      x = clamp(x, 0.0, 1.0) * 0.85;
-      return clamp(vec3(abs(x * 6.0 - 3.0) - 1.0, 2.0 - abs(x * 6.0 - 2.0), 2.0 - abs(x * 6.0 - 4.0)), 0.0, 1.0);
-    }
-
-    void main() {
-      float aspect = uRes.x / uRes.y;
-      vec2 p = vec2(vUv.x * aspect, vUv.y);
-      vec2 s = vec2(uSrc.x * aspect, uSrc.y);
-      vec2 d = p - s;
-      float r = length(d);
-      float a = atan(d.y, d.x);
-      float t = uTime;
-      vec3 col = vec3(0.0);
-
-      if (uMode < 0.5) {
-        // Cathedral: shafts of red light fall from the rose window through
-        // incense haze, motes drift in them, candles breathe at the sides.
-        float down = smoothstep(0.05, 0.6, -d.y / max(r, 0.001));
-        float n = noise(vec2(a * 9.0, t * 0.1)) * 0.65 + noise(vec2(a * 23.0 + 3.1, -t * 0.07)) * 0.35;
-        float shafts = smoothstep(0.42, 0.85, n) * down * exp(-r * 1.2);
-        shafts *= 0.55 + 0.45 * fbm(p * 2.5 + vec2(t * 0.02, -t * 0.035));
-        float motes = twinkles(p + vec2(sin(t * 0.07) * 0.02, t * 0.006), 60.0, 0.12, 1.3) * smoothstep(0.02, 0.2, shafts);
-        float window = exp(-r * r * 26.0) * (0.55 + 0.12 * sin(t * 0.6));
-        vec2 c1 = vec2(uAux.x * aspect, uAux.y);
-        vec2 c2 = vec2((1.0 - uAux.x) * aspect, uAux.y);
-        float candles = exp(-dot(p - c1, p - c1) * 120.0) * (0.7 + 0.3 * noise(vec2(t * 7.0, 0.0)))
-                      + exp(-dot(p - c2, p - c2) * 120.0) * (0.7 + 0.3 * noise(vec2(t * 6.3, 4.0)));
-        col = uColor * (shafts * 0.5 + window * 0.4) * (1.0 + uSurge * 2.2)
-            + vec3(1.0, 0.62, 0.32) * candles * 0.28
-            + vec3(1.0, 0.7, 0.62) * motes * 0.7;
-      } else if (uMode < 1.5) {
-        // Temple: the sun disc breathes, its rays turn slowly, gold leaf glints.
-        float spokes = pow(0.5 + 0.5 * sin(a * 24.0 + t * 0.12), 7.0) * exp(-r * 1.5);
-        float glow = exp(-r * r * 40.0) * (0.75 + 0.2 * sin(t * 0.8));
-        float halo = exp(-r * 2.6) * 0.25;
-        float glints = twinkles(p, 38.0, 0.16, 1.1) + twinkles(p + 7.3, 64.0, 0.1, 1.7) * 0.7;
-        col = uColor * (spokes * 0.32 + glow * 0.55 + halo) * (1.0 + uSurge * 2.4)
-            + vec3(1.0, 0.9, 0.62) * glints * 0.85;
-      } else if (uMode < 2.5) {
-        // Seven Rays: pulses of white light run down the beam into the prism,
-        // the spectrum fans out shimmering, glass shards catch the colours.
-        vec2 b0 = vec2(uAux.x * aspect, uAux.y);
-        vec2 dir = normalize(s - b0);
-        vec2 bp = p - b0;
-        float along = clamp(dot(bp, dir), 0.0, length(s - b0));
-        float off = length(bp - dir * along);
-        float pulse = pow(0.5 + 0.5 * sin(along * 22.0 - t * 2.4), 10.0);
-        float beam = exp(-off * off * 3000.0) * (0.25 + 0.9 * pulse);
-        float base = atan(dir.y, dir.x);
-        float da = mod(a - base + 3.14159, 6.28318) - 3.14159;
-        float spread = 0.42;
-        float inFan = smoothstep(-0.05, 0.03, da + spread * 0.5) * (1.0 - smoothstep(-0.03, 0.05, da - spread * 0.5));
-        float flow = 0.55 + 0.45 * pow(0.5 + 0.5 * sin(r * 16.0 - t * 1.8), 3.0);
-        float fan = inFan * flow * exp(-r * 1.1) * step(0.0, dot(d, dir));
-        vec3 rainbow = spectrum((da + spread * 0.5) / spread) * fan;
-        float prism = exp(-r * r * 90.0) * (0.7 + 0.3 * sin(t * 1.4));
-        float shard = twinkles(p, 30.0, 0.14, 1.2);
-        vec3 sparkle = spectrum(fract(hash(floor(p * 30.0)) + t * 0.05)) * shard;
-        col = vec3(1.0) * (beam * 0.6 + prism * 0.6) * (1.0 + uSurge * 2.0)
-            + rainbow * 0.38 * (1.0 + uSurge * 1.5)
-            + uSurgeColor * prism * uSurge * 1.4
-            + sparkle * 0.7;
-      } else {
-        // Geomancy: the attractor's phosphor breathes, a scan band rolls down,
-        // data fog drifts along the floor, the tube flickers.
-        float glow = exp(-r * r * 7.0) * (0.35 + 0.2 * sin(t * 1.1));
-        float band = exp(-pow((vUv.y - (1.0 - fract(t * 0.05))) * 14.0, 2.0)) * 0.1;
-        float fog = fbm(vec2(p.x * 3.0 + t * 0.05, p.y * 6.0 - t * 0.08)) * smoothstep(0.45, 0.0, vUv.y) * 0.16;
-        float flicker = 1.0 + 0.05 * (noise(vec2(t * 24.0, 0.0)) - 0.5);
-        float bits = twinkles(p + vec2(0.0, -t * 0.03), 48.0, 0.08, 2.4) * 0.5;
-        col = uColor * (glow + band + fog + bits) * flicker * (1.0 + uSurge * 2.2);
-      }
-
-      col = clamp(col, 0.0, 1.0);
-      gl_FragColor = vec4(col, max(col.r, max(col.g, col.b)));
-    }`;
-
-  // Drawn at half resolution (light is soft, and that quarters the fill
-  // cost on a phone), paused while the page is hidden, a still frame for
-  // reduced motion.
-  const light = {
-    canvas: scene.querySelector(".realm-light"),
-    gl: null,
-    u: {},
-    frame: null,
-    surge: 0,
-    surgeColor: [1, 1, 1],
-    lastAt: 0,
-    failed: false,
-    src: [0.5, 0.2],
-    aux: [0, 0],
-
-    init() {
-      if (this.gl || this.failed) return Boolean(this.gl);
-      const gl = this.canvas.getContext("webgl", { alpha: true, premultipliedAlpha: true, antialias: false, depth: false, stencil: false });
-      if (!gl) {
-        this.failed = true;
-        return false;
-      }
-      const compile = (type, source) => {
-        const shader = gl.createShader(type);
-        gl.shaderSource(shader, source);
-        gl.compileShader(shader);
-        return shader;
-      };
-      const program = gl.createProgram();
-      gl.attachShader(program, compile(gl.VERTEX_SHADER, VERTEX_SHADER));
-      gl.attachShader(program, compile(gl.FRAGMENT_SHADER, FRAGMENT_SHADER));
-      gl.linkProgram(program);
-      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-        this.failed = true;
-        return false;
-      }
-      gl.useProgram(program);
-      const buffer = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-      const aPos = gl.getAttribLocation(program, "aPos");
-      gl.enableVertexAttribArray(aPos);
-      gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
-      ["uRes", "uTime", "uMode", "uSurge", "uSrc", "uAux", "uColor", "uSurgeColor"].forEach((name) => {
-        this.u[name] = gl.getUniformLocation(program, name);
+  const LIGHTS = {
+    // The rose window glows, shafts of red light fall from it through
+    // the nave in two sets that breathe out of step, the candles flicker,
+    // and dust drifts in the light.
+    bloodmoon({ at, w }, s) {
+      const src = at(s.src);
+      const floorY = window.innerHeight * 1.04;
+      const sets = [[], []];
+      const defs = [];
+      [-30, -17, -5, 7, 19, 31].forEach((tilt, i) => {
+        const length = (floorY - src[1]) / Math.cos(tilt * DEG);
+        const end = [src[0] + Math.sin(tilt * DEG) * length, src[1] + Math.cos(tilt * DEG) * length];
+        defs.push(linear(`rl-shaft-${i}`, src, end, [[0, "rgba(255,84,90,0.36)"], [0.45, "rgba(200,20,40,0.15)"], [0.92, "rgba(200,20,40,0)"]]));
+        sets[i % 2].push(`<polygon points="${taper(src, end, w * 0.03, w * (0.11 + (i % 3) * 0.03))}" fill="url(#rl-shaft-${i})"/>`);
       });
-      this.canvas.addEventListener("webglcontextlost", (event) => {
-        event.preventDefault();
-        this.stop();
-        this.gl = null;
-        this.failed = true;
-      });
-      this.gl = gl;
-      return true;
+      const candles = s.candles.map((c, i) => lightAt("rl-candle", at(c), w * 0.075, `--i:${i}`)).join("");
+      // The second set uses the gradients defined with the first.
+      return `${screenSvg("rl-shafts", defs.join(""), sets[0].join(""))}${screenSvg("rl-shafts rl-shafts-b", "", sets[1].join(""))}
+        ${lightAt("rl-glow", src, w * 0.62)}${lightAt("rl-flare", src, w * 0.9)}${candles}<span class="rl-motes"></span>`;
     },
 
-    // Light positions follow the painting through background-size: cover.
-    place() {
-      const config = SCENES[activeKey];
-      if (!config) return;
-      const orient = orientation();
-      const [iw, ih] = PAINTING_SIZE[orient];
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-      const scale = Math.max(vw / iw, vh / ih);
-      const dw = iw * scale;
-      const dh = ih * scale;
-      const toUv = ([u, v]) => [((vw - dw) / 2 + u * dw) / vw, 1 - ((vh - dh) / 2 + v * dh) / vh];
-      this.src = toUv(config[orient].src);
-      this.aux = toUv(config[orient].aux);
-      const ratio = Math.min(window.devicePixelRatio || 1, 2) * 0.5;
-      this.canvas.width = Math.max(1, Math.round(vw * ratio));
-      this.canvas.height = Math.max(1, Math.round(vh * ratio));
-    },
-
-    draw(now) {
-      const gl = this.gl;
-      const config = SCENES[activeKey];
-      if (!gl || !config) return;
-      gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-      gl.uniform2f(this.u.uRes, this.canvas.width, this.canvas.height);
-      gl.uniform1f(this.u.uTime, now / 1000);
-      gl.uniform1f(this.u.uMode, config.mode);
-      gl.uniform1f(this.u.uSurge, this.surge);
-      gl.uniform2f(this.u.uSrc, this.src[0], this.src[1]);
-      gl.uniform2f(this.u.uAux, this.aux[0], this.aux[1]);
-      gl.uniform3fv(this.u.uColor, config.color);
-      gl.uniform3fv(this.u.uSurgeColor, this.surgeColor);
-      gl.clearColor(0, 0, 0, 0);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
-    },
-
-    start() {
-      if (!this.init() || !SCENES[activeKey]) return;
-      this.place();
-      if (reduceMotion.matches) {
-        this.draw(20000);
-        return;
+    // The sun's rays turn slowly behind the winged disc and flare on a
+    // reveal; the torches flicker and the floor's sunburst breathes.
+    deco({ at, w }, s) {
+      const src = at(s.src);
+      const size = Math.min(window.innerHeight * 1.15, 1500);
+      const r = size / 2;
+      const rays = [];
+      for (let k = 0; k < 60; k++) {
+        const a = k * 6;
+        const reach = k % 2 ? r * 0.72 : r;
+        rays.push(`M${pt(polar(r * 0.03, a - 0.7))} L${pt(polar(reach, a - 0.7))} L${pt(polar(reach, a + 0.7))} Z`);
       }
-      if (this.frame) return;
-      this.lastAt = 0;
-      const step = (now) => {
-        this.frame = requestAnimationFrame(step);
-        const dt = this.lastAt ? Math.min((now - this.lastAt) / 1000, 0.1) : 0;
-        this.lastAt = now;
-        this.surge *= Math.exp(-dt / 1.1);
-        this.draw(now);
-      };
-      this.frame = requestAnimationFrame(step);
+      const fan = `<svg class="rl-fan" style="left:${(src[0] - r).toFixed(1)}px;top:${(src[1] - r).toFixed(1)}px" width="${size.toFixed(0)}" height="${size.toFixed(0)}" viewBox="${-r} ${-r} ${size} ${size}">
+        <defs><radialGradient id="rl-fan-fade" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="${r.toFixed(1)}"><stop offset="0.04" stop-color="rgba(255,214,140,0.34)"/><stop offset="0.4" stop-color="rgba(255,206,130,0.12)"/><stop offset="1" stop-color="rgba(255,206,130,0)"/></radialGradient></defs>
+        <path d="${rays.join(" ")}" fill="url(#rl-fan-fade)"/></svg>`;
+      const torches = s.torches.map((c, i) => lightAt("rl-candle rl-torch", at(c), w * 0.12, `--i:${i}`)).join("");
+      return `${fan}${lightAt("rl-glow", src, w * 0.6)}${lightAt("rl-flare", src, w * 1.1)}
+        ${lightAt("rl-floor", at(s.floor), w * 0.7)}${torches}<span class="rl-motes"></span>`;
     },
 
-    stop() {
-      if (this.frame) cancelAnimationFrame(this.frame);
-      this.frame = null;
+    // Pulses of white light run down the beam into the prism, which
+    // glows and casts its spectrum; sparks drift in the crystal field.
+    holo({ at, w }, s) {
+      const src = at(s.src);
+      const from = at(s.from);
+      const to = at(s.to);
+      const beam = screenSvg("rl-beam",
+        linear("rl-beam-fade", from, src, [[0, "rgba(255,255,255,0)"], [0.45, "rgba(255,255,255,0.16)"], [1, "rgba(255,255,255,0.42)"]]),
+        `<polygon points="${taper(from, src, w * 0.05, w * 0.03)}" fill="url(#rl-beam-fade)"/><polygon points="${taper(from, src, w * 0.014, w * 0.01)}" fill="url(#rl-beam-fade)"/>`);
+      // Colour runs across the fan, fading along it.
+      const length = Math.hypot(to[0] - src[0], to[1] - src[1]);
+      const nx = -(to[1] - src[1]) / length;
+      const ny = (to[0] - src[0]) / length;
+      const mid = [(src[0] + to[0]) / 2, (src[1] + to[1]) / 2];
+      const half = w * 0.09;
+      const across = linear("rl-spectrum-across", [mid[0] - nx * half, mid[1] - ny * half], [mid[0] + nx * half, mid[1] + ny * half],
+        ["#a86bff", "#4b8bff", "#3ee09a", "#ffd84b", "#ff9a3b", "#ff4b4b"].map((c, i) => [(i / 5).toFixed(2), c]));
+      const along = linear("rl-spectrum-along", src, to, [[0, "#fff"], [0.55, "#777"], [1, "#000"]]);
+      const fan = screenSvg("rl-spectrum", `${across}${along}<mask id="rl-spectrum-mask"><polygon points="${taper(src, to, w * 0.01, w * 0.2)}" fill="url(#rl-spectrum-along)"/></mask>`,
+        `<polygon points="${taper(src, to, w * 0.01, w * 0.2)}" fill="url(#rl-spectrum-across)" mask="url(#rl-spectrum-mask)"/>`);
+      return `${beam}${bandFrom("rl-pulse-track", from, src, w * 0.06, '<span class="rl-pulse"></span>')}${fan}
+        ${lightAt("rl-glow", src, w * 0.42)}${lightAt("rl-flare", src, w * 0.8)}<span class="rl-motes"></span>`;
     },
 
-    flare(strength) {
-      const scale = (SCENES[activeKey] && SCENES[activeKey].flare) || 1;
-      this.surge = Math.min(1.6, this.surge + strength * scale);
+    // The attractor's glow breathes; the rain does the rest.
+    terminal({ at, w }, s) {
+      const src = at(s.src);
+      return `${lightAt("rl-glow", src, w * 0.85)}${lightAt("rl-flare", src, w * 1.1)}`;
     }
   };
+
+  // Lights, and the scrim's pools of light round the card and the source.
+  function placeLights() {
+    if (!activeKey || !LIGHTS[activeKey]) return;
+    const config = SCENES[activeKey][orientation()];
+    const map = coverMap();
+    const [sx, sy] = map.at(config.src);
+    scene.style.setProperty("--src-x", `${sx.toFixed(1)}px`);
+    scene.style.setProperty("--src-y", `${sy.toFixed(1)}px`);
+    lightsEl.innerHTML = LIGHTS[activeKey](map, config);
+  }
 
   // ---- Mounting and anchoring ----
 
@@ -801,14 +1002,17 @@ dz/dt = xy − βz
   function anchor() {
     const rect = anchorEl().getBoundingClientRect();
     if (!rect.width) return;
-    [back, front].forEach((layer) => {
-      layer.style.setProperty("--cx", `${(rect.left + rect.width / 2).toFixed(1)}px`);
-      layer.style.setProperty("--cy", `${(rect.top + rect.height / 2).toFixed(1)}px`);
-      layer.style.setProperty("--cw", `${rect.width.toFixed(1)}px`);
-      layer.style.setProperty("--ch", `${rect.height.toFixed(1)}px`);
-      layer.style.setProperty("--top", `${rect.top.toFixed(1)}px`);
-      layer.style.setProperty("--left", `${rect.left.toFixed(1)}px`);
-    });
+    const vars = {
+      "--cx": rect.left + rect.width / 2,
+      "--cy": rect.top + rect.height / 2,
+      "--cw": rect.width,
+      "--ch": rect.height,
+      "--top": rect.top,
+      "--left": rect.left
+    };
+    Object.entries(vars).forEach(([name, value]) => back.style.setProperty(name, `${value.toFixed(1)}px`));
+    scene.style.setProperty("--cx", `${vars["--cx"].toFixed(1)}px`);
+    scene.style.setProperty("--cy", `${vars["--cy"].toFixed(1)}px`);
   }
 
   function mount() {
@@ -816,26 +1020,24 @@ dz/dt = xy − βz
     if (key === activeKey && active) return;
     if (active && active.unmount) active.unmount();
     back.innerHTML = "";
-    front.innerHTML = "";
     back.className = "realm";
-    front.className = "realm realm-front";
+    lightsEl.innerHTML = "";
     activeKey = key;
     active = REALMS[key] || null;
     scene.dataset.scene = active ? key : "";
+    showHalo(active ? key : "");
     if (!active) {
-      light.stop();
       painting.style.backgroundImage = "";
       paintingUrl = "";
       scene.classList.remove("is-loaded");
       return;
     }
     back.classList.add(`realm-${key}`);
-    front.classList.add(`realm-${key}`);
+    back.innerHTML = sigilMarkup(key);
     anchor();
-    active.build();
-    light.surgeColor = [1, 1, 1];
+    if (active.build) active.build();
     showPainting();
-    light.start();
+    placeLights();
   }
 
   let relayoutTimer = null;
@@ -845,8 +1047,7 @@ dz/dt = xy − βz
     relayoutTimer = setTimeout(() => {
       if (!active) return;
       showPainting();
-      light.place();
-      if (reduceMotion.matches) light.start();
+      placeLights();
     }, 200);
   }
 
@@ -865,17 +1066,33 @@ dz/dt = xy − βz
 
   new MutationObserver(mount).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
 
+  // Every reveal, card or dice: the sigil's wheels surge and the scene's
+  // light flares, as Mystic's sigil does; then the realm's own beat.
   document.addEventListener("tarot:reveal", (event) => {
+    if (!active) return;
     const detail = event.detail || {};
-    if (active && active.reveal) active.reveal(detail);
-    if (active) light.flare(detail.major ? 1.3 : 0.9);
+    const sigil = back.querySelector(".realm-sigil");
+    if (sigil) {
+      sigil.classList.toggle("is-major", Boolean(detail.major));
+      restart(sigil, "is-surging");
+    }
+    lightsEl.classList.toggle("is-major", Boolean(detail.major));
+    restart(lightsEl, "is-surging");
+    if (active.reveal) active.reveal(detail);
   });
 
-  document.addEventListener("visibilitychange", () => {
-    if (!active) return;
-    if (document.hidden) light.stop();
-    else light.start();
-  });
+  // The shuffle stirs the wheels.
+  if (cardEl) {
+    let wasShuffling = false;
+    new MutationObserver(() => {
+      const shuffling = cardEl.classList.contains("shuffling");
+      if (shuffling && !wasShuffling && active) {
+        const sigil = back.querySelector(".realm-sigil");
+        if (sigil) restart(sigil, "is-stirring");
+      }
+      wasShuffling = shuffling;
+    }).observe(cardEl, { attributes: true, attributeFilter: ["class"] });
+  }
 
   mount();
 })();

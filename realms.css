@@ -1,11 +1,13 @@
 /* ================================================================
    REALMS (realms.js)
-   One mystical tradition per theme. Each is a painted scene with its
-   light running live on top (a WebGL pass), plus a few pieces built
-   around the card. realms.js pins --cx/--cy (card centre), --cw/--ch
-   (card size), --top/--left on the card layers whenever the card moves,
-   so those pieces are placed relative to the card. Motion is
-   transform/opacity on its own layer.
+   One mystical tradition per theme, built the way Mystic is: a backdrop
+   that recedes behind the card, a sigil pinned to the card that turns,
+   breathes and surges, a halo of its own for a Major, and a stir on
+   the shuffle. The backdrop is a painting with its own light on top.
+   realms.js pins --cx/--cy (card centre), --cw/--ch (card size) and
+   --top/--left on the realm layer whenever the card moves. Every moving
+   part animates only transform or opacity, and no group with opacity
+   wraps moving layers.
    ================================================================ */
 
 .realm {
@@ -16,13 +18,9 @@
   pointer-events: none;
 }
 
-.realm-front {
-  z-index: 2;
-}
-
-/* ---- The painted scene: painting, live light, and a scrim that keeps
-   the header and controls readable. It sits first in the page, under
-   every other layer. ---- */
+/* ---- The painted scene: the painting, a scrim that sinks it into the
+   dark and pools light round the card and the scene's light source,
+   and that light itself. First in the page, under every other layer. */
 
 .realm-scene {
   position: fixed;
@@ -33,27 +31,26 @@
   pointer-events: none;
   transform-origin: 50% 38%;
   will-change: transform;
-  animation: realm-drift 48s ease-in-out infinite alternate;
+  animation: realm-drift 56s ease-in-out infinite alternate;
 }
 
 .realm-scene[data-scene]:not([data-scene=""]) {
   display: block;
 }
 
-/* A slow push-in, like a camera settling on the scene. The light canvas
-   is mapped to the painting and scales with it. */
+/* A slow push-in, like a camera settling on the scene. The lights are
+   placed on the painting and scale with it. */
 @keyframes realm-drift {
   from { transform: scale(1); }
-  to { transform: scale(1.05); }
+  to { transform: scale(1.04); }
 }
 
 .realm-painting,
-.realm-light,
-.realm-scrim {
+.realm-scrim,
+.realm-scrim::after,
+.realm-lights {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
 }
 
 .realm-painting {
@@ -62,43 +59,459 @@
   transition: opacity 1.1s ease;
 }
 
-.realm-light {
-  display: block;
+.realm-lights {
   opacity: 0;
   transition: opacity 1.6s ease 0.3s;
 }
 
 .realm-scene.is-loaded .realm-painting,
-.realm-scene.is-loaded .realm-light {
+.realm-scene.is-loaded .realm-lights {
   opacity: 1;
 }
 
+/* The painting sinks into the dark everywhere but round its own light
+   source, and darkest of all behind the card, so the card and its
+   sigil hold the stage as they do in Mystic. */
 .realm-scrim {
   background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0.5), transparent 16%, transparent 66%, rgba(0, 0, 0, 0.62)),
-    radial-gradient(ellipse 120% 90% at 50% 45%, transparent 55%, rgba(0, 0, 0, 0.55));
+    radial-gradient(ellipse min(62vw, 560px) min(46vh, 520px) at var(--cx, 50%) var(--cy, 50%), rgba(0, 0, 0, 0.42), transparent 100%),
+    var(--scrim, rgba(3, 2, 6, 0.64));
+  -webkit-mask-image: radial-gradient(circle min(30vmax, 400px) at var(--src-x, 50%) var(--src-y, 10%), transparent 10%, #000 100%);
+  mask-image: radial-gradient(circle min(30vmax, 400px) at var(--src-x, 50%) var(--src-y, 10%), transparent 10%, #000 100%);
 }
 
-.realm-scene[data-scene="terminal"] .realm-scrim {
+/* Edges and the header and controls bands, on top of the pools. */
+.realm-scrim::after {
+  content: "";
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.45), transparent 14%, transparent 70%, rgba(0, 0, 0, 0.6)),
+    radial-gradient(ellipse 125% 95% at 50% 45%, transparent 58%, rgba(0, 0, 0, 0.6));
+}
+
+.realm-scene[data-scene="bloodmoon"] { --scrim: rgba(4, 1, 3, 0.7); }
+.realm-scene[data-scene="deco"] { --scrim: rgba(5, 3, 1, 0.74); }
+.realm-scene[data-scene="holo"] { --scrim: rgba(3, 2, 9, 0.64); }
+.realm-scene[data-scene="terminal"] { --scrim: rgba(0, 4, 2, 0.72); }
+
+.realm-scene[data-scene="terminal"] .realm-scrim::after {
   background:
     repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.22) 0 1px, transparent 1px 3px),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 16%, transparent 66%, rgba(0, 0, 0, 0.65)),
-    radial-gradient(ellipse 120% 90% at 50% 45%, transparent 50%, rgba(0, 0, 0, 0.6));
+    linear-gradient(180deg, rgba(0, 0, 0, 0.5), transparent 14%, transparent 70%, rgba(0, 0, 0, 0.62)),
+    radial-gradient(ellipse 125% 95% at 50% 45%, transparent 55%, rgba(0, 0, 0, 0.62));
 }
 
 /* The painting replaces each theme's own CSS backdrop. */
-[data-theme="deco"] body:has(> .realm-scene.is-loaded)::before,
 [data-theme="deco"] body:has(> .realm-scene.is-loaded)::after {
   content: none;
-}
-
-[data-theme="terminal"] body:has(> .realm-scene.is-loaded) {
-  animation: none;
 }
 
 /* The hint sits straight on the painting, without a panel behind it. */
 body:has(> .realm-scene.is-loaded) .hint {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 0 14px rgba(0, 0, 0, 0.85);
+}
+
+/* ---- The scene's light. Placed in px by realms.js. ---- */
+
+.realm-lights > * {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+}
+
+.realm-scene[data-scene="bloodmoon"] { --rl-core: rgba(255, 96, 92, 0.42); --rl-mid: rgba(196, 18, 40, 0.17); --rl-flare: rgba(255, 150, 130, 0.5); }
+.realm-scene[data-scene="deco"] { --rl-core: rgba(255, 218, 150, 0.5); --rl-mid: rgba(255, 168, 60, 0.18); --rl-flare: rgba(255, 228, 170, 0.6); }
+.realm-scene[data-scene="holo"] { --rl-core: rgba(255, 255, 255, 0.5); --rl-mid: rgba(186, 166, 255, 0.18); --rl-flare: var(--rs-tint, #ffffff); }
+.realm-scene[data-scene="terminal"] { --rl-core: rgba(90, 255, 170, 0.3); --rl-mid: rgba(34, 255, 127, 0.1); --rl-flare: rgba(120, 255, 180, 0.38); }
+
+/* The source's glow breathes, as Mystic's aura does. */
+.rl-glow {
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--rl-core), var(--rl-mid) 42%, transparent);
+  will-change: opacity;
+  animation: rl-breathe 9s ease-in-out infinite alternate;
+}
+
+@keyframes rl-breathe {
+  from { opacity: 0.55; }
+  to { opacity: 1; }
+}
+
+/* A separate flare answers each reveal, so the glow never has to
+   breathe and flare at once. */
+.rl-flare {
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--rl-flare), transparent 72%);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.realm-lights.is-surging .rl-flare {
+  animation: rl-flare 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.realm-lights.is-surging.is-major .rl-flare {
+  animation: rl-flare-major 3.6s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+@keyframes rl-flare {
+  0% { opacity: 0; transform: scale(0.7); }
+  16% { opacity: 0.75; }
+  100% { opacity: 0; transform: scale(1.08); }
+}
+
+@keyframes rl-flare-major {
+  0% { opacity: 0; transform: scale(0.6); }
+  18% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.25); }
+}
+
+/* Candles and torches: an irregular flicker, each on its own clock. */
+.rl-candle {
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 196, 120, 0.6), rgba(255, 120, 40, 0.18) 45%, transparent);
+  will-change: opacity;
+  animation: rl-flicker calc(1.9s + var(--i) * 0.37s) linear calc(var(--i) * -0.7s) infinite;
+}
+
+.rl-torch {
+  background: radial-gradient(closest-side, rgba(255, 214, 140, 0.62), rgba(255, 150, 40, 0.2) 45%, transparent);
+}
+
+@keyframes rl-flicker {
+  0% { opacity: 0.72; }
+  11% { opacity: 0.95; }
+  19% { opacity: 0.62; }
+  33% { opacity: 0.9; }
+  48% { opacity: 0.74; }
+  60% { opacity: 1; }
+  76% { opacity: 0.66; }
+  100% { opacity: 0.72; }
+}
+
+/* Dust or sparks drifting up through the light: a tile of points that
+   slides up by exactly one tile, so the loop never shows a seam. */
+.rl-motes {
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: calc(100% + 320px);
+  background-size: 260px 320px;
+  will-change: transform;
+  animation: rl-drift 46s linear infinite;
+}
+
+@keyframes rl-drift {
+  from { transform: translateY(0); }
+  to { transform: translateY(-320px); }
+}
+
+.realm-scene[data-scene="bloodmoon"] .rl-motes {
+  background-image:
+    radial-gradient(1.4px 1.4px at 12% 18%, rgba(255, 200, 170, 0.75), transparent),
+    radial-gradient(1px 1px at 37% 64%, rgba(255, 150, 130, 0.7), transparent),
+    radial-gradient(1.6px 1.6px at 58% 33%, rgba(255, 210, 180, 0.6), transparent),
+    radial-gradient(1.1px 1.1px at 81% 82%, rgba(255, 170, 150, 0.7), transparent),
+    radial-gradient(1.3px 1.3px at 92% 41%, rgba(255, 200, 170, 0.55), transparent);
+  opacity: 0.6;
+}
+
+.realm-scene[data-scene="deco"] .rl-motes {
+  background-image:
+    radial-gradient(1.4px 1.4px at 14% 22%, rgba(255, 226, 160, 0.8), transparent),
+    radial-gradient(1px 1px at 41% 71%, rgba(255, 200, 120, 0.7), transparent),
+    radial-gradient(1.5px 1.5px at 63% 38%, rgba(255, 236, 190, 0.65), transparent),
+    radial-gradient(1.1px 1.1px at 86% 86%, rgba(255, 210, 140, 0.7), transparent);
+  opacity: 0.55;
+}
+
+.realm-scene[data-scene="holo"] .rl-motes {
+  background-image:
+    radial-gradient(1.5px 1.5px at 10% 16%, #fff, transparent),
+    radial-gradient(1.2px 1.2px at 33% 58%, rgba(255, 170, 230, 0.9), transparent),
+    radial-gradient(1.6px 1.6px at 54% 29%, rgba(170, 220, 255, 0.9), transparent),
+    radial-gradient(1.1px 1.1px at 77% 77%, rgba(200, 255, 220, 0.9), transparent),
+    radial-gradient(1.4px 1.4px at 91% 46%, #fff, transparent);
+  opacity: 0.6;
+}
+
+/* Blood Moon: shafts of red light falling from the rose window, in two
+   sets that breathe out of step. */
+.rl-shafts {
+  will-change: opacity;
+  animation: rl-shaft 9s ease-in-out infinite alternate;
+}
+
+.rl-shafts-b {
+  animation-duration: 12.5s;
+  animation-delay: -6s;
+}
+
+@keyframes rl-shaft {
+  from { opacity: 0.25; }
+  to { opacity: 0.9; }
+}
+
+/* Deco: the sun's rays turning behind the winged disc, and the floor's
+   sunburst answering it. */
+.rl-fan {
+  will-change: transform;
+  animation: sigil-turn 300s linear infinite;
+}
+
+.rl-floor {
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 210, 130, 0.3), rgba(255, 170, 60, 0.08) 50%, transparent);
+  will-change: opacity;
+  animation: rl-breathe 11s ease-in-out -4s infinite alternate;
+}
+
+/* Holo: pulses of white light running down the beam into the prism, and
+   the spectrum it casts, shimmering. */
+.rl-pulse-track {
+  transform-origin: 0 50%;
+}
+
+.rl-pulse {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 16%;
+  height: 100%;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.25) 45%, transparent);
+  transform: translateX(-100%);
+  will-change: transform;
+  animation: rl-pulse 4.2s cubic-bezier(0.55, 0, 0.7, 1) infinite;
+}
+
+@keyframes rl-pulse {
+  0% { transform: translateX(-100%); }
+  62%, 100% { transform: translateX(600%); }
+}
+
+.rl-spectrum {
+  will-change: opacity;
+  animation: rl-shimmer 6.5s ease-in-out infinite alternate;
+}
+
+@keyframes rl-shimmer {
+  from { opacity: 0.18; }
+  to { opacity: 0.5; }
+}
+
+/* ---- Sigils: each realm's counterpart to Mystic's, on the same frame
+   and at the same speeds (sigil-turn, sigil-breathe and sigil-surge
+   are Mystic's own keyframes in style.css). ---- */
+
+.realm-sigil {
+  position: absolute;
+  left: var(--cx);
+  top: var(--cy);
+  width: min(1040px, max(720px, 130vmin));
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+}
+
+.realm-holo .realm-sigil { color: #eee8ff; --rs-aura: rgba(150, 110, 255, 0.24); }
+.realm-terminal .realm-sigil { color: #22ff7f; --rs-aura: rgba(34, 255, 127, 0.13); }
+.realm-bloodmoon .realm-sigil { color: #b1a8ad; --rs-aura: rgba(190, 18, 40, 0.3); }
+.realm-deco .realm-sigil { color: #e8c368; --rs-aura: rgba(255, 186, 80, 0.2); }
+
+.rs-aura,
+.rs-tint,
+.rs-sweep,
+.rs-ping {
+  position: absolute;
+  border-radius: 50%;
+}
+
+.rs-aura,
+.rs-tint {
+  inset: 0;
+}
+
+.rs-aura {
+  background:
+    radial-gradient(closest-side, transparent 86%, color-mix(in srgb, currentColor 9%, transparent) 93%, transparent 99%),
+    radial-gradient(closest-side, var(--rs-aura), color-mix(in srgb, var(--rs-aura) 40%, transparent) 45%, transparent 100%);
+  opacity: 0.62;
+  animation: sigil-breathe 14s ease-in-out infinite;
+}
+
+/* Holo: the aura takes the card's ray once one is drawn. */
+.rs-tint {
+  display: none;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--rs-tint, #fff) 34%, transparent), transparent 75%);
+  opacity: 0;
+}
+
+.realm-holo .rs-tint {
+  display: block;
+}
+
+.realm-holo.is-dispersing .rs-tint {
+  animation: rs-tint 2.8s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+
+@keyframes rs-tint {
+  0% { opacity: 0; }
+  16% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
+.rs-spin {
+  position: absolute;
+  aspect-ratio: 1;
+  opacity: 0.62;
+  will-change: transform;
+}
+
+.rs-spin-rim {
+  width: 100%;
+  left: 0;
+  top: 0;
+  animation: sigil-turn 360s linear infinite;
+}
+
+.rs-spin-mid {
+  width: 83.333%;
+  left: 8.3335%;
+  top: 8.3335%;
+  animation: sigil-turn 240s linear infinite reverse;
+}
+
+.rs-spin-hub {
+  width: 50.667%;
+  left: 24.6665%;
+  top: 24.6665%;
+  animation: sigil-turn 120s linear infinite;
+}
+
+/* The figures tick round like a clock, a degree a second. */
+.realm-terminal .rs-spin-rim {
+  animation-timing-function: steps(360);
+}
+
+.rs-stir,
+.rs-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.rs-layer {
+  display: block;
+  overflow: visible;
+}
+
+.rs-spin-rim .rs-layer { opacity: 0.55; }
+.rs-spin-mid .rs-layer { opacity: 0.66; }
+.rs-spin-hub .rs-layer { opacity: 0.8; }
+
+/* The bit rings are dense; they sit back so the figures lead. */
+.realm-terminal .rs-spin-mid .rs-layer { opacity: 0.42; }
+
+.rs-text {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
+}
+
+.rs-mono {
+  font-family: 'Space Mono', monospace;
+}
+
+.rs-ray {
+  stroke-opacity: 0.34;
+}
+
+.rs-ray.is-chosen {
+  stroke-opacity: 1;
+}
+
+/* A flare through the wheels on every reveal, listed after each turn so
+   the turn keeps running (animations are matched by name). */
+.realm-sigil.is-surging .rs-spin-rim {
+  animation: sigil-turn 360s linear infinite, sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.realm-terminal .realm-sigil.is-surging .rs-spin-rim {
+  animation: sigil-turn 360s steps(360) infinite, sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.realm-sigil.is-surging .rs-spin-mid {
+  animation: sigil-turn 240s linear infinite reverse, sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.realm-sigil.is-surging .rs-spin-hub {
+  animation: sigil-turn 120s linear infinite, sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+/* The shuffle stirs the wheels: each swings round and settles back,
+   on a layer inside its turn so the turn itself never jumps. */
+.realm-sigil.is-stirring .rs-stir {
+  animation: rs-stir 1.7s cubic-bezier(0.3, 0.6, 0.25, 1);
+}
+
+.realm-sigil.is-stirring .rs-spin-mid .rs-stir {
+  animation-name: rs-stir-back;
+}
+
+@keyframes rs-stir {
+  0% { transform: rotate(0deg); }
+  38% { transform: rotate(16deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes rs-stir-back {
+  0% { transform: rotate(0deg); }
+  38% { transform: rotate(-22deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* Terminal: a radar sweep turning inside the reticle, and a ping on
+   every reveal. */
+.rs-sweep,
+.rs-ping {
+  display: none;
+  width: 50.667%;
+  left: 24.6665%;
+  top: 24.6665%;
+  aspect-ratio: 1;
+}
+
+.realm-terminal .rs-sweep {
+  display: block;
+  background: conic-gradient(from 0deg, transparent 0deg 292deg, rgba(34, 255, 127, 0.22) 356deg, rgba(190, 255, 215, 0.5) 359.4deg, transparent 360deg);
+  -webkit-mask-image: radial-gradient(closest-side, transparent 38%, #000 40%, #000 92%, transparent 93%);
+  mask-image: radial-gradient(closest-side, transparent 38%, #000 40%, #000 92%, transparent 93%);
+  opacity: 0.7;
+  will-change: transform;
+  animation: sigil-turn 7s linear infinite;
+}
+
+.realm-terminal .rs-ping {
+  display: block;
+  border: 1.5px solid #22ff7f;
+  box-shadow: 0 0 18px rgba(34, 255, 127, 0.55), inset 0 0 18px rgba(34, 255, 127, 0.35);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.realm-terminal .realm-sigil.is-surging .rs-ping {
+  animation: rs-ping 1.6s cubic-bezier(0.2, 0.6, 0.3, 1);
+}
+
+@keyframes rs-ping {
+  0% { opacity: 0.95; transform: scale(0.62); }
+  100% { opacity: 0; transform: scale(1.9); }
+}
+
+/* ---- Major halos: each realm's own in place of Mystic's star chart.
+   Same bloom (.major-halo in style.css). ---- */
+
+:is([data-theme="holo"], [data-theme="terminal"], [data-theme="bloodmoon"], [data-theme="deco"]) .major-halo > svg:not(.realm-halo) {
+  display: none;
 }
 
 /* ---- Card-back emblems: each theme's own seal in place of the
@@ -260,53 +673,20 @@ body:has(> .realm-scene.is-loaded) .hint {
 
 /* ---- Blood Moon: the Crimson Cathedral ---- */
 
-.briar {
-  position: absolute;
-  width: clamp(92px, calc(var(--cw) * 0.44), 156px);
-  aspect-ratio: 1;
-}
-
-.briar svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.briar-tl {
-  left: calc(var(--left) - 14px);
-  top: calc(var(--top) - 14px);
-}
-
-.briar-tr {
-  left: calc(var(--left) + var(--cw) + 14px);
-  top: calc(var(--top) - 14px);
-  translate: -100% 0;
-  transform: scaleX(-1);
-}
-
-.briar-bl {
-  left: calc(var(--left) - 14px);
-  top: calc(var(--top) + var(--ch) + 14px);
-  translate: 0 -100%;
-  transform: scaleY(-1);
-}
-
-.briar-br {
-  left: calc(var(--left) + var(--cw) + 14px);
-  top: calc(var(--top) + var(--ch) + 14px);
-  translate: -100% -100%;
-  transform: scale(-1, -1);
-}
-
-/* Light through the glass, cast across the card for a moment. */
+/* Light through the glass, cast across the card for a moment. It sits
+   on the card's face, so it turns with the card. */
 .rose-cast {
+  display: none;
+}
+
+[data-theme="bloodmoon"] .rose-cast {
   position: absolute;
-  left: var(--left);
-  top: var(--top);
-  width: var(--cw);
-  height: var(--ch);
+  inset: 0;
+  z-index: 3;
+  display: block;
   overflow: hidden;
-  border-radius: var(--radius-card);
+  border-radius: inherit;
+  pointer-events: none;
 }
 
 .rose-cast span {
@@ -322,14 +702,14 @@ body:has(> .realm-scene.is-loaded) .hint {
   will-change: opacity;
 }
 
-.realm-front.is-flooding .rose-cast span {
+.rose-cast.is-flooding span {
   animation: rose-cast 4.2s ease-out;
 }
 
-.realm-front.is-flooding .rose-cast span:nth-child(2) { animation-delay: 0.1s; }
-.realm-front.is-flooding .rose-cast span:nth-child(3) { animation-delay: 0.2s; }
-.realm-front.is-flooding .rose-cast span:nth-child(4) { animation-delay: 0.3s; }
-.realm-front.is-flooding .rose-cast span:nth-child(5) { animation-delay: 0.4s; }
+.rose-cast.is-flooding span:nth-child(2) { animation-delay: 0.1s; }
+.rose-cast.is-flooding span:nth-child(3) { animation-delay: 0.2s; }
+.rose-cast.is-flooding span:nth-child(4) { animation-delay: 0.3s; }
+.rose-cast.is-flooding span:nth-child(5) { animation-delay: 0.4s; }
 
 @keyframes rose-cast {
   0% { opacity: 0; }
@@ -337,13 +717,33 @@ body:has(> .realm-scene.is-loaded) .hint {
   100% { opacity: 0; }
 }
 
+/* Reduced motion: everything holds still, as Mystic's sigil does; the
+   lights keep their resting glow. */
 @media (prefers-reduced-motion: reduce) {
-  .realm-scene {
-    animation: none;
+  .realm-scene,
+  .rs-spin,
+  .rs-aura,
+  .rs-sweep,
+  .rl-glow,
+  .rl-candle,
+  .rl-motes,
+  .rl-shafts,
+  .rl-fan,
+  .rl-floor,
+  .rl-pulse,
+  .rl-spectrum {
+    animation: none !important;
   }
 
+  .rl-pulse,
+  .rs-sweep {
+    display: none !important;
+  }
+
+  .realm-sigil *,
+  .realm-lights *,
   .realm-holo.is-dispersing *,
-  .realm-front.is-flooding * {
+  .rose-cast * {
     animation-duration: 0.01ms !important;
   }
 }
@@ -383,6 +783,11 @@ body:has(> .realm-scene.is-loaded) .hint {
   box-shadow:
     0 0 24px -6px color-mix(in srgb, var(--ray, #a86bff) 55%, transparent),
     0 28px 60px -22px rgba(0, 0, 0, 0.85);
+}
+
+/* The realm's face is still glass: no foil crossfade over it. */
+[data-theme="holo"] .card-face::before {
+  content: none;
 }
 
 [data-theme="holo"] .card-art,
@@ -480,22 +885,7 @@ body:has(> .realm-scene.is-loaded) .hint {
 .geo-screen.is-judged > :nth-child(4) { animation-delay: 0.45s; }
 .geo-screen.is-judged > :nth-child(5) { animation-delay: 0.6s; }
 
-/* ---- Cathedral: the card stands in a pointed arch, its art is ruby
-   glass in a lead lattice ---- */
-
-.gothic-arch {
-  position: absolute;
-  left: calc(var(--left) - 16px);
-  top: calc(var(--top) - var(--cw) * 0.3);
-  width: calc(var(--cw) + 32px);
-  height: calc(var(--ch) + var(--cw) * 0.3 + 18px);
-}
-
-.gothic-arch svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
+/* ---- Cathedral: the card's art is ruby glass in a lead lattice ---- */
 
 [data-theme="bloodmoon"] .card-art,
 [data-theme="bloodmoon"] .card-art[data-element] {
