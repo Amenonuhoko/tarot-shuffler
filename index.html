@@ -7,9 +7,9 @@
 <title>Tarot Pull</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css?v=20261025-3">
-<link rel="stylesheet" href="dice.css?v=20261025">
-<link rel="stylesheet" href="realms.css?v=20261025-5">
+<link rel="stylesheet" href="style.css?v=20261025-4">
+<link rel="stylesheet" href="dice.css?v=20261025-2">
+<link rel="stylesheet" href="realms.css?v=20261025-6">
 <script>
   // Put the saved theme on before the first paint, so the default theme
   // doesn't flash first, and tint the browser chrome to match. script.js
@@ -21,6 +21,24 @@
       var chrome = getComputedStyle(document.documentElement).getPropertyValue("--chrome").trim();
       if (chrome) document.querySelector('meta[name="theme-color"]').setAttribute("content", chrome);
     } catch (err) {}
+  })();
+  // Light mode for older phones: the slow background motion steps ten
+  // times a second instead of every frame (see "Light mode" in
+  // style.css). On for phones that report 4 GB of memory or less, or
+  // once script.js has seen this device drop frames. ?lite=1 forces it
+  // on, ?lite=0 keeps it off for good.
+  (function () {
+    var forced = /[?&]lite=([01])/.exec(location.search);
+    var saved = forced ? forced[1] : null;
+    try {
+      if (forced) localStorage.setItem("tarotPullLite", saved);
+      else saved = localStorage.getItem("tarotPullLite");
+    } catch (err) {}
+    var lowMemory = navigator.deviceMemory && navigator.deviceMemory <= 4
+      && window.matchMedia && matchMedia("(pointer: coarse)").matches;
+    if (saved === "1" || (saved !== "0" && lowMemory)) {
+      document.documentElement.classList.add("perf-lite");
+    }
   })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -629,7 +647,7 @@
   </a>
 </footer>
 
-<script src="script.js?v=20261025-4"></script>
+<script src="script.js?v=20261025-5"></script>
 <script src="realms.js?v=20261025-5"></script>
 </body>
 </html>

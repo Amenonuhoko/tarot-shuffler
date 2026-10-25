@@ -713,6 +713,30 @@ body:has(> .realm-scene.is-loaded) .hint {
   100% { opacity: 0; }
 }
 
+/* Light mode (see the end of style.css): the realm's slow motion steps
+   ten times a second, on the same frames as the rest. The candles jump
+   between their flicker's keyframes, the radar sweep ticks round like
+   the rim, and the beam's pulse steps 20 times a second. */
+.perf-lite .rs-spin-rim { animation-timing-function: steps(3600) !important; }
+.perf-lite .rs-spin-mid { animation-timing-function: steps(2400) !important; }
+.perf-lite .rs-spin-hub { animation-timing-function: steps(1200) !important; }
+.perf-lite .realm-terminal .rs-spin-rim { animation-timing-function: steps(360) !important; }
+.perf-lite .realm-sigil.is-surging .rs-spin-rim { animation-timing-function: steps(3600), cubic-bezier(0.2, 0.7, 0.3, 1) !important; }
+.perf-lite .realm-sigil.is-surging .rs-spin-mid { animation-timing-function: steps(2400), cubic-bezier(0.2, 0.7, 0.3, 1) !important; }
+.perf-lite .realm-sigil.is-surging .rs-spin-hub { animation-timing-function: steps(1200), cubic-bezier(0.2, 0.7, 0.3, 1) !important; }
+.perf-lite .realm-terminal .realm-sigil.is-surging .rs-spin-rim { animation-timing-function: steps(360), cubic-bezier(0.2, 0.7, 0.3, 1) !important; }
+.perf-lite .rs-aura { animation-timing-function: steps(70) !important; }
+.perf-lite .rl-glow { animation-timing-function: steps(90) !important; }
+.perf-lite .rl-floor { animation-timing-function: steps(110) !important; }
+.perf-lite .rl-candle { animation-timing-function: steps(1) !important; }
+.perf-lite .rl-motes { animation-timing-function: steps(460) !important; }
+.perf-lite .rl-shafts { animation-timing-function: steps(90) !important; }
+.perf-lite .rl-shafts-b { animation-timing-function: steps(125) !important; }
+.perf-lite .rl-fan { animation-timing-function: steps(3000) !important; }
+.perf-lite .rl-spectrum { animation-timing-function: steps(65) !important; }
+.perf-lite .rl-pulse { animation-timing-function: steps(52) !important; }
+.perf-lite .realm-terminal .rs-sweep { animation-timing-function: steps(70) !important; }
+
 /* Reduced motion: everything holds still, as Mystic's sigil does; the
    lights keep their resting glow. */
 @media (prefers-reduced-motion: reduce) {

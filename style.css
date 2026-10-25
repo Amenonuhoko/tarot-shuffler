@@ -1393,6 +1393,15 @@ body.major-omen .omen-veil {
   50% { color: var(--gold); }
 }
 
+/* The star's pulse and the themes' title shimmers repaint on the main
+   thread every frame, and the front face kept running them while the
+   card lay face down with the face out of sight. They hold until it
+   turns up. */
+.card:not(.flipped) .card-title,
+.card:not(.flipped) .card-description.has-more::after {
+  animation-play-state: paused;
+}
+
 .hint {
   margin: 0;
   font-size: 0.85rem;
@@ -3126,6 +3135,38 @@ body.major-omen .omen-veil {
 .card-front.is-open .mystic-frame-inner {
   opacity: 0;
 }
+
+/* -- Light mode, for older phones (.perf-lite on the root; index.html
+   and script.js decide). The slow background motion steps ten times a
+   second instead of every frame. A 360s wheel moves under a pixel per
+   step, so it reads the same, but between steps there is nothing new to
+   draw and the GPU rests: Mystic at idle drops from about 52 frames a
+   second to 9, cutting its drawing work by about 80%. Each step count
+   is its keyframe segment's length in tenths of a second, so every
+   layer's steps land on the same frames. The title shimmers step 20
+   times a second, since a sweeping highlight shows coarser steps. The
+   card's own turns, flares and the Major sequence are untouched. -- */
+.perf-lite .sigil-spin-rim { animation-timing-function: steps(3600) !important; }
+.perf-lite .sigil-spin-zodiac { animation-timing-function: steps(2400) !important; }
+.perf-lite .sigil-spin-planets { animation-timing-function: steps(1200) !important; }
+.perf-lite .motif-sigil.is-surging .sigil-spin-rim { animation-timing-function: steps(3600), cubic-bezier(0.2, 0.7, 0.3, 1) !important; }
+.perf-lite .motif-sigil.is-surging .sigil-spin-zodiac { animation-timing-function: steps(2400), cubic-bezier(0.2, 0.7, 0.3, 1) !important; }
+.perf-lite .motif-sigil.is-surging .sigil-spin-planets { animation-timing-function: steps(1200), cubic-bezier(0.2, 0.7, 0.3, 1) !important; }
+.perf-lite .sigil-aura { animation-timing-function: steps(70) !important; }
+.perf-lite .motif-veil { animation-timing-function: steps(520) !important; }
+.perf-lite .motif-stars { animation-timing-function: steps(48) !important; }
+.perf-lite .motif-stars::after { animation-timing-function: steps(72) !important; }
+.perf-lite .card-slot::before { animation-timing-function: steps(45) !important; }
+.perf-lite .card-glow { animation-timing-function: steps(35) !important; }
+.perf-lite .card-description.has-more::after { animation-timing-function: steps(12) !important; }
+.perf-lite[data-theme="holo"] .card-face::before { animation-timing-function: steps(45) !important; }
+.perf-lite[data-theme="bloodmoon"] .hint::after { animation-timing-function: steps(22) !important; }
+.perf-lite[data-theme="holo"] .card-title { animation-timing-function: steps(100) !important; }
+.perf-lite[data-theme="deco"] .card-title,
+.perf-lite[data-theme="bloodmoon"] .card-title { animation-timing-function: steps(120) !important; }
+.perf-lite[data-theme="holo"] .card-front-content.content-cascade > .card-title { animation-timing-function: steps(100), ease-out !important; }
+.perf-lite[data-theme="deco"] .card-front-content.content-cascade > .card-title,
+.perf-lite[data-theme="bloodmoon"] .card-front-content.content-cascade > .card-title { animation-timing-function: steps(120), ease-out !important; }
 
 @media (prefers-reduced-motion: reduce) {
   .card, .card.shuffling, .card.revealing, .reveal-flash, .card.revealing .reveal-flash,

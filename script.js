@@ -2519,13 +2519,37 @@ function drawRainGlyph(ctx, index, size, color) {
   }
 }
 
+// The rain's soft focus is baked into each sprite where the canvas can
+// blur, so the full-screen canvas doesn't carry a CSS blur that the GPU
+// re-runs over the whole screen on every frame. Sprites get a margin
+// above and below for the blur to spread into; the figures already sit
+// well clear of their sides.
+const TERMINAL_RAIN_BLUR_PX = 0.6;
+const terminalRainBlursSprites = typeof CanvasRenderingContext2D === "function"
+  && "filter" in CanvasRenderingContext2D.prototype;
+const TERMINAL_RAIN_SPRITE_PAD = terminalRainBlursSprites ? 2 : 0;
+
 function buildTerminalRainGlyphs() {
-  const size = TERMINAL_RAIN_FONT_SIZE * terminalRainScale();
+  const scale = terminalRainScale();
+  const size = TERMINAL_RAIN_FONT_SIZE * scale;
+  const pad = TERMINAL_RAIN_SPRITE_PAD * scale;
+  const glyph = document.createElement("canvas");
+  glyph.width = size;
+  glyph.height = size;
+  const glyphCtx = glyph.getContext("2d");
   const make = (index, color) => {
     const sprite = document.createElement("canvas");
     sprite.width = size;
-    sprite.height = size;
-    drawRainGlyph(sprite.getContext("2d"), index, size, color);
+    sprite.height = size + pad * 2;
+    if (!terminalRainBlursSprites) {
+      drawRainGlyph(sprite.getContext("2d"), index, size, color);
+      return sprite;
+    }
+    glyphCtx.clearRect(0, 0, size, size);
+    drawRainGlyph(glyphCtx, index, size, color);
+    const spriteCtx = sprite.getContext("2d");
+    spriteCtx.filter = `blur(${TERMINAL_RAIN_BLUR_PX * scale}px)`;
+    spriteCtx.drawImage(glyph, 0, pad);
     return sprite;
   };
   terminalRainGlyphs = Array.from({ length: 16 + 64 }, (_, i) => ({
@@ -2556,40 +2580,58 @@ function resizeTerminalRain() {
   }));
 }
 
+// The rain moves in whole-glyph steps every 55-220ms, so drawing it on
+// every frame showed nothing new half the time. At 30 frames a second
+// the steps keep the pace they had at 60 (four and fourteen 60Hz frames).
+// Light mode (see the end of the file) draws 15 a second: the opening
+// rush keeps its pace and the steady fall runs about 15% slower.
+const TERMINAL_RAIN_FRAME_MS = 1000 / 30;
+const TERMINAL_RAIN_LITE_FRAME_MS = 1000 / 15;
+
 function drawTerminalRain(now) {
   terminalRainFrame = requestAnimationFrame(drawTerminalRain);
+  const frameMs = document.documentElement.classList.contains("perf-lite")
+    ? TERMINAL_RAIN_LITE_FRAME_MS
+    : TERMINAL_RAIN_FRAME_MS;
+  // A little slack, so frames a few ms early on the screen's beat still count.
+  if (terminalRainLastTime && now - terminalRainLastTime < frameMs - 4) {
+    return;
+  }
 
   const delta = terminalRainLastTime ? Math.min(now - terminalRainLastTime, 100) : 16;
   terminalRainLastTime = now;
 
-  terminalRainCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-
+  // A column only changes when it steps, and columns don't overlap, so
+  // only the columns that stepped are cleared and redrawn. A tick where
+  // none did leaves the canvas, and the screen, untouched.
   terminalRainColumns.forEach((col) => {
     col.elapsed += delta;
     const stepMs = col.hasLooped ? TERMINAL_RAIN_SLOW_STEP_MS : TERMINAL_RAIN_FAST_STEP_MS;
-    if (col.elapsed >= stepMs) {
-      col.elapsed = 0;
+    if (col.elapsed < stepMs) {
+      return;
+    }
+    col.elapsed = 0;
 
-      col.drops.forEach((drop) => {
-        drop.y += TERMINAL_RAIN_FONT_SIZE;
-        drop.trail.unshift(Math.floor(Math.random() * terminalRainGlyphs.length));
-        drop.trail.length = TERMINAL_RAIN_TRAIL_LENGTH;
-      });
+    col.drops.forEach((drop) => {
+      drop.y += TERMINAL_RAIN_FONT_SIZE;
+      drop.trail.unshift(Math.floor(Math.random() * terminalRainGlyphs.length));
+      drop.trail.length = TERMINAL_RAIN_TRAIL_LENGTH;
+    });
 
-      const trailBottom = window.innerHeight + TERMINAL_RAIN_TRAIL_LENGTH * TERMINAL_RAIN_FONT_SIZE;
-      col.drops = col.drops.filter((drop) => drop.y <= trailBottom);
+    const trailBottom = window.innerHeight + TERMINAL_RAIN_TRAIL_LENGTH * TERMINAL_RAIN_FONT_SIZE;
+    col.drops = col.drops.filter((drop) => drop.y <= trailBottom);
 
-      // A new drop doesn't need to wait for the previous one to fully fall off —
-      // it can start once the newest drop is most of the way down.
-      const newestDrop = col.drops[col.drops.length - 1];
-      const canSpawn = col.drops.length < TERMINAL_RAIN_MAX_DROPS
-        && (!newestDrop || newestDrop.y > window.innerHeight * 0.6);
-      if (canSpawn && Math.random() > 0.975) {
-        col.drops.push(makeTerminalRainDrop(0));
-        col.hasLooped = true;
-      }
+    // A new drop doesn't need to wait for the previous one to fully fall off —
+    // it can start once the newest drop is most of the way down.
+    const newestDrop = col.drops[col.drops.length - 1];
+    const canSpawn = col.drops.length < TERMINAL_RAIN_MAX_DROPS
+      && (!newestDrop || newestDrop.y > window.innerHeight * 0.6);
+    if (canSpawn && Math.random() > 0.975) {
+      col.drops.push(makeTerminalRainDrop(0));
+      col.hasLooped = true;
     }
 
+    terminalRainCtx.clearRect(col.x, 0, TERMINAL_RAIN_FONT_SIZE, window.innerHeight);
     col.drops.forEach((drop) => {
       drop.trail.forEach((glyph, i) => {
         if (glyph < 0) {
@@ -2597,7 +2639,13 @@ function drawTerminalRain(now) {
         }
         const sprite = terminalRainGlyphs[glyph];
         terminalRainCtx.globalAlpha = i === 0 ? 0.95 : 0.55 * Math.pow(0.88, i);
-        terminalRainCtx.drawImage(i === 0 ? sprite.head : sprite.trail, col.x, drop.y - (i + 1) * TERMINAL_RAIN_FONT_SIZE, TERMINAL_RAIN_FONT_SIZE, TERMINAL_RAIN_FONT_SIZE);
+        terminalRainCtx.drawImage(
+          i === 0 ? sprite.head : sprite.trail,
+          col.x,
+          drop.y - (i + 1) * TERMINAL_RAIN_FONT_SIZE - TERMINAL_RAIN_SPRITE_PAD,
+          TERMINAL_RAIN_FONT_SIZE,
+          TERMINAL_RAIN_FONT_SIZE + TERMINAL_RAIN_SPRITE_PAD * 2
+        );
       });
     });
   });
@@ -2612,6 +2660,9 @@ function startTerminalRain() {
     buildTerminalRainGlyphs();
   }
   resizeTerminalRain();
+  if (terminalRainBlursSprites) {
+    terminalRainCanvas.style.filter = "none";
+  }
   terminalRainCanvas.hidden = false;
   terminalRainLastTime = 0;
   terminalRainFrame = requestAnimationFrame(drawTerminalRain);
@@ -2756,3 +2807,82 @@ document.addEventListener("click", (event) => {
 });
 
 applyTheme(loadStoredTheme());
+
+// ---- Light mode for slower phones ----
+// index.html turns it on up front for phones that report little memory.
+// Any other device gets its frame rate checked twice after it opens; if
+// it can't keep the background moving smoothly both times, light mode
+// goes on and is remembered for next time (?lite=0 keeps it off).
+const LITE_STORAGE_KEY = "tarotPullLite";
+const LITE_PROBE_FRAMES = 90;
+const LITE_PROBE_SLOW_FRAME_MS = 25;
+const LITE_PROBE_SLOW_SHARE = 0.25;
+const LITE_PROBE_DELAYS_MS = [3000, 8000];
+
+function liteModeSettled() {
+  if (document.documentElement.classList.contains("perf-lite")) {
+    return true;
+  }
+  try {
+    return localStorage.getItem(LITE_STORAGE_KEY) === "0";
+  } catch (err) {
+    return false;
+  }
+}
+
+function enableLiteMode() {
+  document.documentElement.classList.add("perf-lite");
+  try {
+    localStorage.setItem(LITE_STORAGE_KEY, "1");
+  } catch (err) {}
+}
+
+// Reports whether a quarter or more of the next 90 frames ran late.
+// A gap of half a second means the page was hidden, not slow, so the
+// count starts over.
+function probeFramePacing(onDone) {
+  const gaps = [];
+  let last = 0;
+  function step(now) {
+    if (last) {
+      const gap = now - last;
+      if (gap > 500) {
+        gaps.length = 0;
+      } else {
+        gaps.push(gap);
+      }
+    }
+    last = now;
+    if (gaps.length < LITE_PROBE_FRAMES) {
+      requestAnimationFrame(step);
+      return;
+    }
+    const slow = gaps.filter((gap) => gap > LITE_PROBE_SLOW_FRAME_MS).length;
+    onDone(slow / gaps.length >= LITE_PROBE_SLOW_SHARE);
+  }
+  requestAnimationFrame(step);
+}
+
+function probeForLiteMode(round = 0) {
+  if (liteModeSettled() || prefersReducedMotion()) {
+    return;
+  }
+  setTimeout(() => {
+    probeFramePacing((slow) => {
+      if (!slow) {
+        return;
+      }
+      if (round + 1 < LITE_PROBE_DELAYS_MS.length) {
+        probeForLiteMode(round + 1);
+      } else {
+        enableLiteMode();
+      }
+    });
+  }, LITE_PROBE_DELAYS_MS[round]);
+}
+
+if (document.readyState === "complete") {
+  probeForLiteMode();
+} else {
+  window.addEventListener("load", () => probeForLiteMode(), { once: true });
+}

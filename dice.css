@@ -865,6 +865,15 @@ body.is-dice-mode .dice-settings {
   text-align: right;
 }
 
+/* Light mode (see the end of style.css): the tray's slow motion steps
+   about ten times a second. */
+.perf-lite .sigil-svg { animation-timing-function: steps(2400); }
+.perf-lite .sigil-svg-ward { animation-timing-function: steps(3200); }
+.perf-lite .cipher-ring { animation-timing-function: steps(1400); }
+.perf-lite .mist-blob-a { animation-timing-function: steps(73); }
+.perf-lite .mist-blob-b { animation-timing-function: steps(100); }
+.perf-lite .mist-blob-c { animation-timing-function: steps(87); }
+
 @media (prefers-reduced-motion: reduce) {
   .mist-blob,
   .sigil-svg,
