@@ -2409,6 +2409,7 @@ if ("serviceWorker" in navigator) {
 const themeToggleEl = document.getElementById("themeToggle");
 const themeMenuEl = document.getElementById("themeMenu");
 const themeOptionEls = document.querySelectorAll(".theme-option");
+const themeColorMetaEl = document.querySelector('meta[name="theme-color"]');
 let isThemeMenuOpen = false;
 
 const THEME_STORAGE_KEY = "tarotPullTheme";
@@ -2660,6 +2661,11 @@ function applyTheme(themeValue) {
 
   renderHistory();
   saveTheme(themeValue);
+
+  const chrome = getComputedStyle(document.documentElement).getPropertyValue("--chrome").trim();
+  if (chrome) {
+    themeColorMetaEl.setAttribute("content", chrome);
+  }
 
   if (window.TarotDice) {
     window.TarotDice.applyTheme();

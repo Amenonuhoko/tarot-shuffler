@@ -7,8 +7,21 @@
 <title>Tarot Pull</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css?v=20261025">
+<link rel="stylesheet" href="style.css?v=20261025-2">
 <link rel="stylesheet" href="dice.css?v=20261025">
+<script>
+  // Put the saved theme on before the first paint, so the default theme
+  // doesn't flash first, and tint the browser chrome to match. script.js
+  // re-applies (and validates) it once it loads.
+  (function () {
+    try {
+      var theme = localStorage.getItem("tarotPullTheme");
+      if (theme) document.documentElement.setAttribute("data-theme", theme);
+      var chrome = getComputedStyle(document.documentElement).getPropertyValue("--chrome").trim();
+      if (chrome) document.querySelector('meta[name="theme-color"]').setAttribute("content", chrome);
+    } catch (err) {}
+  })();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Grenze+Gotisch:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Cinzel:wght@500;600&family=Cinzel+Decorative:wght@400;700;900&family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&family=Marck+Script&display=swap" rel="stylesheet">
@@ -16,6 +29,18 @@
 <body>
 
 <canvas class="terminal-rain" id="terminalRain" aria-hidden="true" hidden></canvas>
+
+<!-- Glitch Terminal's phosphor screen for the art window: maps
+     brightness onto the theme's green. The second copy is pre-inverted
+     for reversed cards, whose face is inverted as a whole. -->
+<svg class="svg-defs" width="0" height="0" aria-hidden="true" focusable="false">
+  <filter id="phosphor" color-interpolation-filters="sRGB">
+    <feColorMatrix type="matrix" values="0.0425 0.143 0.0144 0 0  0.319 1.073 0.108 0 0  0.159 0.534 0.054 0 0  0 0 0 1 0"/>
+  </filter>
+  <filter id="phosphor-inverted" color-interpolation-filters="sRGB">
+    <feColorMatrix type="matrix" values="-0.0425 -0.143 -0.0144 0 1  -0.319 -1.073 -0.108 0 1  -0.159 -0.534 -0.054 0 1  0 0 0 1 0"/>
+  </filter>
+</svg>
 
 <div class="mystic-motif" aria-hidden="true">
   <span class="motif-veil"></span>
@@ -603,6 +628,6 @@
   </a>
 </footer>
 
-<script src="script.js?v=20261025"></script>
+<script src="script.js?v=20261025-2"></script>
 </body>
 </html>
