@@ -2640,42 +2640,6 @@ body.major-omen .omen-veil {
     radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 55%);
 }
 
-/* The eclipse itself: a dim coppery disc in the upper sky, lit along
-   its lower-left limb and darkest where the Earth's shadow is deepest,
-   kept toward the top-left so it sits beside the deck picker rather
-   than behind it. ::after closes the night in at the edges. Both are
-   fixed layers that paint once - nothing here animates. */
-[data-theme="bloodmoon"] body::before {
-  content: "";
-  position: fixed;
-  top: 1vh;
-  left: max(-14px, calc(50% - 420px));
-  width: clamp(70px, 18vmin, 160px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  z-index: 0;
-  pointer-events: none;
-  background: radial-gradient(circle at 32% 70%, #c2603a 0%, #8e1c1e 36%, #4a0910 70%, #22040a 100%);
-  box-shadow: inset -6px 6px 14px rgba(10, 1, 3, 0.55), 0 0 34px 6px rgba(163, 16, 44, 0.3);
-  opacity: 0.85;
-}
-
-[data-theme="bloodmoon"] body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0, 0, 0, 0.7) 100%);
-}
-
-/* Lifted over the eclipse layer (it's positioned, so it would otherwise
-   paint over unpositioned content). */
-[data-theme="bloodmoon"] .support-footer {
-  position: relative;
-  z-index: 1;
-}
-
 [data-theme="bloodmoon"] .card-face {
   border: 1.5px solid var(--gold);
   box-shadow: 0 0 0 1px rgba(241,243,247,0.3), 0 0 14px -5px rgba(241,243,247,0.5), 0 0 26px -10px rgba(163,16,44,0.65), 0 20px 42px -22px rgba(0,0,0,0.85);

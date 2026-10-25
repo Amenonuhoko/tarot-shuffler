@@ -1,0 +1,582 @@
+/* ================================================================
+   REALMS (realms.js)
+   One mystical tradition per theme, built around the card. realms.js
+   pins --cx/--cy (card centre), --cw/--ch (card size), --top/--left on
+   both layers whenever the card moves, so everything here is placed
+   relative to the card. Motion is transform/opacity on its own layer,
+   except the deco gate's tiers, which only animate during a reveal.
+   ================================================================ */
+
+.realm {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.realm-front {
+  z-index: 2;
+}
+
+/* ---- Card-back emblems: each theme's own seal in place of the
+   Mystic star motif ---- */
+
+.realm-emblem {
+  display: none;
+  width: 70%;
+  aspect-ratio: 100 / 160;
+}
+
+.realm-emblem svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.realm-emblem-spin {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+[data-theme="holo"] .realm-emblem[data-realm="holo"],
+[data-theme="terminal"] .realm-emblem[data-realm="terminal"],
+[data-theme="bloodmoon"] .realm-emblem[data-realm="bloodmoon"],
+[data-theme="deco"] .realm-emblem[data-realm="deco"] {
+  display: block;
+}
+
+[data-theme="holo"] #cardBack .back-motif,
+[data-theme="terminal"] #cardBack .back-motif,
+[data-theme="bloodmoon"] #cardBack .back-motif,
+[data-theme="deco"] #cardBack .back-motif {
+  display: none;
+}
+
+[data-theme="bloodmoon"] .realm-emblem[data-realm="bloodmoon"] svg {
+  height: auto;
+  margin-top: 30%;
+  filter: drop-shadow(0 0 10px rgba(179, 18, 42, 0.45));
+}
+
+[data-theme="deco"] .realm-emblem[data-realm="deco"] {
+  color: var(--gold);
+}
+
+/* ---- Holographic Foil: the Seven Rays ---- */
+
+.holo-cube {
+  position: absolute;
+  left: var(--cx);
+  top: var(--cy);
+  width: min(1100px, 150vmin);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  opacity: 0.5;
+  will-change: transform;
+  animation: realm-turn 300s linear infinite;
+}
+
+.holo-cube svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.holo-cube-inner {
+  width: min(560px, 76vmin);
+  opacity: 0.4;
+  animation-duration: 180s;
+  animation-direction: reverse;
+}
+
+@keyframes realm-turn {
+  to { transform: rotate(360deg); }
+}
+
+/* Light enters from the upper left, the card is the prism, and the seven
+   rays fan out to the lower right. */
+.holo-ray,
+.holo-beam {
+  position: absolute;
+  left: var(--cx);
+  top: var(--cy);
+  width: 160vmax;
+  height: 56px;
+  margin-top: -28px;
+  transform-origin: 0 50%;
+  transform: rotate(var(--a));
+  clip-path: polygon(0 48%, 100% 0, 100% 100%, 0 52%);
+  will-change: opacity;
+}
+
+.holo-ray {
+  background: linear-gradient(90deg, var(--ray) 0%, color-mix(in srgb, var(--ray) 45%, transparent) 30%, transparent 80%);
+  opacity: 0.13;
+  transition: opacity 1.2s ease;
+}
+
+.holo-ray.is-chosen {
+  opacity: 0.55;
+}
+
+.holo-beam {
+  --a: 225deg;
+  height: 26px;
+  margin-top: -13px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.25) 35%, transparent 75%);
+  opacity: 0.12;
+}
+
+.realm-holo.is-dispersing .holo-beam {
+  animation: holo-beam 2s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.realm-holo.is-dispersing .holo-ray {
+  animation: holo-disperse 2.6s cubic-bezier(0.2, 0.7, 0.3, 1) calc(0.25s + var(--i) * 70ms) backwards;
+}
+
+@keyframes holo-beam {
+  0% { opacity: 0.12; }
+  12% { opacity: 0.85; }
+}
+
+@keyframes holo-disperse {
+  0% { opacity: 0; }
+  20% { opacity: 0.9; }
+}
+
+.holo-caption {
+  position: absolute;
+  left: var(--cx);
+  top: calc(var(--top) - 14px);
+  margin: 0;
+  translate: -50% -50%;
+  font: 600 0.68rem var(--font-display);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-shadow: 0 0 12px currentColor;
+  opacity: 0;
+}
+
+.realm-holo.is-dispersing .holo-caption {
+  animation: holo-caption 1.2s ease-out 0.7s forwards;
+}
+
+@keyframes holo-caption {
+  from { opacity: 0; translate: -50% -10%; }
+  to { opacity: 1; translate: -50% -50%; }
+}
+
+/* ---- Glitch Terminal: digital geomancy and chaos ---- */
+
+.geo-bifurcation {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 30vh;
+  opacity: 0.2;
+}
+
+.geo-attractor,
+.geo-attractor-head {
+  position: absolute;
+  left: var(--cx);
+  top: var(--cy);
+  width: min(100vw, 760px);
+  aspect-ratio: 1 / 1.05;
+  translate: -50% -50%;
+}
+
+.geo-eq {
+  position: absolute;
+  top: max(8px, env(safe-area-inset-top));
+  margin: 0;
+  font: 400 9px/1.5 'Space Mono', monospace;
+  color: rgba(34, 255, 127, 0.5);
+  white-space: pre;
+}
+
+.geo-eq-lorenz {
+  left: 12px;
+}
+
+.geo-eq-logistic {
+  right: 12px;
+  text-align: right;
+}
+
+/* The cast runs in the card's art window. */
+.geo-screen {
+  display: none;
+}
+
+[data-theme="terminal"] .geo-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8%;
+  background: #000d07;
+  color: #22ff7f;
+}
+
+[data-theme="terminal"] .geo-screen:empty {
+  display: none;
+}
+
+/* Reversed art turns upside down; the readout doesn't. */
+.card-art.is-reversed .geo-screen {
+  transform: rotate(180deg);
+}
+
+.geo-log {
+  width: 100%;
+  margin: 0;
+  font: 400 clamp(7px, 2.3vw, 9.5px)/1.6 'Space Mono', monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+  text-align: left;
+  color: #b6ffd4;
+}
+
+.geo-judge {
+  width: 44%;
+  fill: #22ff7f;
+  filter: drop-shadow(0 0 4px rgba(34, 255, 127, 0.75));
+}
+
+.geo-judge-name {
+  margin: 6px 0 6px;
+  font: 700 clamp(8px, 2.6vw, 11px) 'Space Mono', monospace;
+  letter-spacing: 0.18em;
+  color: #b6ffd4;
+}
+
+.geo-hexagram {
+  width: 16%;
+  fill: rgba(34, 255, 127, 0.7);
+}
+
+.geo-screen.is-judged > * {
+  animation: geo-in 0.5s steps(4) both;
+}
+
+.geo-screen.is-judged > :nth-child(2) { animation-delay: 0.15s; }
+.geo-screen.is-judged > :nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes geo-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ---- Blood Moon: the Crimson Cathedral ---- */
+
+.rose-light,
+.rose-window,
+.rose-flare {
+  position: absolute;
+  left: var(--cx);
+  top: var(--cy);
+  width: max(calc(var(--ch) * 1.5), min(1000px, 140vmin));
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+}
+
+.rose-light {
+  width: max(calc(var(--ch) * 1.85), min(1240px, 172vmin));
+  background: radial-gradient(circle, rgba(255, 90, 80, 0.4), rgba(160, 14, 36, 0.22) 42%, transparent 66%);
+  will-change: opacity;
+  animation: rose-breathe 9s ease-in-out infinite alternate;
+}
+
+.rose-window {
+  opacity: 0.6;
+  will-change: opacity;
+  animation: rose-glass 13s ease-in-out infinite alternate;
+}
+
+.rose-window svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.rose-flare {
+  background: radial-gradient(circle, rgba(255, 210, 190, 0.55), rgba(255, 60, 70, 0.3) 38%, transparent 70%);
+  opacity: 0;
+  will-change: opacity;
+}
+
+@keyframes rose-breathe {
+  from { opacity: 0.35; }
+  to { opacity: 0.7; }
+}
+
+@keyframes rose-glass {
+  from { opacity: 0.5; }
+  to { opacity: 0.7; }
+}
+
+.realm-bloodmoon.is-flooding .rose-flare {
+  animation: rose-flood 3.6s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+@keyframes rose-flood {
+  0% { opacity: 0; }
+  18% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.briar {
+  position: absolute;
+  width: clamp(92px, calc(var(--cw) * 0.44), 156px);
+  aspect-ratio: 1;
+}
+
+.briar svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.briar-tl {
+  left: calc(var(--left) - 14px);
+  top: calc(var(--top) - 14px);
+}
+
+.briar-tr {
+  left: calc(var(--left) + var(--cw) + 14px);
+  top: calc(var(--top) - 14px);
+  translate: -100% 0;
+  transform: scaleX(-1);
+}
+
+.briar-bl {
+  left: calc(var(--left) - 14px);
+  top: calc(var(--top) + var(--ch) + 14px);
+  translate: 0 -100%;
+  transform: scaleY(-1);
+}
+
+.briar-br {
+  left: calc(var(--left) + var(--cw) + 14px);
+  top: calc(var(--top) + var(--ch) + 14px);
+  translate: -100% -100%;
+  transform: scale(-1, -1);
+}
+
+/* Light through the glass, cast across the card for a moment. */
+.rose-cast {
+  position: absolute;
+  left: var(--left);
+  top: var(--top);
+  width: var(--cw);
+  height: var(--ch);
+  overflow: hidden;
+  border-radius: var(--radius-card);
+}
+
+.rose-cast span {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--w);
+  height: var(--h);
+  background: radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--c) 60%, transparent), transparent 72%);
+  clip-path: polygon(50% 0, 82% 14%, 100% 40%, 100% 100%, 0 100%, 0 40%, 18% 14%);
+  transform: rotate(var(--r));
+  opacity: 0;
+  will-change: opacity;
+}
+
+.realm-front.is-flooding .rose-cast span {
+  animation: rose-cast 4.2s ease-out;
+}
+
+.realm-front.is-flooding .rose-cast span:nth-child(2) { animation-delay: 0.1s; }
+.realm-front.is-flooding .rose-cast span:nth-child(3) { animation-delay: 0.2s; }
+.realm-front.is-flooding .rose-cast span:nth-child(4) { animation-delay: 0.3s; }
+.realm-front.is-flooding .rose-cast span:nth-child(5) { animation-delay: 0.4s; }
+
+@keyframes rose-cast {
+  0% { opacity: 0; }
+  20% { opacity: 0.45; }
+  100% { opacity: 0; }
+}
+
+/* ---- Art Deco Luxe: the Temple of Ra ---- */
+
+.ra-pylon-wrap {
+  position: absolute;
+  top: calc(var(--top) - var(--ch) * 0.08);
+  height: calc(var(--ch) * 1.16);
+  aspect-ratio: 100 / 360;
+}
+
+.ra-pylon-wrap svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ra-left {
+  left: calc(var(--left) + 18px);
+  translate: -100% 0;
+}
+
+.ra-right {
+  left: calc(var(--left) + var(--cw) - 18px);
+}
+
+.ra-pylon {
+  fill: #15110a;
+}
+
+.ra-tier {
+  fill: url(#raGold);
+  opacity: 0.35;
+}
+
+.realm-deco.is-rising .ra-tier {
+  animation: ra-tier 2.4s ease-out calc(var(--i) * 0.13s);
+}
+
+@keyframes ra-tier {
+  0% { opacity: 0.35; }
+  30% { opacity: 1; }
+  100% { opacity: 0.35; }
+}
+
+/* The winged sun, in the gap above the card. */
+.ra-sun {
+  position: absolute;
+  left: var(--cx);
+  top: calc(var(--top) - 24px);
+  width: min(calc(var(--cw) * 1.3), 420px);
+  height: 52px;
+  translate: -50% -50%;
+}
+
+.ra-wing {
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  transform: scaleX(0.62);
+  will-change: transform;
+}
+
+.ra-wing svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ra-wing-left {
+  right: 50%;
+  margin-right: 8px;
+  transform-origin: 100% 50%;
+}
+
+.ra-wing-left svg {
+  transform: scaleX(-1);
+}
+
+.ra-wing-right {
+  left: 50%;
+  margin-left: 8px;
+  transform-origin: 0 50%;
+}
+
+.ra-feather-row {
+  fill: url(#raGold);
+  stroke: #6b5216;
+  stroke-width: 0.6;
+}
+
+.ra-feather-lines {
+  stroke: #5a4410;
+  stroke-width: 0.8;
+}
+
+.realm-deco.is-rising .ra-wing {
+  animation: ra-unfold 1.6s cubic-bezier(0.2, 0.8, 0.25, 1) forwards;
+}
+
+@keyframes ra-unfold {
+  0% { transform: scaleX(0.62); }
+  60% { transform: scaleX(1.04); }
+  100% { transform: scaleX(1); }
+}
+
+.ra-disc {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #fff6da, #e8c368 45%, #a8501f 100%);
+  box-shadow: 0 0 16px rgba(255, 200, 90, 0.55);
+}
+
+.ra-disc::after {
+  content: "";
+  position: absolute;
+  inset: -26px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 220, 140, 0.75), transparent 65%);
+  opacity: 0;
+  will-change: opacity;
+}
+
+.realm-deco.is-rising .ra-disc::after {
+  animation: ra-flare 2.4s ease-out;
+}
+
+@keyframes ra-flare {
+  0% { opacity: 0; }
+  25% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.ra-uraeus {
+  position: absolute;
+  top: 50%;
+  width: 6px;
+  height: 15px;
+  margin-top: -9px;
+  border-radius: 50% 50% 30% 30%;
+  background: linear-gradient(#fff6da, #c9a24a);
+}
+
+.ra-uraeus-left { left: calc(50% - 22px); }
+.ra-uraeus-right { left: calc(50% + 16px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .holo-cube,
+  .rose-light,
+  .rose-window {
+    animation: none;
+  }
+
+  .realm-holo.is-dispersing *,
+  .realm-bloodmoon.is-flooding *,
+  .realm-front.is-flooding *,
+  .realm-deco.is-rising * {
+    animation-duration: 0.01ms !important;
+  }
+
+  .realm-deco.is-rising .ra-wing {
+    transform: scaleX(1);
+  }
+}

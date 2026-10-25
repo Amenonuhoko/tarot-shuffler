@@ -2021,12 +2021,6 @@ deckSelect.addEventListener("change", () => {
 });
 
 document.addEventListener("click", (event) => {
-  // A drag across the sky (layers.js's lens) ends in a click too; it was
-  // looking around, not asking for a card.
-  if (window.TarotLayers && window.TarotLayers.consumeDrag()) {
-    return;
-  }
-
   // A held tap that just triggered the Magician burn also fires a click
   // on release - swallow that one click so it doesn't also pull a new
   // card out from under the reveal.
@@ -2485,7 +2479,59 @@ let terminalRainColumns = [];
 let terminalRainLastTime = 0;
 
 function makeTerminalRainDrop(y) {
-  return { y, trail: new Array(TERMINAL_RAIN_TRAIL_LENGTH).fill("") };
+  return { y, trail: new Array(TERMINAL_RAIN_TRAIL_LENGTH).fill(-1) };
+}
+
+// The rain is binary divination, not binary code: the sixteen figures of
+// geomancy (four rows of one dot or two) and I Ching hexagrams (six lines,
+// whole or broken). Each glyph is drawn once into a small sprite, in the
+// bright head colour and the trail green, and stamped from there.
+let terminalRainGlyphs = null;
+
+function drawRainGlyph(ctx, index, size, color) {
+  ctx.fillStyle = color;
+  if (index < 16) {
+    // Geomantic figure: bit set = a single dot, clear = a pair.
+    const dot = size * 0.13;
+    for (let row = 0; row < 4; row++) {
+      const y = size * (0.16 + row * 0.23);
+      const single = (index >> (3 - row)) & 1;
+      const xs = single ? [size / 2] : [size * 0.32, size * 0.68];
+      xs.forEach((x) => {
+        ctx.beginPath();
+        ctx.arc(x, y, dot / 2, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+    return;
+  }
+  // Hexagram: bit set = a whole line, clear = broken.
+  const lines = index - 16;
+  const h = size * 0.08;
+  for (let row = 0; row < 6; row++) {
+    const y = size * (0.12 + row * 0.15);
+    if ((lines >> (5 - row)) & 1) {
+      ctx.fillRect(size * 0.14, y, size * 0.72, h);
+    } else {
+      ctx.fillRect(size * 0.14, y, size * 0.3, h);
+      ctx.fillRect(size * 0.56, y, size * 0.3, h);
+    }
+  }
+}
+
+function buildTerminalRainGlyphs() {
+  const size = TERMINAL_RAIN_FONT_SIZE;
+  const make = (index, color) => {
+    const sprite = document.createElement("canvas");
+    sprite.width = size;
+    sprite.height = size;
+    drawRainGlyph(sprite.getContext("2d"), index, size, color);
+    return sprite;
+  };
+  terminalRainGlyphs = Array.from({ length: 16 + 64 }, (_, i) => ({
+    head: make(i, "rgb(210, 255, 225)"),
+    trail: make(i, "rgb(34, 255, 127)")
+  }));
 }
 
 function resizeTerminalRain() {
@@ -2510,7 +2556,6 @@ function drawTerminalRain(now) {
   terminalRainLastTime = now;
 
   terminalRainCtx.clearRect(0, 0, terminalRainCanvas.width, terminalRainCanvas.height);
-  terminalRainCtx.font = `${TERMINAL_RAIN_FONT_SIZE}px 'Space Mono', monospace`;
 
   terminalRainColumns.forEach((col) => {
     col.elapsed += delta;
@@ -2520,7 +2565,7 @@ function drawTerminalRain(now) {
 
       col.drops.forEach((drop) => {
         drop.y += TERMINAL_RAIN_FONT_SIZE;
-        drop.trail.unshift(Math.random() > 0.5 ? "1" : "0");
+        drop.trail.unshift(Math.floor(Math.random() * terminalRainGlyphs.length));
         drop.trail.length = TERMINAL_RAIN_TRAIL_LENGTH;
       });
 
@@ -2539,14 +2584,13 @@ function drawTerminalRain(now) {
     }
 
     col.drops.forEach((drop) => {
-      drop.trail.forEach((char, i) => {
-        if (!char) {
+      drop.trail.forEach((glyph, i) => {
+        if (glyph < 0) {
           return;
         }
-        terminalRainCtx.fillStyle = i === 0
-          ? "rgba(210, 255, 225, 0.95)"
-          : `rgba(34, 255, 127, ${(0.55 * Math.pow(0.88, i)).toFixed(3)})`;
-        terminalRainCtx.fillText(char, col.x, drop.y - i * TERMINAL_RAIN_FONT_SIZE);
+        const sprite = terminalRainGlyphs[glyph];
+        terminalRainCtx.globalAlpha = i === 0 ? 0.95 : 0.55 * Math.pow(0.88, i);
+        terminalRainCtx.drawImage(i === 0 ? sprite.head : sprite.trail, col.x, drop.y - (i + 1) * TERMINAL_RAIN_FONT_SIZE);
       });
     });
   });
@@ -2557,6 +2601,9 @@ function startTerminalRain() {
     return;
   }
   terminalRainCtx = terminalRainCanvas.getContext("2d");
+  if (!terminalRainGlyphs) {
+    buildTerminalRainGlyphs();
+  }
   resizeTerminalRain();
   terminalRainCanvas.hidden = false;
   terminalRainLastTime = 0;
@@ -2615,12 +2662,14 @@ if (document.fonts && document.fonts.ready) {
 placeSigil();
 
 // On every reveal the sigil flares and swells for a moment. The event
-// lets the scene layers (layers.js) answer the same reveal.
+// lets each theme's realm (realms.js) answer the same reveal; card is
+// null for a roll of the dice.
 function surgeSigil(isMajor = false) {
   motifSigilEl.classList.remove("is-surging");
   void motifSigilEl.offsetWidth;
   motifSigilEl.classList.add("is-surging");
-  document.dispatchEvent(new CustomEvent("tarot:reveal", { detail: { major: isMajor } }));
+  const card = isDiceActive() ? null : currentCard;
+  document.dispatchEvent(new CustomEvent("tarot:reveal", { detail: { major: isMajor, card } }));
 }
 
 document.addEventListener("visibilitychange", () => {
