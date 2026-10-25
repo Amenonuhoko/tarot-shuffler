@@ -137,7 +137,12 @@
       const caption = back.querySelector(".holo-caption");
       caption.textContent = `Ray ${NUMERALS[index]} · ${ray.name}`;
       caption.style.color = ray.color;
+      // The card's art window takes on its ray (see realms.css).
+      cardSlot.style.setProperty("--ray", ray.color);
       restart(back, "is-dispersing");
+    },
+    unmount() {
+      cardSlot.style.removeProperty("--ray");
     }
   };
 
@@ -356,9 +361,13 @@ dz/dt = xy − βz
           if (instant) log.textContent = lines.join("\n");
           this.castTimer = setTimeout(() => {
             geoScreen.innerHTML = `
+              <p class="geo-head">┌ SCVTVM ┐</p>
+              <div class="geo-mothers">${cast.mothers.map((m, k) =>
+                `<span class="geo-mother">${figureSvg(m, "geo-mini")}<small>${["I", "II", "III", "IV"][k]}</small></span>`
+              ).join("")}</div>
               ${figureSvg(cast.judge, "geo-judge")}
-              <p class="geo-judge-name">${FIGURE_BY_BITS[cast.judge]}</p>
-              ${hexagramSvg(cast.hexagram)}`;
+              <p class="geo-judge-name"><small>IVDEX</small>${FIGURE_BY_BITS[cast.judge]}</p>
+              <div class="geo-foot">${hexagramSvg(cast.hexagram)}<code>${cast.hexagram.join("")}</code></div>`;
             geoScreen.classList.add("is-judged");
           }, instant ? 0 : 700);
         }
@@ -458,12 +467,15 @@ dz/dt = xy − βz
     for (let i = 0; i < 8; i++) {
       panes.push(`<path d="${lancet(10, 29, i * 45, 17)}" fill="${GLASS[(i + 1) % GLASS.length]}"/>`);
     }
-    const quatrefoil = [0, 90, 180, 270].map((a) => {
-      const [x, y] = polar(4.2, a);
-      return `<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="4.6" fill="#c99a3a"/>`;
-    }).join("");
+    // The heart of the window is the blood moon itself, half in shadow.
+    const quatrefoil = `
+      <circle r="9.4" fill="url(#${id}-moon)"/>
+      <path d="M2.6,-8.9 A9.4,9.4 0 0 1 2.6,8.9 A7.2,9.4 0 0 0 2.6,-8.9 Z" fill="#1a0306" fill-opacity="0.55"/>
+      <circle cx="-3" cy="-2.4" r="1.6" fill="#5a0a10" fill-opacity="0.6"/>
+      <circle cx="1.2" cy="3.2" r="1.1" fill="#5a0a10" fill-opacity="0.5"/>`;
     return `<svg viewBox="-100 -100 200 200">
       <defs>
+        <radialGradient id="${id}-moon" cx="0.4" cy="0.38"><stop offset="0" stop-color="#ff8a5a"/><stop offset="0.55" stop-color="#b3202a"/><stop offset="1" stop-color="#4a0610"/></radialGradient>
         <radialGradient id="${id}-light"><stop offset="0" stop-color="#fff2e0" stop-opacity="0.38"/><stop offset="0.45" stop-color="#ff6a5a" stop-opacity="0.12"/><stop offset="1" stop-color="#000" stop-opacity="0.35"/></radialGradient>
       </defs>
       <circle r="98" fill="#0b0305"/>
@@ -496,12 +508,26 @@ dz/dt = xy − βz
     </svg>`;
   }
 
+  // A pointed stone arch the card stands in, like a lancet niche under
+  // the rose window. Stretched to the card, so its strokes don't scale.
+  function archSvg() {
+    const outer = "M3,610 L3,190 C3,96 70,34 152,4 C234,34 301,96 301,190 L301,610";
+    const inner = "M17,610 L17,196 C17,110 78,56 152,26 C226,56 287,110 287,196 L287,610";
+    return `<svg viewBox="0 0 304 612" preserveAspectRatio="none">
+      <path d="${outer} Z" fill="rgba(8, 3, 5, 0.62)"/>
+      <path d="${outer}" fill="none" stroke="#2b2124" stroke-width="9" vector-effect="non-scaling-stroke"/>
+      <path d="${outer}" fill="none" stroke="#4a3d41" stroke-width="2" vector-effect="non-scaling-stroke"/>
+      <path d="${inner}" fill="none" stroke="#9a9ca6" stroke-width="1" stroke-opacity="0.6" vector-effect="non-scaling-stroke"/>
+    </svg>`;
+  }
+
   const bloodmoon = {
     build() {
       back.innerHTML = `
         <span class="rose-light"></span>
         <div class="rose-window">${roseWindowSvg("roseWindow")}</div>
-        <span class="rose-flare"></span>`;
+        <span class="rose-flare"></span>
+        <div class="gothic-arch">${archSvg()}</div>`;
       front.innerHTML = `
         ${["tl", "tr", "bl", "br"].map((corner) => `<div class="briar briar-${corner}">${briarSvg()}</div>`).join("")}
         <div class="rose-cast">
@@ -520,6 +546,14 @@ dz/dt = xy − βz
 
   // ---- Art Deco Luxe: the Temple of Ra ----
 
+  // Small hieroglyphs for the pylons' panels: eye, djed, was, scarab.
+  const GLYPHS = [
+    '<path d="M-7,0 Q0,-6 7,0 Q0,5 -7,0 Z M7,0 L10,0 M-1,3 L-2,8 M2,3 Q4,8 7,7"/><circle r="2" stroke="none" fill="url(#raGold)"/>',
+    '<path d="M0,-9 L0,9 M-5,-6 L5,-6 M-5,-3 L5,-3 M-5,0 L5,0 M-4,9 L4,9"/>',
+    '<path d="M0,-9 L0,9 M0,-9 L5,-7 M-3,9 L0,6 L3,9"/>',
+    '<ellipse cx="0" cy="1" rx="5" ry="6.5"/><path d="M0,-5.5 L0,7.5 M-5,-2 L-9,-5 M5,-2 L9,-5 M-5,4 L-9,7 M5,4 L9,7 M-2,-7 L-3,-9 M2,-7 L3,-9"/>'
+  ];
+
   function pylonSvg() {
     const tiers = Array.from({ length: 6 }, (_, i) => {
       const y = 330 - i * 52;
@@ -532,25 +566,33 @@ dz/dt = xy − βz
           <stop offset="0" stop-color="#fff6da"/><stop offset="0.3" stop-color="#e8c368"/><stop offset="0.6" stop-color="#8f7328"/><stop offset="1" stop-color="#e8c368"/>
         </linearGradient>
       </defs>
-      <path class="ra-pylon" d="M14,20 L86,20 L96,356 L4,356 Z"/>
-      <path d="M8,20 L92,20 L92,10 L80,10 L80,4 L20,4 L20,10 L8,10 Z" fill="url(#raGold)"/>
+      <path class="ra-pylon" d="M14,26 L86,26 L96,356 L4,356 Z"/>
+      <path d="M10,26 L90,26 L98,10 C80,14 20,14 2,10 Z" fill="url(#raGold)"/>
+      <path d="M12,26 L88,26" stroke="#fff6da" stroke-width="1.4"/>
+      <path d="M11,30 L89,30" stroke="url(#raGold)" stroke-width="2.4" stroke-dasharray="3 2"/>
       <g class="ra-tiers">${tiers}</g>
       <g fill="none" stroke="url(#raGold)" stroke-width="2.2" stroke-linecap="round">
-        <ellipse cx="50" cy="132" rx="9" ry="12"/>
-        <path d="M50,144 L50,186 M36,152 L64,152"/>
+        <ellipse cx="50" cy="78" rx="9" ry="12"/>
+        <path d="M50,90 L50,132 M36,98 L64,98"/>
+      </g>
+      <rect x="34" y="150" width="32" height="132" rx="2" fill="#0d0a05" stroke="url(#raGold)" stroke-width="1"/>
+      <g fill="none" stroke="url(#raGold)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        ${GLYPHS.map((glyph, i) => `<g transform="translate(50 ${168 + i * 32})">${glyph}</g>`).join("")}
       </g>
       <path d="M14,20 L86,20 L96,356 L4,356 Z" fill="none" stroke="url(#raGold)" stroke-width="1.6"/>
     </svg>`;
   }
 
+  // Cloisonne wings: gold cells set with lapis, carnelian and turquoise,
+  // one stone per row of feathers.
   function wingSvg() {
-    const rows = [[0, 26, 190, 10], [9, 22, 164, 9], [17, 18, 132, 8]];
-    const feathers = rows.map(([y0, depth, length, count], r) => {
+    const rows = [[0, 26, 190, 10, "#1f4aa8"], [9, 22, 164, 9, "#b0442a"], [17, 18, 132, 8, "#2aa198"]];
+    const feathers = rows.map(([y0, depth, length, count, stone], r) => {
       const strokes = Array.from({ length: count }, (_, k) => {
         const x = 22 + ((length - 22) * (k + 1)) / (count + 1);
         return `<path d="M${x.toFixed(1)},${(y0 - 2 - (x / length) * 10).toFixed(1)} L${(x + 6).toFixed(1)},${(y0 + depth * 0.6 - (x / length) * 12).toFixed(1)}"/>`;
       }).join("");
-      return `<path class="ra-feather-row" style="--r: ${r}" d="M18,${y0 - 6} C80,${y0 - 14} 140,${y0 - 20} ${length},${y0 - 22} C${length - 18},${y0 - 6} ${length - 40},${y0 + depth * 0.5} 18,${y0 + depth * 0.7} Z"/>
+      return `<path class="ra-feather-row" style="--r: ${r}; --stone: ${stone}" d="M18,${y0 - 6} C80,${y0 - 14} 140,${y0 - 20} ${length},${y0 - 22} C${length - 18},${y0 - 6} ${length - 40},${y0 + depth * 0.5} 18,${y0 + depth * 0.7} Z"/>
         <g class="ra-feather-lines">${strokes}</g>`;
     }).join("");
     return `<svg viewBox="0 -30 200 70">${feathers}</svg>`;
@@ -565,8 +607,10 @@ dz/dt = xy − βz
           <div class="ra-wing ra-wing-left">${wingSvg()}</div>
           <div class="ra-wing ra-wing-right">${wingSvg()}</div>
           <span class="ra-disc"></span>
-          <span class="ra-uraeus ra-uraeus-left"></span>
-          <span class="ra-uraeus ra-uraeus-right"></span>
+          <svg class="ra-uraei" viewBox="-30 -16 60 32" aria-hidden="true">
+            <path d="M-17,14 C-19,8 -21,2 -19,-4 C-18,-9 -13,-11 -11,-7 C-9,-3 -11,1 -14,2 L-14,14" />
+            <path d="M17,14 C19,8 21,2 19,-4 C18,-9 13,-11 11,-7 C9,-3 11,1 14,2 L14,14" />
+          </svg>
         </div>`;
     },
     reveal() {

@@ -580,3 +580,230 @@
     transform: scaleX(1);
   }
 }
+
+/* ================================================================
+   Card treatments: each realm dresses the card itself, not just the
+   space around it. The shared art-window tints (one per element) are
+   replaced with each tradition's own material.
+   ================================================================ */
+
+/* ---- Seven Rays: dark glass, a spectral edge, the card's ray inside ---- */
+
+[data-theme="holo"] {
+  --bg: #06050b;
+  --bg-glow: #120e24;
+  --chrome: #06050b;
+  --surface: #110e1f;
+  --panel-bg: rgba(14, 11, 26, 0.9);
+}
+
+/* A deep, still field so the spectrum lines glow; the drifting pastel
+   haze averaged out to grey. */
+[data-theme="holo"] body {
+  background-image: radial-gradient(ellipse at 50% 36%, #17112e 0%, #0b0917 45%, #050409 100%);
+  background-size: 100% 100%;
+  animation: none;
+}
+
+[data-theme="holo"] .card-face {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.06), transparent 34%, rgba(255, 255, 255, 0.04) 56%, transparent) padding-box,
+    linear-gradient(165deg, #161129, #0b0916) padding-box,
+    conic-gradient(from 210deg, #ff4b4b, #ff9a3b, #ffd84b, #3ee09a, #4b8bff, #a86bff, #ff6fbf, #ff4b4b) border-box;
+  background-size: auto;
+  animation: none;
+  box-shadow:
+    0 0 24px -6px color-mix(in srgb, var(--ray, #a86bff) 55%, transparent),
+    0 28px 60px -22px rgba(0, 0, 0, 0.85);
+}
+
+[data-theme="holo"] .card-art,
+[data-theme="holo"] .card-art[data-element] {
+  background:
+    radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--ray, #c9b8ff) 50%, transparent), transparent 64%),
+    conic-gradient(from 200deg at 50% 42%, rgba(255, 75, 75, 0.12), rgba(255, 216, 75, 0.12), rgba(62, 224, 154, 0.12), rgba(75, 139, 255, 0.12), rgba(168, 107, 255, 0.12), rgba(255, 75, 75, 0.12)),
+    #0b0916;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
+[data-theme="holo"] .card-art-fallback {
+  color: #f5f2ff;
+  opacity: 0.7;
+}
+
+[data-theme="holo"] .holo-beam {
+  height: 34px;
+  margin-top: -17px;
+  opacity: 0.18;
+}
+
+[data-theme="holo"] .holo-caption {
+  font-size: 0.72rem;
+}
+
+/* ---- Geomancy: crisp rain, and the full shield chart ---- */
+
+[data-theme="terminal"] .terminal-rain {
+  filter: none;
+  opacity: 0.72;
+}
+
+.geo-head {
+  margin: 0 0 4%;
+  font: 400 clamp(7px, 2.2vw, 9px) 'Space Mono', monospace;
+  letter-spacing: 0.3em;
+  color: rgba(182, 255, 212, 0.7);
+}
+
+.geo-mothers {
+  display: flex;
+  justify-content: center;
+  gap: 8%;
+  width: 100%;
+  margin-bottom: 4%;
+}
+
+.geo-mother {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 15%;
+}
+
+.geo-mother small {
+  font: 400 clamp(6px, 1.8vw, 8px) 'Space Mono', monospace;
+  color: rgba(182, 255, 212, 0.55);
+}
+
+.geo-mini {
+  width: 100%;
+  fill: rgba(34, 255, 127, 0.75);
+}
+
+.geo-screen .geo-judge {
+  width: 34%;
+}
+
+.geo-judge-name {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.geo-judge-name small {
+  font-size: 0.75em;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  color: rgba(182, 255, 212, 0.55);
+}
+
+.geo-foot {
+  display: flex;
+  align-items: center;
+  gap: 8%;
+}
+
+.geo-foot .geo-hexagram {
+  width: 22px;
+}
+
+.geo-foot code {
+  font: 400 clamp(7px, 2vw, 9px) 'Space Mono', monospace;
+  letter-spacing: 0.2em;
+  color: rgba(182, 255, 212, 0.7);
+}
+
+.geo-screen.is-judged > :nth-child(4) { animation-delay: 0.45s; }
+.geo-screen.is-judged > :nth-child(5) { animation-delay: 0.6s; }
+
+/* ---- Cathedral: the card stands in a pointed arch, its art is ruby
+   glass in a lead lattice ---- */
+
+.gothic-arch {
+  position: absolute;
+  left: calc(var(--left) - 16px);
+  top: calc(var(--top) - var(--cw) * 0.3);
+  width: calc(var(--cw) + 32px);
+  height: calc(var(--ch) + var(--cw) * 0.3 + 18px);
+}
+
+.gothic-arch svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+[data-theme="bloodmoon"] .card-art,
+[data-theme="bloodmoon"] .card-art[data-element] {
+  background:
+    repeating-linear-gradient(45deg, rgba(12, 2, 5, 0.9) 0 1.4px, transparent 1.4px 20px),
+    repeating-linear-gradient(-45deg, rgba(12, 2, 5, 0.9) 0 1.4px, transparent 1.4px 20px),
+    radial-gradient(circle at 50% 34%, #c01f34, #6a0919 52%, #24040b 100%);
+  box-shadow: inset 0 0 0 2px #1a0d10, inset 0 0 24px rgba(0, 0, 0, 0.55);
+}
+
+[data-theme="bloodmoon"] .card-art-fallback {
+  color: #f1f3f7;
+  opacity: 0.6;
+}
+
+/* ---- Temple of Ra: cloisonne wings, rearing cobras, a lapis sky of
+   five-pointed stars in the art window ---- */
+
+.ra-feather-row {
+  fill: var(--stone, #1f4aa8);
+  stroke: #e8c368;
+  stroke-width: 1.1;
+}
+
+.ra-feather-lines {
+  stroke: #e8c368;
+  stroke-width: 1;
+}
+
+.ra-disc {
+  background: radial-gradient(circle at 40% 35%, #ffd8a0, #d4652a 50%, #7e2410 100%);
+  box-shadow: 0 0 0 2px #e8c368, 0 0 18px rgba(255, 170, 80, 0.55);
+}
+
+.ra-uraei {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 60px;
+  height: 32px;
+  margin: -16px 0 0 -30px;
+  fill: url(#raGold);
+  stroke: #6b5216;
+  stroke-width: 0.8;
+}
+
+.ra-uraeus {
+  display: none;
+}
+
+[data-theme="deco"] .card-art,
+[data-theme="deco"] .card-art[data-element] {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath d='M13 7.2l1.5 4.4h4.6l-3.7 2.7 1.4 4.4-3.8-2.7-3.8 2.7 1.4-4.4-3.7-2.7h4.6z' fill='%23e8c368' fill-opacity='0.85'/%3E%3C/svg%3E") 0 0 / 26px 26px,
+    linear-gradient(172deg, #1d3d8c, #0f245c 60%, #0a1a45);
+  box-shadow: inset 0 0 0 1px rgba(232, 195, 104, 0.6), inset 0 0 0 4px #0a1a45, inset 0 0 0 5px rgba(232, 195, 104, 0.35);
+}
+
+[data-theme="deco"] .card-art-fallback {
+  color: #e8c368;
+  opacity: 0.85;
+}
+
+/* A reversed card inverts its whole face (style.css); invert each realm's
+   art window back so its glass, ruby or lapis survives, and undo the
+   outline pre-inversion that only makes sense for an inverted window. */
+[data-theme="holo"] .card-front-content.is-reversed .card-art,
+[data-theme="bloodmoon"] .card-front-content.is-reversed .card-art,
+[data-theme="deco"] .card-front-content.is-reversed .card-art {
+  filter: invert(1);
+  outline-color: color-mix(in srgb, var(--gold-dim) 65%, transparent);
+}

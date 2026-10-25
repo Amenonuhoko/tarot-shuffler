@@ -2520,7 +2520,7 @@ function drawRainGlyph(ctx, index, size, color) {
 }
 
 function buildTerminalRainGlyphs() {
-  const size = TERMINAL_RAIN_FONT_SIZE;
+  const size = TERMINAL_RAIN_FONT_SIZE * terminalRainScale();
   const make = (index, color) => {
     const sprite = document.createElement("canvas");
     sprite.width = size;
@@ -2534,13 +2534,20 @@ function buildTerminalRainGlyphs() {
   }));
 }
 
+function terminalRainScale() {
+  return Math.min(window.devicePixelRatio || 1, 2);
+}
+
 function resizeTerminalRain() {
   if (!terminalRainCanvas) {
     return;
   }
-  terminalRainCanvas.width = window.innerWidth;
-  terminalRainCanvas.height = window.innerHeight;
-  const columnCount = Math.ceil(terminalRainCanvas.width / TERMINAL_RAIN_FONT_SIZE);
+  // Drawn at device resolution (capped at 2x) so the figures stay crisp.
+  const scale = terminalRainScale();
+  terminalRainCanvas.width = Math.round(window.innerWidth * scale);
+  terminalRainCanvas.height = Math.round(window.innerHeight * scale);
+  terminalRainCtx.setTransform(scale, 0, 0, scale, 0, 0);
+  const columnCount = Math.ceil(window.innerWidth / TERMINAL_RAIN_FONT_SIZE);
   terminalRainColumns = new Array(columnCount).fill(0).map((_, i) => ({
     x: i * TERMINAL_RAIN_FONT_SIZE,
     elapsed: Math.random() * TERMINAL_RAIN_FAST_STEP_MS,
@@ -2555,7 +2562,7 @@ function drawTerminalRain(now) {
   const delta = terminalRainLastTime ? Math.min(now - terminalRainLastTime, 100) : 16;
   terminalRainLastTime = now;
 
-  terminalRainCtx.clearRect(0, 0, terminalRainCanvas.width, terminalRainCanvas.height);
+  terminalRainCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
   terminalRainColumns.forEach((col) => {
     col.elapsed += delta;
@@ -2569,14 +2576,14 @@ function drawTerminalRain(now) {
         drop.trail.length = TERMINAL_RAIN_TRAIL_LENGTH;
       });
 
-      const trailBottom = terminalRainCanvas.height + TERMINAL_RAIN_TRAIL_LENGTH * TERMINAL_RAIN_FONT_SIZE;
+      const trailBottom = window.innerHeight + TERMINAL_RAIN_TRAIL_LENGTH * TERMINAL_RAIN_FONT_SIZE;
       col.drops = col.drops.filter((drop) => drop.y <= trailBottom);
 
       // A new drop doesn't need to wait for the previous one to fully fall off —
       // it can start once the newest drop is most of the way down.
       const newestDrop = col.drops[col.drops.length - 1];
       const canSpawn = col.drops.length < TERMINAL_RAIN_MAX_DROPS
-        && (!newestDrop || newestDrop.y > terminalRainCanvas.height * 0.6);
+        && (!newestDrop || newestDrop.y > window.innerHeight * 0.6);
       if (canSpawn && Math.random() > 0.975) {
         col.drops.push(makeTerminalRainDrop(0));
         col.hasLooped = true;
@@ -2590,7 +2597,7 @@ function drawTerminalRain(now) {
         }
         const sprite = terminalRainGlyphs[glyph];
         terminalRainCtx.globalAlpha = i === 0 ? 0.95 : 0.55 * Math.pow(0.88, i);
-        terminalRainCtx.drawImage(i === 0 ? sprite.head : sprite.trail, col.x, drop.y - (i + 1) * TERMINAL_RAIN_FONT_SIZE);
+        terminalRainCtx.drawImage(i === 0 ? sprite.head : sprite.trail, col.x, drop.y - (i + 1) * TERMINAL_RAIN_FONT_SIZE, TERMINAL_RAIN_FONT_SIZE, TERMINAL_RAIN_FONT_SIZE);
       });
     });
   });
