@@ -140,9 +140,12 @@ body:has(> .realm-scene.is-loaded) .hint {
   background: radial-gradient(closest-side, var(--rl-flare), transparent 72%);
   opacity: 0;
   will-change: transform, opacity;
+  /* Hidden between reveals, so its layer holds no texture at rest. */
+  visibility: hidden;
 }
 
 .realm-lights.is-surging .rl-flare {
+  visibility: visible;
   animation: rl-flare 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
@@ -492,9 +495,11 @@ body:has(> .realm-scene.is-loaded) .hint {
   box-shadow: 0 0 18px rgba(34, 255, 127, 0.55), inset 0 0 18px rgba(34, 255, 127, 0.35);
   opacity: 0;
   will-change: transform, opacity;
+  visibility: hidden;
 }
 
 .realm-terminal .realm-sigil.is-surging .rs-ping {
+  visibility: visible;
   animation: rs-ping 1.6s cubic-bezier(0.2, 0.6, 0.3, 1);
 }
 

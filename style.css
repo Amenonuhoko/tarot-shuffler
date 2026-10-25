@@ -701,9 +701,13 @@ body {
   pointer-events: none;
   z-index: 4;
   filter: blur(3px);
+  /* Hidden between reveals: at rest, transparent, it still held a
+     blurred GPU layer the size of the card. */
+  visibility: hidden;
 }
 
 .card.revealing .reveal-flash {
+  visibility: visible;
   animation: reveal-flash-burst 1.3s ease-out;
 }
 
@@ -902,6 +906,13 @@ body.major-omen .omen-veil {
   pointer-events: none;
   z-index: 3;
   mix-blend-mode: screen;
+  /* Only there for the burn. Otherwise its blend mode kept a layer
+     and an extra blending pass on every card face, in every theme. */
+  display: none;
+}
+
+.card-front.card-secret-burning .burn-glow {
+  display: block;
 }
 
 .burn-embers {

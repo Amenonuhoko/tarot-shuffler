@@ -2558,7 +2558,13 @@ function buildTerminalRainGlyphs() {
   }));
 }
 
+// Light mode draws the rain at one canvas pixel per CSS pixel: the
+// figures are soft-focused anyway, and the canvas has a quarter of the
+// pixels to fill and composite on a 2x screen.
 function terminalRainScale() {
+  if (document.documentElement.classList.contains("perf-lite")) {
+    return 1;
+  }
   return Math.min(window.devicePixelRatio || 1, 2);
 }
 
@@ -2567,6 +2573,7 @@ function resizeTerminalRain() {
     return;
   }
   // Drawn at device resolution (capped at 2x) so the figures stay crisp.
+  // The sprites keep the scale they were built at, and are scaled to fit.
   const scale = terminalRainScale();
   terminalRainCanvas.width = Math.round(window.innerWidth * scale);
   terminalRainCanvas.height = Math.round(window.innerHeight * scale);
@@ -2576,8 +2583,68 @@ function resizeTerminalRain() {
     x: i * TERMINAL_RAIN_FONT_SIZE,
     elapsed: Math.random() * TERMINAL_RAIN_FAST_STEP_MS,
     hasLooped: false,
-    drops: [makeTerminalRainDrop(Math.random() * -300)],
+    // Whole pixels, so each cell's edges fall on device pixels.
+    drops: [makeTerminalRainDrop(Math.round(Math.random() * -300))],
   }));
+}
+
+// A trail's glyphs stay where they land: on each step every glyph
+// moves one place back in its drop's trail, where it shows at 0.88 of
+// the alpha it had, and a new head lands below. So a step dims the
+// trail in one fill and redraws only the cells round the head, instead
+// of stamping all 22 glyphs of each drop again. The result is the same
+// picture to within a shade.
+const TERMINAL_RAIN_TRAIL_FADE = 0.88;
+
+function terminalRainAlpha(i) {
+  return i === 0 ? 0.95 : 0.55 * Math.pow(TERMINAL_RAIN_TRAIL_FADE, i);
+}
+
+function terminalRainCellTop(drop, i) {
+  return drop.y - (i + 1) * TERMINAL_RAIN_FONT_SIZE;
+}
+
+function stampTerminalRainGlyph(col, drop, i) {
+  const glyph = drop.trail[i];
+  if (glyph === undefined || glyph < 0) {
+    return;
+  }
+  const sprite = terminalRainGlyphs[glyph];
+  terminalRainCtx.globalAlpha = terminalRainAlpha(i);
+  terminalRainCtx.drawImage(
+    i === 0 ? sprite.head : sprite.trail,
+    col.x,
+    terminalRainCellTop(drop, i) - TERMINAL_RAIN_SPRITE_PAD,
+    TERMINAL_RAIN_FONT_SIZE,
+    TERMINAL_RAIN_FONT_SIZE + TERMINAL_RAIN_SPRITE_PAD * 2
+  );
+}
+
+// Dims the glyphs a step moved back along the trail, behind the old
+// head. destination-out only touches the pixels under the rect, so no
+// clip is needed (destination-in would wipe the rest of the canvas).
+function fadeTerminalRainTrail(col, drop) {
+  const top = terminalRainCellTop(drop, TERMINAL_RAIN_TRAIL_LENGTH - 1) - TERMINAL_RAIN_SPRITE_PAD;
+  terminalRainCtx.globalCompositeOperation = "destination-out";
+  terminalRainCtx.globalAlpha = 1;
+  terminalRainCtx.fillStyle = `rgba(0, 0, 0, ${1 - TERMINAL_RAIN_TRAIL_FADE})`;
+  terminalRainCtx.fillRect(col.x, top, TERMINAL_RAIN_FONT_SIZE, terminalRainCellTop(drop, 1) - top);
+  terminalRainCtx.globalCompositeOperation = "source-over";
+}
+
+// Rebuilds one cell from scratch: its own glyph plus the blur its
+// neighbours in the trail spread into it.
+function redrawTerminalRainCell(col, drop, cell) {
+  const top = terminalRainCellTop(drop, cell);
+  terminalRainCtx.save();
+  terminalRainCtx.beginPath();
+  terminalRainCtx.rect(col.x, top, TERMINAL_RAIN_FONT_SIZE, TERMINAL_RAIN_FONT_SIZE);
+  terminalRainCtx.clip();
+  terminalRainCtx.clearRect(col.x, top, TERMINAL_RAIN_FONT_SIZE, TERMINAL_RAIN_FONT_SIZE);
+  for (let i = Math.max(0, cell - 1); i <= cell + 1; i++) {
+    stampTerminalRainGlyph(col, drop, i);
+  }
+  terminalRainCtx.restore();
 }
 
 // The rain moves in whole-glyph steps every 55-220ms, so drawing it on
@@ -2602,8 +2669,8 @@ function drawTerminalRain(now) {
   terminalRainLastTime = now;
 
   // A column only changes when it steps, and columns don't overlap, so
-  // only the columns that stepped are cleared and redrawn. A tick where
-  // none did leaves the canvas, and the screen, untouched.
+  // only the columns that stepped are touched. A tick where none did
+  // leaves the canvas, and the screen, untouched.
   terminalRainColumns.forEach((col) => {
     col.elapsed += delta;
     const stepMs = col.hasLooped ? TERMINAL_RAIN_SLOW_STEP_MS : TERMINAL_RAIN_FAST_STEP_MS;
@@ -2631,22 +2698,20 @@ function drawTerminalRain(now) {
       col.hasLooped = true;
     }
 
-    terminalRainCtx.clearRect(col.x, 0, TERMINAL_RAIN_FONT_SIZE, window.innerHeight);
     col.drops.forEach((drop) => {
-      drop.trail.forEach((glyph, i) => {
-        if (glyph < 0) {
-          return;
-        }
-        const sprite = terminalRainGlyphs[glyph];
-        terminalRainCtx.globalAlpha = i === 0 ? 0.95 : 0.55 * Math.pow(0.88, i);
-        terminalRainCtx.drawImage(
-          i === 0 ? sprite.head : sprite.trail,
-          col.x,
-          drop.y - (i + 1) * TERMINAL_RAIN_FONT_SIZE - TERMINAL_RAIN_SPRITE_PAD,
-          TERMINAL_RAIN_FONT_SIZE,
-          TERMINAL_RAIN_FONT_SIZE + TERMINAL_RAIN_SPRITE_PAD * 2
-        );
-      });
+      // The glyph that just left the end of the trail goes; the old head
+      // turns trail green, and the new head lands in the cell below it,
+      // its glow reaching into the cell below that.
+      terminalRainCtx.clearRect(
+        col.x,
+        terminalRainCellTop(drop, TERMINAL_RAIN_TRAIL_LENGTH) - TERMINAL_RAIN_SPRITE_PAD,
+        TERMINAL_RAIN_FONT_SIZE,
+        TERMINAL_RAIN_FONT_SIZE + TERMINAL_RAIN_SPRITE_PAD
+      );
+      fadeTerminalRainTrail(col, drop);
+      redrawTerminalRainCell(col, drop, 1);
+      redrawTerminalRainCell(col, drop, 0);
+      redrawTerminalRainCell(col, drop, -1);
     });
   });
 }
@@ -2811,12 +2876,12 @@ applyTheme(loadStoredTheme());
 // ---- Light mode for slower phones ----
 // index.html turns it on up front for phones that report little memory.
 // Any other device gets its frame rate checked twice after it opens; if
-// it can't keep the background moving smoothly both times, light mode
-// goes on and is remembered for next time (?lite=0 keeps it off).
+// it can't keep up both times, light mode goes on and is remembered for
+// next time (?lite=0 keeps it off).
 const LITE_STORAGE_KEY = "tarotPullLite";
 const LITE_PROBE_FRAMES = 90;
 const LITE_PROBE_SLOW_FRAME_MS = 25;
-const LITE_PROBE_SLOW_SHARE = 0.25;
+const LITE_PROBE_SLOW_SHARE = 0.2;
 const LITE_PROBE_DELAYS_MS = [3000, 8000];
 
 function liteModeSettled() {
@@ -2837,7 +2902,7 @@ function enableLiteMode() {
   } catch (err) {}
 }
 
-// Reports whether a quarter or more of the next 90 frames ran late.
+// Reports whether a fifth or more of the next 90 frames ran late.
 // A gap of half a second means the page was hidden, not slow, so the
 // count starts over.
 function probeFramePacing(onDone) {
@@ -2863,23 +2928,35 @@ function probeFramePacing(onDone) {
   requestAnimationFrame(step);
 }
 
-function probeForLiteMode(round = 0) {
+// Probes run after the page opens and again after each theme change
+// (some themes cost far more than others); a newer run replaces an
+// older one.
+let liteProbeRun = 0;
+
+function probeForLiteMode(round = 0, run = ++liteProbeRun) {
   if (liteModeSettled() || prefersReducedMotion()) {
     return;
   }
   setTimeout(() => {
+    if (run !== liteProbeRun) {
+      return;
+    }
     probeFramePacing((slow) => {
-      if (!slow) {
+      if (!slow || run !== liteProbeRun) {
         return;
       }
       if (round + 1 < LITE_PROBE_DELAYS_MS.length) {
-        probeForLiteMode(round + 1);
+        probeForLiteMode(round + 1, run);
       } else {
         enableLiteMode();
       }
     });
   }, LITE_PROBE_DELAYS_MS[round]);
 }
+
+themeOptionEls.forEach((option) => {
+  option.addEventListener("click", () => probeForLiteMode());
+});
 
 if (document.readyState === "complete") {
   probeForLiteMode();
