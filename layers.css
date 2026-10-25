@@ -1,0 +1,250 @@
+/* ================================================================
+   SCENE LAYERS (layers.js)
+   Depth, light, atmosphere and the hidden chart, laid over every
+   theme. Colors come from each theme's --gold, so the layers take on
+   whichever theme is active.
+   ================================================================ */
+
+/* The astrolabe ticks forward on each reveal through the independent
+   rotate property, which composes with the wheels' running turn rather
+   than replacing it. translate (the depth shift) is set every frame and
+   so never transitions. */
+.sigil-spin {
+  transition: rotate 2.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.motif-stars,
+.motif-veil,
+.layer-chart,
+.layer-rays {
+  will-change: translate;
+}
+
+/* ---- Charted constellations: found through the lens, kept for good ---- */
+
+.layer-chart {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.32;
+}
+
+.layer-chart svg,
+.hidden-sky {
+  display: block;
+  overflow: visible;
+}
+
+.figure line {
+  stroke: var(--gold);
+  stroke-width: 0.8;
+  stroke-linecap: round;
+  opacity: 0.55;
+}
+
+.figure circle {
+  fill: var(--gold);
+}
+
+.figure text {
+  fill: var(--gold);
+  font-family: var(--font-plate);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-anchor: middle;
+  opacity: 0.8;
+}
+
+.layer-chart .figure line {
+  opacity: 0.7;
+}
+
+/* ---- Light falling on the card ---- */
+
+.layer-rays {
+  position: fixed;
+  left: 50%;
+  top: 0;
+  z-index: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.ray {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--w);
+  height: var(--ray-h, 80vh);
+  margin-left: calc(var(--w) / -2);
+  transform-origin: 50% 0;
+  transform: rotate(var(--a));
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in srgb, var(--gold) 20%, transparent) 30%,
+    color-mix(in srgb, var(--gold) 9%, transparent) 70%,
+    transparent
+  );
+  clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%);
+  opacity: 0.5;
+  animation: ray-sway var(--t, 10s) ease-in-out var(--delay, 0s) infinite alternate;
+}
+
+@keyframes ray-sway {
+  from { opacity: 0.3; }
+  to { opacity: 1; }
+}
+
+.ray-flare {
+  opacity: 0;
+  animation: none;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in srgb, var(--gold) 42%, transparent) 30%,
+    color-mix(in srgb, var(--gold) 16%, transparent) 75%,
+    transparent
+  );
+}
+
+.layer-rays.is-flaring .ray-flare {
+  animation: ray-flare 2.6s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+@keyframes ray-flare {
+  0% { opacity: 0; }
+  14% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ---- The lens onto the hidden chart ---- */
+
+/* In front of everything but the notes: on a phone the card fills most
+   of the screen, so a lens behind it would hardly ever be seen. It's a
+   looking-glass you sweep over the whole scene. */
+.layer-lens {
+  --lens: 220px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 3;
+  width: var(--lens);
+  height: var(--lens);
+  margin: calc(var(--lens) / -2) 0 0 calc(var(--lens) / -2);
+  border-radius: 50%;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(circle, color-mix(in srgb, var(--bg) 70%, transparent), color-mix(in srgb, var(--bg) 35%, transparent) 70%);
+  transition: opacity 0.45s ease;
+  will-change: transform, opacity;
+}
+
+.layer-lens.is-on {
+  opacity: 1;
+}
+
+.layer-lens-view {
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform;
+}
+
+.layer-lens-rim {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--gold) 55%, transparent),
+    inset 0 0 0 4px color-mix(in srgb, var(--gold) 8%, transparent),
+    inset 0 0 34px color-mix(in srgb, var(--gold) 22%, transparent),
+    0 0 26px color-mix(in srgb, var(--gold) 18%, transparent);
+}
+
+.hidden-sky .grid {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 0.5;
+  opacity: 0.16;
+}
+
+.hidden-sky .dust {
+  fill: var(--ink);
+  opacity: 0.55;
+}
+
+.hidden-sky .figure line {
+  stroke-width: 1;
+  opacity: 0.8;
+}
+
+.hidden-sky .figure circle {
+  filter: drop-shadow(0 0 3px var(--gold));
+}
+
+.hidden-sky .figure.is-found line {
+  opacity: 1;
+}
+
+.hidden-sky .figure.is-found text {
+  opacity: 1;
+}
+
+/* ---- Motes and edge glows, in front of everything ---- */
+
+.layer-motes {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ---- Discovery notes ---- */
+
+.layer-toast {
+  position: fixed;
+  left: 50%;
+  top: max(14px, env(safe-area-inset-top));
+  z-index: 60;
+  max-width: calc(100vw - 32px);
+  margin: 0;
+  padding: 9px 16px;
+  border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent);
+  border-radius: var(--radius-pill);
+  background: var(--panel-bg);
+  color: var(--gold);
+  font: 500 0.78rem var(--font-body);
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transform: translate(-50%, -8px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  pointer-events: none;
+}
+
+.layer-toast.is-on {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sigil-spin {
+    transition: none;
+  }
+
+  .ray,
+  .layer-rays.is-flaring .ray-flare {
+    animation: none;
+  }
+
+  .layer-motes,
+  .layer-lens {
+    display: none;
+  }
+}

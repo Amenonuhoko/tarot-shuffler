@@ -49,6 +49,8 @@ Then visit `http://localhost:8000`.
 
 The dice mode lives in `dice.js` and `dice.css`, ported from the standalone [Magic Ask Ball](https://github.com/Amenonuhoko/magic-ask-ball) app. It loads three.js r128 from jsdelivr, and only when the dice are first picked. Each theme sets the die's colors, numeral font, material and lights through the `--die-*` custom properties at the top of `dice.css`.
 
+The scene's depth and atmosphere live in `layers.js` and `layers.css`, on top of the existing scene. They add parallax planes (the sigil's three wheels move independently), an astrolabe that ticks forward on every reveal, falling light, drifting motes, and a lens that shows a hidden star chart when you drag across the sky. Each of its ten constellations stays charted in your sky once found. Every theme tints them through its `--gold`.
+
 Card artwork goes in `images/`, named after the card's slug (for example `images/the-fool.webp`). Add each file to the `CARD_ART` list near the top of `script.js` (`"the-fool": "webp"`); cards that aren't listed show the placeholder and never request an image.
 
 The site is published to GitHub Pages by the **Deploy site** workflow: `main` at the root, and whatever is on the `preview` branch at [/preview/](https://amenonuhoko.github.io/tarot-shuffler/preview/). To try a change before it goes live, push it to `preview`; it runs through the repo's `preview` environment first, then the site redeploys with it. (Pages must be set to deploy from GitHub Actions: Settings → Pages → Source.)

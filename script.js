@@ -1152,7 +1152,7 @@ function triggerRevealFanfare(isMajor = false) {
   void cardFrontContentEl.offsetWidth;
   cardFrontContentEl.classList.add("content-cascade");
 
-  surgeSigil();
+  surgeSigil(isMajor);
 }
 
 // Stops whatever keyframe turn or reveal is running without the card
@@ -2021,6 +2021,12 @@ deckSelect.addEventListener("change", () => {
 });
 
 document.addEventListener("click", (event) => {
+  // A drag across the sky (layers.js's lens) ends in a click too; it was
+  // looking around, not asking for a card.
+  if (window.TarotLayers && window.TarotLayers.consumeDrag()) {
+    return;
+  }
+
   // A held tap that just triggered the Magician burn also fires a click
   // on release - swallow that one click so it doesn't also pull a new
   // card out from under the reveal.
@@ -2608,11 +2614,13 @@ if (document.fonts && document.fonts.ready) {
 }
 placeSigil();
 
-// On every reveal the sigil flares and swells for a moment.
-function surgeSigil() {
+// On every reveal the sigil flares and swells for a moment. The event
+// lets the scene layers (layers.js) answer the same reveal.
+function surgeSigil(isMajor = false) {
   motifSigilEl.classList.remove("is-surging");
   void motifSigilEl.offsetWidth;
   motifSigilEl.classList.add("is-surging");
+  document.dispatchEvent(new CustomEvent("tarot:reveal", { detail: { major: isMajor } }));
 }
 
 document.addEventListener("visibilitychange", () => {
