@@ -858,8 +858,8 @@ dz/dt = xy − βz
   // to the screen. w is the painting's width on screen.
   function coverMap() {
     const [pw, ph] = PAINTING_SIZE[orientation()];
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
+    const vw = scene.clientWidth;
+    const vh = scene.clientHeight;
     const scale = Math.max(vw / pw, vh / ph);
     const ox = (vw - pw * scale) / 2;
     const oy = (vh - ph * scale) / 2;
@@ -885,8 +885,8 @@ dz/dt = xy − βz
   // and fans are polygons filled with gradients, so nothing is clipped
   // or masked while it animates - only the whole layer's opacity moves.
   function screenSvg(className, defs, body) {
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
+    const vw = scene.clientWidth;
+    const vh = scene.clientHeight;
     return `<svg class="${className}" width="${vw}" height="${vh}" viewBox="0 0 ${vw} ${vh}"><defs>${defs}</defs>${body}</svg>`;
   }
 
@@ -911,7 +911,7 @@ dz/dt = xy − βz
     // and dust drifts in the light.
     bloodmoon({ at, w }, s) {
       const src = at(s.src);
-      const floorY = window.innerHeight * 1.04;
+      const floorY = scene.clientHeight * 1.04;
       const sets = [[], []];
       const defs = [];
       [-30, -17, -5, 7, 19, 31].forEach((tilt, i) => {
@@ -930,7 +930,7 @@ dz/dt = xy − βz
     // reveal; the torches flicker and the floor's sunburst breathes.
     deco({ at, w }, s) {
       const src = at(s.src);
-      const size = Math.min(window.innerHeight * 1.15, 1500);
+      const size = Math.min(scene.clientHeight * 1.15, 1500);
       const r = size / 2;
       const rays = [];
       for (let k = 0; k < 60; k++) {
@@ -980,6 +980,7 @@ dz/dt = xy − βz
   // Lights, and the scrim's pools of light round the card and the source.
   function placeLights() {
     if (!activeKey || !LIGHTS[activeKey]) return;
+    sceneSize = `${scene.clientWidth}x${scene.clientHeight}`;
     const config = SCENES[activeKey][orientation()];
     const map = coverMap();
     const [sx, sy] = map.at(config.src);
@@ -1041,12 +1042,18 @@ dz/dt = xy − βz
   }
 
   let relayoutTimer = null;
+  // The lights are rebuilt only when the scene itself changes size (a
+  // rotation or a resized window), not when a phone's address bar
+  // slides, so they never restart mid-breath.
+  let sceneSize = "";
   function relayout() {
     anchor();
     clearTimeout(relayoutTimer);
     relayoutTimer = setTimeout(() => {
       if (!active) return;
       showPainting();
+      const size = `${scene.clientWidth}x${scene.clientHeight}`;
+      if (size === sceneSize) return;
       placeLights();
     }, 200);
   }
