@@ -2442,8 +2442,7 @@ const THEME_ICON_PATHS = {
   holo: '<path d="M4 7 L9 2 L14 7 L9 16 Z"/><path d="M4 7 L14 7"/><path d="M6.5 7 L9 2 L11.5 7"/>',
   terminal: '<path d="M3 5 L8 9 L3 13"/><path d="M9.5 14 L15 14"/>',
   deco: '<path d="M9 16 L9 2 M9 16 L4.5 4 M9 16 L13.5 4 M9 16 L1.5 9.5 M9 16 L16.5 9.5"/>',
-  bloodmoon: '<circle cx="9" cy="9" r="4.5" fill="currentColor" stroke="none"/><circle cx="9" cy="9" r="7.4" stroke-dasharray="1.2 2.4"/>',
-  soft: '<circle cx="9" cy="9" r="3.6"/><path d="M9 1.8v2M9 14.2v2M1.8 9h2M14.2 9h2M3.9 3.9l1.4 1.4M12.7 12.7l1.4 1.4M3.9 14.1l1.4-1.4M12.7 5.3l1.4-1.4"/>'
+  bloodmoon: '<circle cx="9" cy="9" r="4.5" fill="currentColor" stroke="none"/><circle cx="9" cy="9" r="7.4" stroke-dasharray="1.2 2.4"/>'
 };
 
 function setThemeMenuOpen(open) {

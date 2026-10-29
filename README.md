@@ -63,7 +63,7 @@ The realms are:
 - Blood Moon is a crimson cathedral under a rose window.
 - Art Deco is the Temple of Ra.
 
-The default theme, Soft Realism Dark, and Soft Realism Light share `soft.css`: matte, softly lit surfaces raised off the table or pressed into it. The dark one keeps the starry sigil atmosphere from `style.css` (the rules under `:root:not([data-theme])`), with the sigil carved into a lacquer medallion; the light one is lilac porcelain.
+The default theme, Mystic Violet, is drawn in soft realism: matte, softly lit surfaces raised off the table or pressed into it, over a starry sigil atmosphere with the sigil carved into a lacquer medallion. Its rules are the ones under `:root:not([data-theme])` in `style.css`.
 
 Light sources are placed per painting in `SCENES` in `realms.js`. Every moving part animates only `transform` or `opacity`; see `docs/realms-plan.md` for the measurements behind that rule.
 
