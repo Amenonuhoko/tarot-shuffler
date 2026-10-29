@@ -810,8 +810,10 @@ const orientationLabelEl = document.getElementById("orientationLabel");
 const cardDescriptionEl = document.getElementById("cardDescription");
 const hintEl = document.getElementById("hint");
 const shuffleBtn = document.getElementById("shuffleBtn");
+const shuffleLabelEl = document.getElementById("shuffleLabel");
 const deckSelect = document.getElementById("deckSelect");
 const menuToggle = document.getElementById("menuToggle");
+const searchToggle = document.getElementById("searchToggle");
 const historyPanel = document.getElementById("historyPanel");
 const historyBody = document.getElementById("historyBody");
 const historyCount = document.getElementById("historyCount");
@@ -1930,6 +1932,14 @@ menuToggle.addEventListener("click", (event) => {
   toggleMenu();
 });
 
+// The search sits in the history panel: the search button opens the
+// panel straight to it.
+searchToggle.addEventListener("click", (event) => {
+  event.stopPropagation();
+  setMenuOpen(true);
+  cardSearchInputEl.focus();
+});
+
 // ---- Dice mode ----
 // "Magic Ask Ball" in the deck picker swaps the card for a 3D die
 // (dice.js, ported from the standalone Magic Ask Ball app). It needs
@@ -1974,7 +1984,8 @@ function loadDice() {
 
 function enterDiceMode() {
   document.body.classList.add("is-dice-mode");
-  shuffleBtn.textContent = "Roll";
+  shuffleLabelEl.textContent = "Roll";
+  menuToggle.setAttribute("aria-label", "Dice settings");
   hintEl.textContent = "Tap to roll, or hold and shake";
   loadDice().then(() => {
     if (isDiceActive()) {
@@ -1987,7 +1998,8 @@ function enterDiceMode() {
 
 function exitDiceMode() {
   document.body.classList.remove("is-dice-mode");
-  shuffleBtn.textContent = "Shuffle";
+  shuffleLabelEl.textContent = "Shuffle";
+  menuToggle.setAttribute("aria-label", "Recent pulls");
   if (window.TarotDice) {
     window.TarotDice.deactivate();
   }
@@ -2035,7 +2047,7 @@ document.addEventListener("click", (event) => {
     return;
   }
 
-  if (event.target.closest("#menuToggle")) {
+  if (event.target.closest("#menuToggle, #searchToggle")) {
     return;
   }
 
@@ -2426,13 +2438,12 @@ function saveTheme(themeValue) {
 }
 
 const THEME_ICON_PATHS = {
-  "": '<circle cx="9" cy="9" r="7"/><circle cx="9" cy="9" r="3.5"/><circle cx="14.5" cy="6" r="1" fill="currentColor" stroke="none"/>',
+  "": '<path d="M14.5 11.2 A6.5 6.5 0 1 1 6.8 3.5 A5.2 5.2 0 0 0 14.5 11.2 Z"/>',
   holo: '<path d="M4 7 L9 2 L14 7 L9 16 Z"/><path d="M4 7 L14 7"/><path d="M6.5 7 L9 2 L11.5 7"/>',
   terminal: '<path d="M3 5 L8 9 L3 13"/><path d="M9.5 14 L15 14"/>',
   deco: '<path d="M9 16 L9 2 M9 16 L4.5 4 M9 16 L13.5 4 M9 16 L1.5 9.5 M9 16 L16.5 9.5"/>',
   bloodmoon: '<circle cx="9" cy="9" r="4.5" fill="currentColor" stroke="none"/><circle cx="9" cy="9" r="7.4" stroke-dasharray="1.2 2.4"/>',
-  soft: '<circle cx="9" cy="9" r="6.5"/><path d="M5.5 6.5 Q9 3.5 12.5 6.5"/>',
-  softdark: '<path d="M14.5 11.2 A6.5 6.5 0 1 1 6.8 3.5 A5.2 5.2 0 0 0 14.5 11.2 Z"/>'
+  soft: '<circle cx="9" cy="9" r="3.6"/><path d="M9 1.8v2M9 14.2v2M1.8 9h2M14.2 9h2M3.9 3.9l1.4 1.4M12.7 12.7l1.4 1.4M3.9 14.1l1.4-1.4M12.7 5.3l1.4-1.4"/>'
 };
 
 function setThemeMenuOpen(open) {
