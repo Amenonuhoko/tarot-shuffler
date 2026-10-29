@@ -2822,7 +2822,7 @@ body.major-omen .omen-veil {
     radial-gradient(closest-side, rgba(122, 84, 224, 0.26), rgba(122, 84, 224, 0.1) 45%, rgba(216, 183, 106, 0.05) 70%, transparent 100%);
 }
 
-:root:not([data-theme]) .motif-sigil {
+:root:is(:not([data-theme]), [data-theme="softdark"]) .motif-sigil {
   display: block;
 }
 
@@ -2837,7 +2837,7 @@ body.major-omen .omen-veil {
   opacity: 0.62;
 }
 
-:root:not([data-theme]) .sigil-aura {
+:root:is(:not([data-theme]), [data-theme="softdark"]) .sigil-aura {
   opacity: 0.62;
   animation: sigil-breathe 14s ease-in-out infinite;
 }
@@ -2854,7 +2854,7 @@ body.major-omen .omen-veil {
   aspect-ratio: 1;
 }
 
-:root:not([data-theme]) .sigil-spin {
+:root:is(:not([data-theme]), [data-theme="softdark"]) .sigil-spin {
   will-change: transform;
 }
 
@@ -2887,7 +2887,7 @@ body.major-omen .omen-veil {
   transform: none;
 }
 
-:root:not([data-theme]) .sigil-layer {
+:root:is(:not([data-theme]), [data-theme="softdark"]) .sigil-layer {
   display: block;
 }
 
@@ -2923,15 +2923,15 @@ body.major-omen .omen-veil {
    card lands - cost extra raster work each time. */
 /* Listed after each wheel's turn so the turn keeps running when the
    surge is added (animations are matched by name). */
-:root:not([data-theme]) .motif-sigil.is-surging .sigil-spin-rim {
+:root:is(:not([data-theme]), [data-theme="softdark"]) .motif-sigil.is-surging .sigil-spin-rim {
   animation: sigil-turn 360s linear infinite, sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
-:root:not([data-theme]) .motif-sigil.is-surging .sigil-spin-zodiac {
+:root:is(:not([data-theme]), [data-theme="softdark"]) .motif-sigil.is-surging .sigil-spin-zodiac {
   animation: sigil-turn 240s linear infinite reverse, sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
-:root:not([data-theme]) .motif-sigil.is-surging .sigil-spin-planets {
+:root:is(:not([data-theme]), [data-theme="softdark"]) .motif-sigil.is-surging .sigil-spin-planets {
   animation: sigil-turn 120s linear infinite, sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
@@ -2947,7 +2947,7 @@ body.major-omen .omen-veil {
    toward the card. All of it lives in the fixed decorative layer,
    so none of it touches the page layout. */
 
-:root:not([data-theme]) .motif-veil {
+:root:is(:not([data-theme]), [data-theme="softdark"]) .motif-veil {
   display: block;
   inset: -12%;
   background:
@@ -2962,14 +2962,14 @@ body.major-omen .omen-veil {
   to { transform: translate3d(2.5%, -1.5%, 0) scale(1.08); }
 }
 
-:root:not([data-theme]) .motif-stars,
-:root:not([data-theme]) .motif-stars::after {
+:root:is(:not([data-theme]), [data-theme="softdark"]) .motif-stars,
+:root:is(:not([data-theme]), [data-theme="softdark"]) .motif-stars::after {
   display: block;
   opacity: 0.6;
   animation: mystic-twinkle 4.8s ease-in-out infinite alternate;
 }
 
-:root:not([data-theme]) .motif-stars {
+:root:is(:not([data-theme]), [data-theme="softdark"]) .motif-stars {
   background-image:
     radial-gradient(1.6px 1.6px at 9% 20%, #fff, transparent),
     radial-gradient(1.2px 1.2px at 27% 33%, var(--gold), transparent),
@@ -2985,7 +2985,7 @@ body.major-omen .omen-veil {
     radial-gradient(1.3px 1.3px at 90% 66%, var(--gold), transparent);
 }
 
-:root:not([data-theme]) .motif-stars::after {
+:root:is(:not([data-theme]), [data-theme="softdark"]) .motif-stars::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -3011,7 +3011,7 @@ body.major-omen .omen-veil {
   to { opacity: 1; }
 }
 
-:root:not([data-theme]) .mystic-motif::after {
+:root:is(:not([data-theme]), [data-theme="softdark"]) .mystic-motif::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -3023,7 +3023,7 @@ body.major-omen .omen-veil {
    the bottom of the slot's own stacking context (perspective creates
    one), so the deck stack and the card always paint above it. */
 
-:root:not([data-theme]) .card-slot::before {
+:root:is(:not([data-theme]), [data-theme="softdark"]) .card-slot::before {
   content: "";
   position: absolute;
   inset: -12% -28%;
@@ -3046,8 +3046,8 @@ body.major-omen .omen-veil {
    on the frame. :not(:empty) keeps them from floating alone while the
    reveal briefly clears the hint. */
 
-:root:not([data-theme]) .hint:not(:empty)::before,
-:root:not([data-theme]) .hint:not(:empty)::after {
+:root:is(:not([data-theme]), [data-theme="softdark"]) .hint:not(:empty)::before,
+:root:is(:not([data-theme]), [data-theme="softdark"]) .hint:not(:empty)::after {
   content: "";
   display: inline-block;
   width: 5px;
@@ -3062,12 +3062,12 @@ body.major-omen .omen-veil {
    and a soft drop shadow, so the buttons read as brushed metal on the
    table rather than flat outlines. */
 
-:root:not([data-theme]) .btn-secondary,
-:root:not([data-theme]) .menu-toggle,
-:root:not([data-theme]) .donate-link,
-:root:not([data-theme]) .deck-selector select,
-:root:not([data-theme]) .search-btn,
-:root:not([data-theme]) .flip-btn {
+:root:is(:not([data-theme]), [data-theme="softdark"]) .btn-secondary,
+:root:is(:not([data-theme]), [data-theme="softdark"]) .menu-toggle,
+:root:is(:not([data-theme]), [data-theme="softdark"]) .donate-link,
+:root:is(:not([data-theme]), [data-theme="softdark"]) .deck-selector select,
+:root:is(:not([data-theme]), [data-theme="softdark"]) .search-btn,
+:root:is(:not([data-theme]), [data-theme="softdark"]) .flip-btn {
   background-image: linear-gradient(180deg, rgba(216, 183, 106, 0.09), rgba(216, 183, 106, 0) 60%);
   box-shadow: inset 0 1px 0 rgba(216, 183, 106, 0.16), 0 10px 22px -14px rgba(0, 0, 0, 0.8);
 }
@@ -3091,7 +3091,7 @@ body.major-omen .omen-veil {
   pointer-events: none;
 }
 
-:root:not([data-theme]) .card-glow {
+:root:is(:not([data-theme]), [data-theme="softdark"]) .card-glow {
   display: block;
   box-shadow: 0 0 22px rgba(216, 183, 106, 0.5);
   opacity: 0.7;
@@ -3105,7 +3105,7 @@ body.major-omen .omen-veil {
 
 /* The gilded edge is the Mystic front's outline, so the plain border
    underneath steps aside instead of doubling it. */
-:root:not([data-theme]) .card-front {
+:root:is(:not([data-theme]), [data-theme="softdark"]) .card-front {
   border-color: transparent;
 }
 
@@ -3120,7 +3120,7 @@ body.major-omen .omen-veil {
   z-index: 3;
 }
 
-:root:not([data-theme]) .mystic-frame {
+:root:is(:not([data-theme]), [data-theme="softdark"]) .mystic-frame {
   display: block;
 }
 
@@ -3136,7 +3136,7 @@ body.major-omen .omen-veil {
 /* Mystic's own frame already draws the inset hairline and corner stars
    (matching the card back), so the Illuminated frame line stays off
    here rather than doubling it. */
-:root:not([data-theme]) .card-illum {
+:root:is(:not([data-theme]), [data-theme="softdark"]) .card-illum {
   display: none;
 }
 
@@ -3160,15 +3160,15 @@ body.major-omen .omen-veil {
   [data-theme="terminal"] .card::after, [data-theme="terminal"] .card-front::after, [data-theme="terminal"] .card-title, [data-theme="terminal"] .hint::after,
   [data-theme="deco"] .card-title,
   [data-theme="bloodmoon"] .card-face, [data-theme="bloodmoon"] .card-title, [data-theme="bloodmoon"] .hint::after,
-  :root:not([data-theme]) .motif-sigil,
-  :root:not([data-theme]) .sigil-breath,
-  :root:not([data-theme]) .sigil-layer,
+  :root:is(:not([data-theme]), [data-theme="softdark"]) .motif-sigil,
+  :root:is(:not([data-theme]), [data-theme="softdark"]) .sigil-breath,
+  :root:is(:not([data-theme]), [data-theme="softdark"]) .sigil-layer,
   .sigil-spin, .sigil-aura,
-  :root:not([data-theme]) .motif-veil,
-  :root:not([data-theme]) .motif-stars,
-  :root:not([data-theme]) .motif-stars::after,
-  :root:not([data-theme]) .card-slot::before,
-  :root:not([data-theme]) .card-front,
+  :root:is(:not([data-theme]), [data-theme="softdark"]) .motif-veil,
+  :root:is(:not([data-theme]), [data-theme="softdark"]) .motif-stars,
+  :root:is(:not([data-theme]), [data-theme="softdark"]) .motif-stars::after,
+  :root:is(:not([data-theme]), [data-theme="softdark"]) .card-slot::before,
+  :root:is(:not([data-theme]), [data-theme="softdark"]) .card-front,
   .card-description.has-more::after,
   .mystic-frame, .mystic-frame-inner,
   .card-front.card-secret-burning,

@@ -1,0 +1,228 @@
+/* ================================================================
+   Soft Realism: matte, softly lit surfaces that sit above the table
+   (raised) or are pressed into it (wells), in two lights.
+   - Soft Light: lilac porcelain, plum lacquer card back, gold leaf.
+   - Soft Dark: Mystic Violet's whole atmosphere (style.css matches it
+     with :root:is(:not([data-theme]), [data-theme="softdark"])), its
+     sigil carved into a lacquer medallion, on the same surfaces.
+   Static shadows only: nothing here animates a shadow or a filter.
+   ================================================================ */
+
+[data-theme="soft"] {
+  color-scheme: light;
+  --bg: #e6e1ec;
+  --chrome: #e6e1ec;
+  --bg-glow: #f3f0f7;
+  --surface: #ece7f2;
+  --surface-line: rgba(92, 76, 120, 0.16);
+  --gold: #7a5c22;
+  --gold-dim: #9c8456;
+  --ink: #2e2440;
+  --ink-dim: #5e5470;
+  --lavender: #4b3a6b;
+
+  --card-shadow: 14px 22px 34px rgba(46, 36, 64, 0.3), -6px -6px 16px rgba(255, 255, 255, 0.6);
+  --description-bg: #e4deeb;
+  --panel-bg: #eee9f3;
+
+  --soft-raised-bg: linear-gradient(145deg, #f4f1f8, #ded8e6);
+  --soft-raised-shadow: -6px -6px 14px rgba(255, 255, 255, 0.9), 8px 10px 20px rgba(92, 76, 120, 0.26);
+  --soft-pressed-shadow: inset 4px 4px 9px rgba(92, 76, 120, 0.24), inset -4px -4px 9px rgba(255, 255, 255, 0.85);
+  --soft-well-bg: #e3ddea;
+  --soft-well-shadow: inset 5px 5px 10px rgba(92, 76, 120, 0.22), inset -5px -5px 10px rgba(255, 255, 255, 0.85);
+  --soft-panel-shadow: inset 0 2px 2px rgba(255, 255, 255, 0.95), 0 18px 40px rgba(46, 36, 64, 0.22), -6px -6px 16px rgba(255, 255, 255, 0.6);
+  --soft-face-bg: linear-gradient(150deg, #fbf9fc 0%, #eee9f3 60%, #e2dbea 100%);
+  --soft-face-bevel: inset 2px 2px 2px rgba(255, 255, 255, 0.95), inset -3px -4px 8px rgba(92, 76, 120, 0.18);
+  --soft-art-shadow: inset 3px 4px 10px rgba(20, 12, 36, 0.45), inset -2px -2px 4px rgba(255, 255, 255, 0.3);
+  --soft-back-bg: radial-gradient(120% 80% at 25% 12%, #7e6ba3 0%, #4b3a6b 52%, #2f2347 100%);
+  --soft-back-ink: #e8ce96;
+  --soft-back-shadow: inset 2px 2px 3px rgba(255, 255, 255, 0.35), inset -3px -4px 8px rgba(20, 12, 36, 0.45);
+  --soft-pool: rgba(201, 163, 92, 0.24);
+}
+
+[data-theme="softdark"] {
+  --bg: #0e0a17;
+  --chrome: #0e0a17;
+  --bg-glow: #1a1328;
+  --surface: #1e1730;
+  --surface-line: rgba(216, 183, 106, 0.22);
+  --gold: #d8b76a;
+  --gold-dim: #9c8248;
+  --ink: #efe8fa;
+  --ink-dim: #b7abcb;
+  --lavender: #9fc9ee;
+
+  --card-shadow: 0 0 26px rgba(216, 183, 106, 0.18), 14px 22px 34px rgba(0, 0, 0, 0.65);
+  --description-bg: rgba(14, 10, 23, 0.82);
+  --panel-bg: rgba(30, 23, 46, 0.96);
+
+  --soft-raised-bg: linear-gradient(145deg, #2c2342, #19132a);
+  --soft-raised-shadow: inset 0 1px 0 rgba(216, 183, 106, 0.25), -5px -5px 12px rgba(140, 110, 200, 0.1), 8px 10px 20px rgba(0, 0, 0, 0.6);
+  --soft-pressed-shadow: inset 4px 4px 9px rgba(0, 0, 0, 0.65), inset -3px -3px 8px rgba(140, 110, 200, 0.12);
+  --soft-well-bg: rgba(12, 9, 20, 0.85);
+  --soft-well-shadow: inset 5px 5px 10px rgba(0, 0, 0, 0.65), inset -4px -4px 10px rgba(140, 110, 200, 0.1), 0 1px 0 rgba(216, 183, 106, 0.12);
+  --soft-panel-shadow: inset 0 1px 0 rgba(216, 183, 106, 0.3), 0 18px 40px rgba(0, 0, 0, 0.55);
+  --soft-face-bg: linear-gradient(150deg, #2b2140 0%, #1c1529 60%, #140f1f 100%);
+  --soft-face-bevel: inset 2px 2px 2px rgba(255, 240, 220, 0.1), inset -3px -4px 8px rgba(0, 0, 0, 0.55);
+  --soft-art-shadow: inset 0 0 0 1px rgba(216, 183, 106, 0.4), inset 3px 4px 10px rgba(0, 0, 0, 0.7), inset -2px -2px 4px rgba(255, 240, 220, 0.12);
+  --soft-back-bg: radial-gradient(120% 80% at 25% 12%, #6b58a0 0%, #4a3870 50%, #120c1e 100%);
+  --soft-back-ink: #e2c27e;
+  --soft-back-shadow: inset 2px 2px 3px rgba(255, 240, 220, 0.18), inset -3px -4px 8px rgba(0, 0, 0, 0.6);
+  --soft-pool: rgba(216, 183, 106, 0.2);
+}
+
+:root:is([data-theme="soft"], [data-theme="softdark"]) {
+  --font-display: 'Cormorant Garamond', serif;
+  --font-description: 'Cormorant Garamond', serif;
+  --font-plate: 'Cormorant Garamond', serif;
+  --radius-card: 22px;
+  --radius-art: 14px;
+  --radius-pill: 999px;
+  --radius-icon: 50%;
+}
+
+/* ---- The table ---- */
+
+:root[data-theme="soft"] body {
+  background: radial-gradient(120% 70% at 30% 0%, #f3f0f7 0%, #e6e1ec 55%, #dcd5e5 100%) fixed;
+}
+
+/* A pool of light under the card. Soft Dark has Mystic's own. */
+:root[data-theme="soft"] .card-slot::before {
+  content: "";
+  position: absolute;
+  inset: -12% -28%;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--soft-pool), transparent 100%);
+  pointer-events: none;
+}
+
+/* Soft Dark: the sigil is carved into a lacquer medallion. The bevel is
+   painted once behind the turning wheels; the engraving's light and
+   shadow are drawn into each wheel's own layer, so turning them stays
+   a plain compositor rotation. */
+:root[data-theme="softdark"] .motif-sigil::before {
+  content: "";
+  position: absolute;
+  inset: 1.5%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 30%, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0) 55%);
+  box-shadow: inset 4px 5px 8px rgba(255, 240, 220, 0.06), inset -10px -14px 26px rgba(0, 0, 0, 0.55), 0 40px 80px rgba(0, 0, 0, 0.5);
+}
+
+:root[data-theme="softdark"] .sigil-layer {
+  filter: drop-shadow(0 1.2px 0.6px rgba(0, 0, 0, 0.9)) drop-shadow(0 -0.6px 0 rgba(255, 236, 200, 0.28));
+}
+
+/* ---- The card ---- */
+
+:root:is([data-theme="soft"], [data-theme="softdark"]) .card-face {
+  border: none;
+  background: var(--soft-face-bg);
+  box-shadow: var(--soft-face-bevel), var(--card-shadow);
+}
+
+:root:is([data-theme="soft"], [data-theme="softdark"]) .card-back,
+:root:is([data-theme="soft"], [data-theme="softdark"]) .deck-card {
+  background: var(--soft-back-bg);
+  box-shadow: var(--soft-back-shadow), var(--card-shadow);
+}
+
+:root:is([data-theme="soft"], [data-theme="softdark"]) .card-back {
+  color: var(--soft-back-ink);
+  outline: 1.5px solid color-mix(in srgb, var(--soft-back-ink) 60%, transparent);
+  outline-offset: -11px;
+}
+
+:root:is([data-theme="soft"], [data-theme="softdark"]) .deck-card {
+  border: none;
+}
+
+:root:is([data-theme="soft"], [data-theme="softdark"]) .back-motif {
+  color: var(--soft-back-ink);
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.55)) drop-shadow(0 -0.5px 0 rgba(255, 236, 200, 0.35));
+}
+
+:root:is([data-theme="soft"], [data-theme="softdark"]) .card-art {
+  outline: none;
+  box-shadow: var(--soft-art-shadow);
+}
+
+:root:is([data-theme="soft"], [data-theme="softdark"]) .card-title {
+  text-transform: none;
+  letter-spacing: 0.01em;
+  font-size: clamp(1.45rem, 7vw, 1.85rem);
+  line-height: 1.1;
+}
+
+:root[data-theme="softdark"] .card-title {
+  color: #f1e6c8;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.8), 0 0 14px rgba(216, 183, 106, 0.3);
+}
+
+:root:is([data-theme="soft"], [data-theme="softdark"]) .card-description {
+  border: none;
+  border-radius: 18px;
+  background: var(--soft-well-bg);
+  box-shadow: var(--soft-well-shadow);
+  font-size: 1.05rem;
+  line-height: 1.35;
+}
+
+/* ---- Controls: raised to press, wells to type into ---- */
+
+:root:is([data-theme="soft"], [data-theme="softdark"]) :is(.btn-secondary, .menu-toggle, .search-btn, .flip-btn, .donate-link, .deck-selector select) {
+  border-color: transparent;
+  background: var(--soft-raised-bg);
+  box-shadow: var(--soft-raised-shadow);
+  color: var(--ink);
+}
+
+:root:is([data-theme="soft"], [data-theme="softdark"]) .btn-secondary {
+  min-height: 54px;
+}
+
+:root:is([data-theme="soft"], [data-theme="softdark"]) .deck-selector select {
+  border-radius: 16px;
+}
+
+:root:is([data-theme="soft"], [data-theme="softdark"]) :is(.menu-toggle[aria-expanded="true"], .btn-secondary:active, .menu-toggle:active, .search-btn:active, .flip-btn:active) {
+  background: var(--soft-well-bg);
+  box-shadow: var(--soft-pressed-shadow);
+}
+
+:root:is([data-theme="soft"], [data-theme="softdark"]) .card-search-input {
+  border-color: transparent;
+  border-radius: 14px;
+  background: var(--soft-well-bg);
+  box-shadow: var(--soft-well-shadow);
+}
+
+:root:is([data-theme="soft"], [data-theme="softdark"]) :is(.history-panel, .theme-menu) {
+  border: none;
+  border-radius: 22px;
+  background: var(--panel-bg);
+  box-shadow: var(--soft-panel-shadow);
+}
+
+:root[data-theme="soft"] .theme-swatch {
+  border-color: rgba(46, 36, 64, 0.25);
+}
+
+.theme-swatch-soft {
+  background: linear-gradient(135deg, #f4f1f8 0%, #b9aecb 55%, #4b3a6b 100%);
+}
+
+.theme-swatch-softdark {
+  background: linear-gradient(135deg, #e2c27e 0%, #4a3870 45%, #0e0a17 100%);
+}
+
+/* The flip button is small: a full raised shadow swamps it, and on a
+   reversed card (whose face is inverted) it reads as a dark blot. */
+:root:is([data-theme="soft"], [data-theme="softdark"]) .flip-btn {
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25), 2px 3px 6px rgba(20, 12, 36, 0.3);
+}

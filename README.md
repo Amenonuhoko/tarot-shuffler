@@ -63,6 +63,8 @@ The realms are:
 - Blood Moon is a crimson cathedral under a rose window.
 - Art Deco is the Temple of Ra.
 
+The two Soft Realism themes live in `soft.css`: matte, softly lit surfaces raised off the table or pressed into it. Soft Realism Light is lilac porcelain; Soft Realism Dark wears Mystic Violet's whole atmosphere (its selectors in `style.css` match both), with the sigil carved into a lacquer medallion.
+
 Light sources are placed per painting in `SCENES` in `realms.js`. Every moving part animates only `transform` or `opacity`; see `docs/realms-plan.md` for the measurements behind that rule.
 
 Card artwork goes in `images/`, named after the card's slug (for example `images/the-fool.webp`). Add each file to the `CARD_ART` list near the top of `script.js` (`"the-fool": "webp"`); cards that aren't listed show the placeholder and never request an image.

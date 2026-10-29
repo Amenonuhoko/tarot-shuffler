@@ -2430,7 +2430,9 @@ const THEME_ICON_PATHS = {
   holo: '<path d="M4 7 L9 2 L14 7 L9 16 Z"/><path d="M4 7 L14 7"/><path d="M6.5 7 L9 2 L11.5 7"/>',
   terminal: '<path d="M3 5 L8 9 L3 13"/><path d="M9.5 14 L15 14"/>',
   deco: '<path d="M9 16 L9 2 M9 16 L4.5 4 M9 16 L13.5 4 M9 16 L1.5 9.5 M9 16 L16.5 9.5"/>',
-  bloodmoon: '<circle cx="9" cy="9" r="4.5" fill="currentColor" stroke="none"/><circle cx="9" cy="9" r="7.4" stroke-dasharray="1.2 2.4"/>'
+  bloodmoon: '<circle cx="9" cy="9" r="4.5" fill="currentColor" stroke="none"/><circle cx="9" cy="9" r="7.4" stroke-dasharray="1.2 2.4"/>',
+  soft: '<circle cx="9" cy="9" r="6.5"/><path d="M5.5 6.5 Q9 3.5 12.5 6.5"/>',
+  softdark: '<path d="M14.5 11.2 A6.5 6.5 0 1 1 6.8 3.5 A5.2 5.2 0 0 0 14.5 11.2 Z"/>'
 };
 
 function setThemeMenuOpen(open) {
