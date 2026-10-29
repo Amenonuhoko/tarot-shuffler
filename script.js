@@ -1119,17 +1119,22 @@ function endMajorOmen() {
 // so the motion never stops and starts.
 const TURN_CLASSES = ["draw-flip", "major-flip", "redraw-turn", "major-redraw"];
 const TURN_ANIMATIONS = new Set(["turn-up", "major-flip", "turn-over", "major-turn-over"]);
-// When a face-up card turning all the way over shows its back flat to
-// the viewer - the middle of the window where its face is hidden
-// (361-641ms of the 1.25s turn; 218-1348ms of the 2s Major turn).
-const REDRAW_SWAP_MS = 485;
-const REDRAW_SWAP_MAJOR_MS = 700;
+// Just after a redraw's face has turned edge-on and dropped out (500ms
+// into the 1.25s turn; 880ms into the 2s Major turn), so the outgoing
+// face is never cleared while it can still be seen. If the timer runs
+// late, the face is still hidden (by CSS) until the swap, and landTurn()
+// swaps it if the turn ends first.
+const REDRAW_SWAP_MS = 560;
+const REDRAW_SWAP_MAJOR_MS = 940;
 
 let turnInFlight = false;
 let turnTarget = null;
 let turnIsMajor = false;
 let turnFaceSwapped = false;
 let turnSwapTimer = null;
+// Bumped by every turn and every stop, so a swap scheduled for an
+// earlier turn can tell it has been overtaken.
+let turnSerial = 0;
 
 function stopFlipAnimations() {
   // .shuffling too: a draw during the shuffle's shake ends the shake
@@ -1138,6 +1143,7 @@ function stopFlipAnimations() {
   endMajorOmen();
   turnInFlight = false;
   turnFaceSwapped = false;
+  turnSerial++;
   clearTimeout(turnSwapTimer);
   turnSwapTimer = null;
 }
@@ -1278,10 +1284,10 @@ function revealCard(card, roleOverride, ceremony = false) {
     return;
   }
 
-  // Face up already: turn all the way over in one continuous motion and
-  // swap in the next face while the back is toward the viewer. The swap
-  // is page work, but the turn itself runs on the compositor, so it
-  // can't stall the motion.
+  // Face up already: turn the face away to edge-on and bring the next
+  // one round from the other edge in one continuous motion, swapping in
+  // the next face just after the edge. The swap is page work, but the
+  // turn itself runs on the compositor, so it can't stall the motion.
   suspendTilt(isMajor ? 2100 : 1350);
   startTurn({ card, roleOverride, ceremony }, isMajor);
   animateCardPull();
@@ -1290,12 +1296,38 @@ function revealCard(card, roleOverride, ceremony = false) {
   if (isMajor) {
     startMajorOmen();
   }
-  turnSwapTimer = setTimeout(() => {
+  scheduleRedrawSwap(isMajor);
+  onCardFlipTransitionEnd(landTurn, isMajor ? 2900 : 2000, "animation");
+}
+
+// Times the swap from when the turn actually starts on screen (its
+// animation's ready), not from the tap: on a slow phone the turn can
+// start well after the tap, and a swap counted from the tap would clear
+// the outgoing face before it reached the edge. A turn that is stopped
+// or replaced in the meantime never swaps.
+function scheduleRedrawSwap(isMajor) {
+  const serial = ++turnSerial;
+  const swapAt = isMajor ? REDRAW_SWAP_MAJOR_MS : REDRAW_SWAP_MS;
+  const swap = () => {
     turnSwapTimer = null;
+    if (serial !== turnSerial || !turnInFlight || turnFaceSwapped) {
+      return;
+    }
     turnFaceSwapped = true;
     renderPendingFace(turnTarget.card, turnTarget.roleOverride);
-  }, isMajor ? REDRAW_SWAP_MAJOR_MS : REDRAW_SWAP_MS);
-  onCardFlipTransitionEnd(landTurn, isMajor ? 2900 : 2000, "animation");
+  };
+  const name = isMajor ? "major-turn-over" : "turn-over";
+  const turn = cardEl.getAnimations().find((animation) => animation.animationName === name);
+  if (!turn) {
+    turnSwapTimer = setTimeout(swap, swapAt);
+    return;
+  }
+  turn.ready.then(() => {
+    if (serial !== turnSerial || !turnInFlight) {
+      return;
+    }
+    turnSwapTimer = setTimeout(swap, Math.max(0, swapAt - (turn.currentTime || 0)));
+  }, () => {});
 }
 
 function showCard(card) {
