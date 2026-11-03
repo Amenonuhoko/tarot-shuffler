@@ -798,6 +798,7 @@ function pullCard() {
 
 const cardSlotEl = document.getElementById("cardSlot");
 const cardEl = document.getElementById("card");
+const cardPoseEl = document.getElementById("cardPose");
 const cardFrontEl = document.getElementById("cardFront");
 const cardFrontContentEl = document.getElementById("cardFrontContent");
 const spreadCirclesEl = document.getElementById("spreadCircles");
@@ -1136,10 +1137,19 @@ let turnSwapTimer = null;
 // earlier turn can tell it has been overtaken.
 let turnSerial = 0;
 
+// A draw that catches the card still turning face-down turns it back up
+// from wherever it is (see openCard). Held here so it can be stopped.
+let catchUpTurn = null;
+
+// The shuffle's shake and the reveal's pop run on .card-pose, not here,
+// so they're left to finish: stopping one mid-move made the card jump.
 function stopFlipAnimations() {
-  // .shuffling too: a draw during the shuffle's shake ends the shake
-  // (it would otherwise win the cascade and hold the flip back).
-  cardEl.classList.remove(...TURN_CLASSES, "revealing", "major-landing", "shuffling");
+  cardEl.classList.remove(...TURN_CLASSES);
+  if (catchUpTurn) {
+    catchUpTurn.cancel();
+    catchUpTurn = null;
+    cardEl.style.transition = "";
+  }
   endMajorOmen();
   turnInFlight = false;
   turnFaceSwapped = false;
@@ -1150,11 +1160,12 @@ function stopFlipAnimations() {
 
 function triggerRevealFanfare(isMajor = false) {
   // Normally the turn has already ended; if the fallback timer got here
-  // first, finish it now rather than let .revealing override it.
-  cardEl.classList.remove(...TURN_CLASSES, "revealing", "major-landing");
-  void cardEl.offsetWidth;
-  cardEl.classList.add("revealing");
-  cardEl.classList.toggle("major-landing", isMajor);
+  // first, finish it now.
+  cardEl.classList.remove(...TURN_CLASSES);
+  cardPoseEl.classList.remove("revealing", "major-landing");
+  void cardPoseEl.offsetWidth;
+  cardPoseEl.classList.add("revealing");
+  cardPoseEl.classList.toggle("major-landing", isMajor);
 
   cardFrontContentEl.classList.remove("content-pending", "content-cascade");
   void cardFrontContentEl.offsetWidth;
@@ -1163,8 +1174,7 @@ function triggerRevealFanfare(isMajor = false) {
   surgeSigil(isMajor);
 }
 
-// Stops whatever keyframe turn or reveal is running without the card
-// jumping. Removing a running animation together with .flipped starts no
+// Stops whatever turn is running without the card jumping. Removing a running animation together with .flipped starts no
 // transition at all - the card snapped face-down in one frame and sat
 // still until a fallback timer fired. So pin the live pose inline first;
 // the caller then removes .flipped and clears the inline pose in the same
@@ -1235,13 +1245,35 @@ function openCard(card, roleOverride, ceremony = false) {
   }
 
   if (midFlipBack) {
-    // Still turning face-down (a shuffle): let the running transition
-    // reverse smoothly back up instead of snapping to 0deg.
+    // Still turning face-down (a shuffle): turn back up from the angle it
+    // has reached, easing out of the stop. Reversing the running
+    // transition instead set off its fast ease-out start the other way,
+    // and the card whipped tens of degrees in a single frame.
     startTurn({ card, roleOverride, ceremony }, false);
     turnFaceSwapped = true;
+    const { transform } = getComputedStyle(cardEl);
+    const pose = new DOMMatrixReadOnly(transform);
+    const angle = Math.abs(Math.atan2(-pose.m13, pose.m11) * 180 / Math.PI);
+    const duration = Math.max(240, 900 * (180 - angle) / 180);
+    cardEl.style.transition = "none";
     cardEl.classList.add("flipped");
     isFlipped = true;
-    onCardFlipTransitionEnd(landTurn);
+    const turn = cardEl.animate(
+      [{ transform }, { transform: "rotateY(180deg)" }],
+      { duration, easing: "cubic-bezier(0.3, 0, 0.2, 1)" }
+    );
+    catchUpTurn = turn;
+    turn.finished.then(() => {
+      if (catchUpTurn !== turn) {
+        return;
+      }
+      catchUpTurn = null;
+      cardEl.style.transition = "";
+      if (pendingFlipSettlesOn === "catch-up") {
+        settlePendingFlip();
+      }
+    }, () => {});
+    onCardFlipTransitionEnd(landTurn, duration + 600, "catch-up");
     return;
   }
 
@@ -2141,10 +2173,10 @@ document.addEventListener("click", (event) => {
 });
 
 function startShuffleShake() {
-  cardEl.classList.remove("shuffling");
+  cardPoseEl.classList.remove("shuffling");
   cardSlotEl.classList.remove("shuffle-fan");
-  void cardEl.offsetWidth;
-  cardEl.classList.add("shuffling");
+  void cardPoseEl.offsetWidth;
+  cardPoseEl.classList.add("shuffling");
   cardSlotEl.classList.add("shuffle-fan");
 }
 
@@ -2223,12 +2255,32 @@ cardEl.addEventListener("animationend", (event) => {
     } else {
       cardEl.classList.remove(...TURN_CLASSES);
     }
-  } else if (name === "shuffle-shake") {
-    cardEl.classList.remove("shuffling");
+  }
+});
+
+cardPoseEl.addEventListener("animationend", (event) => {
+  const name = event.animationName;
+  if (name === "shuffle-shake") {
+    cardPoseEl.classList.remove("shuffling");
   } else if (name === "reveal-flash-burst" || name === "major-flash") {
     // Keyed off the aura (the longest part of the reveal), not the
     // shorter reveal-pop, so the gold glow is never cut off mid-fade.
-    cardEl.classList.remove("revealing", "major-landing");
+    cardPoseEl.classList.remove("revealing", "major-landing");
+  }
+});
+
+// Once the last piece of the face has risen in, drop .content-cascade so
+// the flip button's transitions apply again (see style.css). The pieces'
+// resting pose is where the cascade leaves them, so nothing moves.
+cardFrontContentEl.addEventListener("animationend", (event) => {
+  if (!event.animationName.startsWith("content-reveal")
+      || !cardFrontContentEl.classList.contains("content-cascade")) {
+    return;
+  }
+  const stillRising = cardFrontContentEl.getAnimations({ subtree: true })
+    .some((animation) => animation.animationName && animation.animationName.startsWith("content-reveal"));
+  if (!stillRising) {
+    cardFrontContentEl.classList.remove("content-cascade");
   }
 });
 

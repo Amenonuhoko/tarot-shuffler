@@ -32,7 +32,6 @@
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const motif = document.querySelector(".mystic-motif");
   const cardSlot = document.getElementById("cardSlot");
-  const cardEl = document.getElementById("card");
   const cardBack = document.getElementById("cardBack");
   const cardFront = document.getElementById("cardFront");
   const cardArt = document.getElementById("cardArt");
@@ -450,7 +449,7 @@ dz/dt = xy − βz
   if (cardBack) {
     const emblems = {
       holo: `<div class="realm-emblem-spin">${metatronSvg("holoEmblemSpectrum", 80)}</div>`,
-      terminal: terminalEmblemSvg(),
+      terminal: outlined(terminalEmblemSvg(), "terminal-emblem"),
       bloodmoon: roseWindowSvg("roseEmblem", false),
       deco: eyeOfHorusSvg()
     };
@@ -737,7 +736,21 @@ dz/dt = xy − βz
     }
   };
 
+  // Swaps a realm's <text> for its pre-drawn outlines (realm-glyphs.js),
+  // in order; leaves the text if the two ever disagree.
+  function outlined(markup, key) {
+    const glyphs = (window.REALM_GLYPHS || {})[key];
+    if (!glyphs) return markup;
+    let k = 0;
+    const out = markup.replace(/<text\b[^>]*>[\s\S]*?<\/text>/g, (m) => (k < glyphs.length ? glyphs[k++] : m));
+    return k === glyphs.length ? out : markup;
+  }
+
   function sigilMarkup(key) {
+    return outlined(sigilMarkupText(key), key);
+  }
+
+  function sigilMarkupText(key) {
     const s = SIGILS[key]();
     return `<div class="realm-sigil">
       <span class="rs-aura"></span><span class="rs-tint"></span>
@@ -1088,17 +1101,19 @@ dz/dt = xy − βz
     if (active.reveal) active.reveal(detail);
   });
 
-  // The shuffle stirs the wheels.
-  if (cardEl) {
+  // The shuffle stirs the wheels. The shake runs on the card's pose
+  // wrapper (see .card-pose in style.css).
+  const poseEl = document.getElementById("cardPose");
+  if (poseEl) {
     let wasShuffling = false;
     new MutationObserver(() => {
-      const shuffling = cardEl.classList.contains("shuffling");
+      const shuffling = poseEl.classList.contains("shuffling");
       if (shuffling && !wasShuffling && active) {
         const sigil = back.querySelector(".realm-sigil");
         if (sigil) restart(sigil, "is-stirring");
       }
       wasShuffling = shuffling;
-    }).observe(cardEl, { attributes: true, attributeFilter: ["class"] });
+    }).observe(poseEl, { attributes: true, attributeFilter: ["class"] });
   }
 
   mount();

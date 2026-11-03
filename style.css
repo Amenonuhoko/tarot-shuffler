@@ -653,6 +653,14 @@ body {
   }
 }
 
+.card-pose {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+
 .card {
   position: relative;
   z-index: 1;
@@ -786,34 +794,36 @@ body {
   100% { transform: translateY(0) translateZ(0) rotateY(180deg) scale(1); }
 }
 
-.card.shuffling {
+.card-pose.shuffling {
   animation: shuffle-shake 1.35s cubic-bezier(0.36, 0.07, 0.19, 0.97);
 }
 
 /* Busy wobble while the ghosts riffle, then a lift and a firm tap
    down as the deck squares up. */
 @keyframes shuffle-shake {
-  0% { transform: rotateY(var(--y, 0)) rotate(0deg) translate(0, 0) scale(1); }
-  8% { transform: rotateY(var(--y, 0)) rotate(-5deg) translate(-9px, -2px) scale(1.03); }
-  18% { transform: rotateY(var(--y, 0)) rotate(5deg) translate(9px, -2px) scale(1.03); }
-  30% { transform: rotateY(var(--y, 0)) rotate(-4deg) translate(-7px, -1px) scale(1.02); }
-  42% { transform: rotateY(var(--y, 0)) rotate(4deg) translate(6px, -1px) scale(1.02); }
-  54% { transform: rotateY(var(--y, 0)) rotate(-3deg) translate(-4px, 0) scale(1.015); }
-  66% { transform: rotateY(var(--y, 0)) rotate(2deg) translate(3px, 0) scale(1.01); }
-  76% { transform: rotateY(var(--y, 0)) rotate(-0.6deg) translate(-1px, -4px) scale(1.018); }
-  86% { transform: rotateY(var(--y, 0)) rotate(0deg) translate(0, 1.5px) scale(0.982); }
-  93% { transform: rotateY(var(--y, 0)) rotate(0deg) translate(0, 0) scale(1.004); }
-  100% { transform: rotateY(var(--y, 0)) rotate(0deg) translate(0, 0) scale(1); }
+  0% { transform: rotate(0deg) translate(0, 0) scale(1); }
+  8% { transform: rotate(-5deg) translate(-9px, -2px) scale(1.03); }
+  18% { transform: rotate(5deg) translate(9px, -2px) scale(1.03); }
+  30% { transform: rotate(-4deg) translate(-7px, -1px) scale(1.02); }
+  42% { transform: rotate(4deg) translate(6px, -1px) scale(1.02); }
+  54% { transform: rotate(-3deg) translate(-4px, 0) scale(1.015); }
+  66% { transform: rotate(2deg) translate(3px, 0) scale(1.01); }
+  76% { transform: rotate(-0.6deg) translate(-1px, -4px) scale(1.018); }
+  86% { transform: rotate(0deg) translate(0, 1.5px) scale(0.982); }
+  93% { transform: rotate(0deg) translate(0, 0) scale(1.004); }
+  100% { transform: rotate(0deg) translate(0, 0) scale(1); }
 }
 
-.card.revealing {
+.card-pose.revealing {
   animation: reveal-pop 0.7s cubic-bezier(0.3, 0, 0.2, 1);
 }
 
+/* Starts from the card's resting size: it used to start at 0.99, so
+   every landing snapped the card 1% smaller in a single frame. */
 @keyframes reveal-pop {
-  0% { transform: rotateY(180deg) scale(0.99); }
-  50% { transform: rotateY(180deg) scale(1.018); }
-  100% { transform: rotateY(180deg) scale(1); }
+  0% { transform: scale(1); }
+  50% { transform: scale(1.018); }
+  100% { transform: scale(1); }
 }
 
 /* A slow gold aura blooming and settling, not a flash -- */
@@ -832,7 +842,7 @@ body {
   visibility: hidden;
 }
 
-.card.revealing .reveal-flash {
+.card-pose.revealing .reveal-flash {
   visibility: visible;
   animation: reveal-flash-burst 1.3s ease-out;
 }
@@ -852,7 +862,7 @@ body {
   opacity: 0;
 }
 
-.card.revealing .reveal-flash::before {
+.card-pose.revealing .reveal-flash::before {
   animation: reveal-aura-glow 1.3s ease-out;
 }
 
@@ -862,11 +872,11 @@ body {
   100% { opacity: 0; }
 }
 
-.card.revealing.major-landing .reveal-flash {
+.card-pose.revealing.major-landing .reveal-flash {
   animation: major-flash 1.9s ease-out;
 }
 
-.card.revealing.major-landing .reveal-flash::before {
+.card-pose.revealing.major-landing .reveal-flash::before {
   box-shadow: 0 0 46px 6px color-mix(in srgb, var(--gold) 55%, transparent);
   animation: major-aura 1.9s ease-out;
 }
@@ -1104,6 +1114,20 @@ body.major-omen .omen-veil {
 .card-front-content.content-pending > * {
   opacity: 0;
   transform: translateY(8px);
+}
+
+/* The face's own transitions are for the flip button on a face-up
+   card. While a new face is set up out of sight, and while it cascades
+   in, they would only fight the draw: a reversed card started a filter
+   transition that repainted the whole face every frame of the turn,
+   and the art window's transform transition ran against its reveal
+   animation, which pushed both off the compositor. script.js drops
+   .content-cascade once the cascade has finished. */
+.card-front-content.content-pending,
+.card-front-content.content-pending > *,
+.card-front-content.content-cascade,
+.card-front-content.content-cascade > * {
+  transition: none;
 }
 
 .card-front-content.content-cascade > * {
@@ -3023,8 +3047,12 @@ body.is-dice-mode .history-toggle span {
   aspect-ratio: 1;
 }
 
+/* Opacity is promised too, so the wheels' 62% is always applied by the
+   compositor. Otherwise it was baked into each wheel's raster at rest,
+   and every reveal's surge (an opacity animation) re-rasterized all
+   three wheels as it started and again as it ended. */
 :root:not([data-theme]) .sigil-spin {
-  will-change: transform;
+  will-change: transform, opacity;
 }
 
 .sigil-spin-rim {
@@ -3070,11 +3098,6 @@ body.is-dice-mode .history-toggle span {
 
 .sigil-planets {
   opacity: 0.75;
-}
-
-.sigil-inscription {
-  font-family: 'Cinzel', serif;
-  font-weight: 600;
 }
 
 @keyframes sigil-turn {
@@ -3371,13 +3394,13 @@ body.is-dice-mode .history-toggle span {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card, .card.shuffling, .card.revealing, .reveal-flash, .card.revealing .reveal-flash,
-  .reveal-flash::before, .card.revealing .reveal-flash::before,
+  .card, .card-pose.shuffling, .card-pose.revealing, .reveal-flash, .card-pose.revealing .reveal-flash,
+  .reveal-flash::before, .card-pose.revealing .reveal-flash::before,
   .card-front-content.content-cascade > *,
   .card-slot.pulling .slot-shadow, .card-slot.shuffle-fan .slot-glow, .deck-card, .card-slot.shuffle-fan .deck-card,
   .card-glow, .card-tilt, .foil-glare, .foil-glare-spot,
   .card.draw-flip, .card.major-flip, .card.redraw-turn, .card.major-redraw, .major-halo, .omen-veil,
-  .card.revealing.major-landing .reveal-flash, .card.revealing.major-landing .reveal-flash::before,
+  .card-pose.revealing.major-landing .reveal-flash, .card-pose.revealing.major-landing .reveal-flash::before,
   .history-row-enter, .card-search-input.not-found,
   [data-theme="holo"] .card-face::before, [data-theme="holo"] .card-front .foil-glare::before, [data-theme="holo"] .card-title,
   [data-theme="terminal"] .card::after, [data-theme="terminal"] .card-front::after, [data-theme="terminal"] .card-title, [data-theme="terminal"] .hint::after,
