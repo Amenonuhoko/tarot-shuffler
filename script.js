@@ -2878,23 +2878,33 @@ function surgeSigil(isMajor = false) {
   document.dispatchEvent(new CustomEvent("tarot:reveal", { detail: { major: isMajor, card } }));
 }
 
-// The idle clock (see style.css): Mystic Violet's resting animations all
+// The idle clock (see style.css): every theme's resting animations
 // tick every 50ms, on the same frames, so the frames in between need no
 // drawing. That only holds while they share a beat. The ones that start
-// with the page do, but the pool of light and the card's glow start
-// again whenever the card slot comes back from the dice, a few
-// milliseconds off, and every off-beat animation costs a second set of
-// redraws. So each one is moved onto the beat as it starts - earlier,
-// by under 50ms, never later: a start moved into the future would blank
-// the animation for a frame.
+// with the page do, but some start later, a few milliseconds off - the
+// pool of light and the card's glow whenever the card slot comes back
+// from the dice, a title's shimmer with each card - and every off-beat
+// animation costs a second set of redraws. So each one is moved onto
+// the beat as it starts - earlier, by under 50ms, never later: a start
+// moved into the future would blank the animation for a frame.
 const IDLE_TICK_MS = 50;
 const IDLE_CLOCK_ANIMATIONS = new Set([
   "sigil-turn",
-  "mystic-sigil-breathe",
+  "sigil-breathe",
   "mystic-veil-drift",
   "mystic-twinkle",
   "mystic-halo-breathe",
-  "mystic-card-glow"
+  "mystic-card-glow",
+  "rl-breathe",
+  "rl-flicker-ticked",
+  "rl-drift",
+  "rl-shaft",
+  "rl-shimmer",
+  "holo-text",
+  "deco-shimmer",
+  "bloodmoon-glint",
+  "bloodmoon-glow",
+  "description-more-pulse"
 ]);
 
 function alignIdleClock() {
@@ -2909,7 +2919,6 @@ function alignIdleClock() {
 }
 
 document.addEventListener("animationstart", event => {
-  if (document.documentElement.hasAttribute("data-theme")) return;
   if (IDLE_CLOCK_ANIMATIONS.has(event.animationName)) alignIdleClock();
 });
 

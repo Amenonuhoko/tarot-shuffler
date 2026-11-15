@@ -882,6 +882,31 @@ dz/dt = xy − βz
     };
   }
 
+  // A flame's flicker on the idle clock (see rl-flicker in realms.css):
+  // its span as a whole number of 50ms ticks, and the flicker's curve
+  // sampled at the start of each tick as a linear() easing that holds
+  // each value for the tick.
+  const FLICKER_CURVE = [[0, 0.72], [0.11, 0.95], [0.19, 0.62], [0.33, 0.9], [0.48, 0.74], [0.6, 1], [0.76, 0.66], [1, 0.72]];
+  const IDLE_TICK_MS = 50;
+
+  function flickerAt(progress) {
+    const next = FLICKER_CURVE.findIndex(([offset]) => offset > progress);
+    const [fromOffset, fromValue] = FLICKER_CURVE[next - 1];
+    const [toOffset, toValue] = FLICKER_CURVE[next];
+    return fromValue + (toValue - fromValue) * (progress - fromOffset) / (toOffset - fromOffset);
+  }
+
+  function flickerStyle(i) {
+    const ticks = Math.round((1900 + i * 370) / IDLE_TICK_MS);
+    const stops = [];
+    for (let tick = 0; tick < ticks; tick++) {
+      const from = (tick / ticks * 100).toFixed(4);
+      const to = ((tick + 1) / ticks * 100).toFixed(4);
+      stops.push(`${flickerAt(tick / ticks).toFixed(3)} ${from}% ${to}%`);
+    }
+    return `--i:${i};--flick-span:${ticks * IDLE_TICK_MS}ms;--flick-ease:linear(${stops.join(",")})`;
+  }
+
   // A light centered at (x, y), `size` px across.
   function lightAt(className, [x, y], size, style = "") {
     return `<span class="${className}" style="left:${(x - size / 2).toFixed(1)}px;top:${(y - size / 2).toFixed(1)}px;width:${size.toFixed(1)}px;height:${size.toFixed(1)}px;${style}"></span>`;
@@ -933,7 +958,7 @@ dz/dt = xy − βz
         defs.push(linear(`rl-shaft-${i}`, src, end, [[0, "rgba(255,84,90,0.36)"], [0.45, "rgba(200,20,40,0.15)"], [0.92, "rgba(200,20,40,0)"]]));
         sets[i % 2].push(`<polygon points="${taper(src, end, w * 0.03, w * (0.11 + (i % 3) * 0.03))}" fill="url(#rl-shaft-${i})"/>`);
       });
-      const candles = s.candles.map((c, i) => lightAt("rl-candle", at(c), w * 0.075, `--i:${i}`)).join("");
+      const candles = s.candles.map((c, i) => lightAt("rl-candle", at(c), w * 0.075, flickerStyle(i))).join("");
       // The second set uses the gradients defined with the first.
       return `${screenSvg("rl-shafts", defs.join(""), sets[0].join(""))}${screenSvg("rl-shafts rl-shafts-b", "", sets[1].join(""))}
         ${lightAt("rl-glow", src, w * 0.62)}${lightAt("rl-flare", src, w * 0.9)}${candles}<span class="rl-motes"></span>`;
@@ -954,7 +979,7 @@ dz/dt = xy − βz
       const fan = `<svg class="rl-fan" style="left:${(src[0] - r).toFixed(1)}px;top:${(src[1] - r).toFixed(1)}px" width="${size.toFixed(0)}" height="${size.toFixed(0)}" viewBox="${-r} ${-r} ${size} ${size}">
         <defs><radialGradient id="rl-fan-fade" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="${r.toFixed(1)}"><stop offset="0.04" stop-color="rgba(255,214,140,0.34)"/><stop offset="0.4" stop-color="rgba(255,206,130,0.12)"/><stop offset="1" stop-color="rgba(255,206,130,0)"/></radialGradient></defs>
         <path d="${rays.join(" ")}" fill="url(#rl-fan-fade)"/></svg>`;
-      const torches = s.torches.map((c, i) => lightAt("rl-candle rl-torch", at(c), w * 0.12, `--i:${i}`)).join("");
+      const torches = s.torches.map((c, i) => lightAt("rl-candle rl-torch", at(c), w * 0.12, flickerStyle(i))).join("");
       return `${fan}${lightAt("rl-glow", src, w * 0.6)}${lightAt("rl-flare", src, w * 1.1)}
         ${lightAt("rl-floor", at(s.floor), w * 0.7)}${torches}<span class="rl-motes"></span>`;
     },

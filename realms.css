@@ -120,17 +120,31 @@ body:has(> .realm-scene.is-loaded) .hint {
 .realm-scene[data-scene="holo"] { --rl-core: rgba(255, 255, 255, 0.5); --rl-mid: rgba(186, 166, 255, 0.18); --rl-flare: var(--rs-tint, #ffffff); }
 .realm-scene[data-scene="terminal"] { --rl-core: rgba(90, 255, 170, 0.3); --rl-mid: rgba(34, 255, 127, 0.1); --rl-flare: rgba(120, 255, 180, 0.38); }
 
+/* Everything at rest here ticks on the idle clock (see the Mystic
+   sigil in style.css): each steps() count is the span between two
+   keyframes divided by 50ms, with the ease-in-out curves spelled out
+   as keyframes. Keep spans and delays whole multiples of 50ms. */
+
 /* The source's glow breathes, as Mystic's aura does. */
 .rl-glow {
   border-radius: 50%;
   background: radial-gradient(closest-side, var(--rl-core), var(--rl-mid) 42%, transparent);
   will-change: opacity;
-  animation: rl-breathe 9s ease-in-out infinite alternate;
+  animation: rl-breathe 9s steps(18) infinite alternate;
 }
 
 @keyframes rl-breathe {
-  from { opacity: 0.55; }
-  to { opacity: 1; }
+  0% { opacity: 0.55; }
+  10% { opacity: 0.5589; }
+  20% { opacity: 0.5867; }
+  30% { opacity: 0.6343; }
+  40% { opacity: 0.6993; }
+  50% { opacity: 0.775; }
+  60% { opacity: 0.8507; }
+  70% { opacity: 0.9157; }
+  80% { opacity: 0.9633; }
+  90% { opacity: 0.9911; }
+  100% { opacity: 1; }
 }
 
 /* A separate flare answers each reveal, so the glow never has to
@@ -188,6 +202,25 @@ body:has(> .realm-scene.is-loaded) .hint {
   100% { opacity: 0.72; }
 }
 
+/* The same flicker on the idle clock. Each flame's span differs, so no
+   one set of keyframes can put all their steps on the 50ms beat;
+   realms.js writes each flame its span (--flick-span, the nearest
+   multiple of 50ms) and the curve above sampled once per tick as a
+   linear() easing (--flick-ease), which gives the opacity directly.
+   Browsers without linear() keep the smooth flicker. */
+@supports (animation-timing-function: linear(0, 1)) {
+  .rl-candle {
+    animation-name: rl-flicker-ticked;
+    animation-duration: var(--flick-span);
+    animation-timing-function: var(--flick-ease);
+  }
+}
+
+@keyframes rl-flicker-ticked {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 /* Dust or sparks drifting up through the light: a tile of points that
    slides up by exactly one tile, so the loop never shows a seam. */
 .rl-motes {
@@ -197,7 +230,7 @@ body:has(> .realm-scene.is-loaded) .hint {
   height: calc(100% + 320px);
   background-size: 260px 320px;
   will-change: transform;
-  animation: rl-drift 46s linear infinite;
+  animation: rl-drift 46s steps(920) infinite;
 }
 
 @keyframes rl-drift {
@@ -238,31 +271,41 @@ body:has(> .realm-scene.is-loaded) .hint {
    sets that breathe out of step. */
 .rl-shafts {
   will-change: opacity;
-  animation: rl-shaft 9s ease-in-out infinite alternate;
+  animation: rl-shaft 9s steps(18) infinite alternate;
 }
 
 .rl-shafts-b {
   animation-duration: 12.5s;
+  animation-timing-function: steps(25);
   animation-delay: -6s;
 }
 
 @keyframes rl-shaft {
-  from { opacity: 0.25; }
-  to { opacity: 0.9; }
+  0% { opacity: 0.25; }
+  10% { opacity: 0.2628; }
+  20% { opacity: 0.3031; }
+  30% { opacity: 0.3718; }
+  40% { opacity: 0.4657; }
+  50% { opacity: 0.575; }
+  60% { opacity: 0.6843; }
+  70% { opacity: 0.7782; }
+  80% { opacity: 0.8469; }
+  90% { opacity: 0.8872; }
+  100% { opacity: 0.9; }
 }
 
 /* Deco: the sun's rays turning behind the winged disc, and the floor's
    sunburst answering it. */
 .rl-fan {
   will-change: transform;
-  animation: sigil-turn 300s linear infinite;
+  animation: sigil-turn 300s steps(6000) infinite;
 }
 
 .rl-floor {
   border-radius: 50%;
   background: radial-gradient(closest-side, rgba(255, 210, 130, 0.3), rgba(255, 170, 60, 0.08) 50%, transparent);
   will-change: opacity;
-  animation: rl-breathe 11s ease-in-out -4s infinite alternate;
+  animation: rl-breathe 11s steps(22) -4s infinite alternate;
 }
 
 /* Holo: pulses of white light running down the beam into the prism, and
@@ -290,12 +333,21 @@ body:has(> .realm-scene.is-loaded) .hint {
 
 .rl-spectrum {
   will-change: opacity;
-  animation: rl-shimmer 6.5s ease-in-out infinite alternate;
+  animation: rl-shimmer 6.5s steps(13) infinite alternate;
 }
 
 @keyframes rl-shimmer {
-  from { opacity: 0.18; }
-  to { opacity: 0.5; }
+  0% { opacity: 0.18; }
+  10% { opacity: 0.1863; }
+  20% { opacity: 0.2061; }
+  30% { opacity: 0.24; }
+  40% { opacity: 0.2862; }
+  50% { opacity: 0.34; }
+  60% { opacity: 0.3938; }
+  70% { opacity: 0.44; }
+  80% { opacity: 0.4739; }
+  90% { opacity: 0.4937; }
+  100% { opacity: 0.5; }
 }
 
 /* ---- Sigils: each realm's counterpart to Mystic's, on the same frame
@@ -334,7 +386,7 @@ body:has(> .realm-scene.is-loaded) .hint {
     radial-gradient(closest-side, transparent 86%, color-mix(in srgb, currentColor 9%, transparent) 93%, transparent 99%),
     radial-gradient(closest-side, var(--rs-aura), color-mix(in srgb, var(--rs-aura) 40%, transparent) 45%, transparent 100%);
   opacity: 0.62;
-  animation: sigil-breathe 14s ease-in-out infinite;
+  animation: sigil-breathe 14s steps(28) infinite;
 }
 
 /* Holo: the aura takes the card's ray once one is drawn. */
@@ -369,21 +421,21 @@ body:has(> .realm-scene.is-loaded) .hint {
   width: 100%;
   left: 0;
   top: 0;
-  animation: sigil-turn 360s linear infinite;
+  animation: sigil-turn 360s steps(7200) infinite;
 }
 
 .rs-spin-mid {
   width: 83.333%;
   left: 8.3335%;
   top: 8.3335%;
-  animation: sigil-turn 240s linear infinite reverse;
+  animation: sigil-turn 240s steps(4800) infinite reverse;
 }
 
 .rs-spin-hub {
   width: 50.667%;
   left: 24.6665%;
   top: 24.6665%;
-  animation: sigil-turn 120s linear infinite;
+  animation: sigil-turn 120s steps(2400) infinite;
 }
 
 /* The figures tick round like a clock, a degree a second. */
@@ -431,7 +483,7 @@ body:has(> .realm-scene.is-loaded) .hint {
 /* A flare through the wheels on every reveal, listed after each turn so
    the turn keeps running (animations are matched by name). */
 .realm-sigil.is-surging .rs-spin-rim {
-  animation: sigil-turn 360s linear infinite, sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
+  animation: sigil-turn 360s steps(7200) infinite, sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
 .realm-terminal .realm-sigil.is-surging .rs-spin-rim {
@@ -439,11 +491,11 @@ body:has(> .realm-scene.is-loaded) .hint {
 }
 
 .realm-sigil.is-surging .rs-spin-mid {
-  animation: sigil-turn 240s linear infinite reverse, sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
+  animation: sigil-turn 240s steps(4800) infinite reverse, sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
 .realm-sigil.is-surging .rs-spin-hub {
-  animation: sigil-turn 120s linear infinite, sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
+  animation: sigil-turn 120s steps(2400) infinite, sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
 /* The shuffle stirs the wheels: each swings round and settles back,

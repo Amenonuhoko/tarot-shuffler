@@ -1546,11 +1546,17 @@ body.major-omen .omen-veil {
 .card-description.has-more::after {
   opacity: 1;
   text-shadow: 0 0 6px color-mix(in srgb, var(--gold) 35%, transparent);
-  animation: description-more-pulse 2.4s ease-in-out infinite;
+  animation: description-more-pulse 2.4s steps(6) infinite;
 }
 
+/* A colour is repainted on the main thread, so this pulse ticks with the
+   idle clock (see the Mystic sigil): 20 repaints of the card's face a
+   second instead of one on every frame, the ease-in-out spelled out. */
 @keyframes description-more-pulse {
   0%, 100% { color: var(--gold-dim); }
+  12.5%, 87.5% { color: color-mix(in srgb, var(--gold) 12.9%, var(--gold-dim)); }
+  25%, 75% { color: color-mix(in srgb, var(--gold) 50%, var(--gold-dim)); }
+  37.5%, 62.5% { color: color-mix(in srgb, var(--gold) 87.1%, var(--gold-dim)); }
   50% { color: var(--gold); }
 }
 
@@ -2424,13 +2430,19 @@ body.is-dice-mode .history-toggle span {
   100% { transform: translate(79%, -79%); opacity: 0; }
 }
 
+/* The colours slide under the letters, which is painted on the main
+   thread: on every frame that was a repaint of the card's face, 60
+   times a second for as long as a card lay face up. On the idle clock
+   (see the Mystic sigil) it repaints 20 times a second, and each step
+   shifts a colour by a few parts in 255. Deco's shimmer and Blood
+   Moon's glint do the same. */
 [data-theme="holo"] .card-title {
   background: linear-gradient(90deg, #ffffff, #ffd9f4, #d9f0ff, #e8ffe0, #ffffff);
   background-size: 300% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: holo-text 5s linear infinite;
+  animation: holo-text 5s steps(100) infinite;
   text-transform: uppercase;
   letter-spacing: 0.03em;
   filter: drop-shadow(0 1px 8px rgba(255,255,255,0.25));
@@ -2443,7 +2455,7 @@ body.is-dice-mode .history-toggle span {
 [data-theme="holo"] .card-front-content.content-cascade > .card-title {
   animation-name: holo-text, content-reveal;
   animation-duration: 5s, 0.65s;
-  animation-timing-function: linear, ease-out;
+  animation-timing-function: steps(100), ease-out;
   animation-iteration-count: infinite, 1;
   animation-fill-mode: none, backwards;
   animation-delay: 0s, 0.13s;
@@ -2801,13 +2813,13 @@ body.is-dice-mode .history-toggle span {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: deco-shimmer 6s linear infinite;
+  animation: deco-shimmer 6s steps(120) infinite;
 }
 
 [data-theme="deco"] .card-front-content.content-cascade > .card-title {
   animation-name: deco-shimmer, content-reveal;
   animation-duration: 6s, 0.65s;
-  animation-timing-function: linear, ease-out;
+  animation-timing-function: steps(120), ease-out;
   animation-iteration-count: infinite, 1;
   animation-fill-mode: none, backwards;
   animation-delay: 0s, 0.13s;
@@ -2909,13 +2921,13 @@ body.is-dice-mode .history-toggle span {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: bloodmoon-glint 6s linear infinite;
+  animation: bloodmoon-glint 6s steps(120) infinite;
 }
 
 [data-theme="bloodmoon"] .card-front-content.content-cascade > .card-title {
   animation-name: bloodmoon-glint, content-reveal;
   animation-duration: 6s, 0.65s;
-  animation-timing-function: linear, ease-out;
+  animation-timing-function: steps(120), ease-out;
   animation-iteration-count: infinite, 1;
   animation-fill-mode: none, backwards;
   animation-delay: 0s, 0.13s;
@@ -2944,11 +2956,15 @@ body.is-dice-mode .history-toggle span {
   content: "\263E";
   margin-left: 6px;
   display: inline-block;
-  animation: bloodmoon-glow 4.5s ease-in-out infinite;
+  animation: bloodmoon-glow 4.5s steps(9) infinite;
 }
 
 @keyframes bloodmoon-glow {
   0%, 100% { opacity: 0.4; }
+  10%, 90% { opacity: 0.4408; }
+  20%, 80% { opacity: 0.5659; }
+  30%, 70% { opacity: 0.7341; }
+  40%, 60% { opacity: 0.8592; }
   50% { opacity: 0.9; }
 }
 
@@ -3032,12 +3048,13 @@ body.is-dice-mode .history-toggle span {
 
 :root:not([data-theme]) .sigil-aura {
   opacity: 0.62;
-  animation: mystic-sigil-breathe 14s steps(28) infinite;
+  animation: sigil-breathe 14s steps(28) infinite;
 }
 
 /* The idle clock. Everything that moves while the page is at rest -
    the three wheels, the aura, the veil, both star layers, the pool of
-   light and the card's glow - moves so slowly that drawing it on every
+   light and the card's glow, and in the realms (realms.css) their
+   lights, motes and wheels - moves so slowly that drawing it on every
    screen refresh (60 to 120 times a second, a dozen full-size
    translucent layers each time) kept a phone's GPU busy for changes
    too small to see. They all tick together every 50ms instead: each
@@ -3048,8 +3065,9 @@ body.is-dice-mode .history-toggle span {
    opacity under 2%. The ease-in-out curves are spelled out as
    keyframes, since steps() takes the place of the easing. Keep every
    span here a whole multiple of 50ms (and any delay too), or the ticks
-   drift apart and the saving goes with them. */
-@keyframes mystic-sigil-breathe {
+   drift apart and the saving goes with them. script.js keeps the
+   animations on one beat (alignIdleClock); a new one joins its list. */
+@keyframes sigil-breathe {
   0%, 100% { opacity: 0.465; }
   10%, 90% { opacity: 0.4777; }
   20%, 80% { opacity: 0.5164; }
@@ -3126,11 +3144,6 @@ body.is-dice-mode .history-toggle span {
 @keyframes sigil-turn {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
-}
-
-@keyframes sigil-breathe {
-  0%, 100% { opacity: 0.465; }
-  50% { opacity: 0.62; }
 }
 
 /* A flare of brightness only. It also swelled 3.5% via scale, but
