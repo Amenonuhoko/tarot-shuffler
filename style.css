@@ -3032,7 +3032,30 @@ body.is-dice-mode .history-toggle span {
 
 :root:not([data-theme]) .sigil-aura {
   opacity: 0.62;
-  animation: sigil-breathe 14s ease-in-out infinite;
+  animation: mystic-sigil-breathe 14s steps(28) infinite;
+}
+
+/* The idle clock. Everything that moves while the page is at rest -
+   the three wheels, the aura, the veil, both star layers, the pool of
+   light and the card's glow - moves so slowly that drawing it on every
+   screen refresh (60 to 120 times a second, a dozen full-size
+   translucent layers each time) kept a phone's GPU busy for changes
+   too small to see. They all tick together every 50ms instead: each
+   steps() count below is its span divided by 50ms, so the ticks land
+   on the same frames and the browser has nothing to draw on the
+   frames in between - a third of the GPU work at 60Hz, a sixth at
+   120Hz. Per tick a wheel's rim moves under half a pixel and an
+   opacity under 2%. The ease-in-out curves are spelled out as
+   keyframes, since steps() takes the place of the easing. Keep every
+   span here a whole multiple of 50ms (and any delay too), or the ticks
+   drift apart and the saving goes with them. */
+@keyframes mystic-sigil-breathe {
+  0%, 100% { opacity: 0.465; }
+  10%, 90% { opacity: 0.4777; }
+  20%, 80% { opacity: 0.5164; }
+  30%, 70% { opacity: 0.5686; }
+  40%, 60% { opacity: 0.6073; }
+  50% { opacity: 0.62; }
 }
 
 /* Each wheel turns as a plain div around its SVG, centered with
@@ -3059,21 +3082,21 @@ body.is-dice-mode .history-toggle span {
   width: 100%;
   left: 0;
   top: 0;
-  animation: sigil-turn 360s linear infinite;
+  animation: sigil-turn 360s steps(7200) infinite;
 }
 
 .sigil-spin-zodiac {
   width: 83.333%;
   left: 8.3335%;
   top: 8.3335%;
-  animation: sigil-turn 240s linear infinite reverse;
+  animation: sigil-turn 240s steps(4800) infinite reverse;
 }
 
 .sigil-spin-planets {
   width: 50.667%;
   left: 24.6665%;
   top: 24.6665%;
-  animation: sigil-turn 120s linear infinite;
+  animation: sigil-turn 120s steps(2400) infinite;
 }
 
 .mystic-motif .sigil-layer {
@@ -3116,15 +3139,15 @@ body.is-dice-mode .history-toggle span {
 /* Listed after each wheel's turn so the turn keeps running when the
    surge is added (animations are matched by name). */
 :root:not([data-theme]) .motif-sigil.is-surging .sigil-spin-rim {
-  animation: sigil-turn 360s linear infinite, sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
+  animation: sigil-turn 360s steps(7200) infinite, sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
 :root:not([data-theme]) .motif-sigil.is-surging .sigil-spin-zodiac {
-  animation: sigil-turn 240s linear infinite reverse, sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
+  animation: sigil-turn 240s steps(4800) infinite reverse, sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
 :root:not([data-theme]) .motif-sigil.is-surging .sigil-spin-planets {
-  animation: sigil-turn 120s linear infinite, sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
+  animation: sigil-turn 120s steps(2400) infinite, sigil-surge 2.8s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
 @keyframes sigil-surge {
@@ -3146,19 +3169,26 @@ body.is-dice-mode .history-toggle span {
     radial-gradient(42% 38% at 24% 22%, rgba(122, 84, 224, 0.2), transparent 70%),
     radial-gradient(38% 34% at 78% 74%, rgba(216, 183, 106, 0.09), transparent 70%),
     radial-gradient(30% 30% at 70% 18%, rgba(111, 184, 232, 0.08), transparent 70%);
-  animation: mystic-veil-drift 52s ease-in-out infinite alternate;
+  animation: mystic-veil-drift 52s steps(130) infinite alternate;
 }
 
 @keyframes mystic-veil-drift {
-  from { transform: translate3d(-2.5%, 1.5%, 0) scale(1); }
-  to { transform: translate3d(2.5%, -1.5%, 0) scale(1.08); }
+  0% { transform: translate3d(-2.5%, 1.5%, 0) scale(1); }
+  12.5% { transform: translate3d(-2.344%, 1.407%, 0) scale(1.00249); }
+  25% { transform: translate3d(-1.854%, 1.113%, 0) scale(1.01033); }
+  37.5% { transform: translate3d(-1.036%, 0.622%, 0) scale(1.02342); }
+  50% { transform: translate3d(0%, 0%, 0) scale(1.04); }
+  62.5% { transform: translate3d(1.036%, -0.622%, 0) scale(1.05658); }
+  75% { transform: translate3d(1.854%, -1.113%, 0) scale(1.06967); }
+  87.5% { transform: translate3d(2.344%, -1.407%, 0) scale(1.07751); }
+  100% { transform: translate3d(2.5%, -1.5%, 0) scale(1.08); }
 }
 
 :root:not([data-theme]) .motif-stars,
 :root:not([data-theme]) .motif-stars::after {
   display: block;
   opacity: 0.6;
-  animation: mystic-twinkle 4.8s ease-in-out infinite alternate;
+  animation: mystic-twinkle 4.8s steps(12) infinite alternate;
 }
 
 :root:not([data-theme]) .motif-stars {
@@ -3249,12 +3279,20 @@ body.is-dice-mode .history-toggle span {
     calc(96% + 2.76px) calc(84% + 2.04px);
   background-repeat: no-repeat;
   animation-duration: 7.2s;
+  animation-timing-function: steps(18);
   animation-delay: -3s;
 }
 
 @keyframes mystic-twinkle {
-  from { opacity: 0.15; }
-  to { opacity: 1; }
+  0% { opacity: 0.15; }
+  12.5% { opacity: 0.1764; }
+  25% { opacity: 0.2598; }
+  37.5% { opacity: 0.3989; }
+  50% { opacity: 0.575; }
+  62.5% { opacity: 0.7511; }
+  75% { opacity: 0.8902; }
+  87.5% { opacity: 0.9736; }
+  100% { opacity: 1; }
 }
 
 :root:not([data-theme]) .mystic-motif::after {
@@ -3277,7 +3315,7 @@ body.is-dice-mode .history-toggle span {
   border-radius: 50%;
   background: radial-gradient(closest-side, rgba(216, 183, 106, 0.16), rgba(122, 84, 224, 0.1) 45%, transparent 100%);
   pointer-events: none;
-  animation: mystic-halo-breathe 9s ease-in-out infinite;
+  animation: mystic-halo-breathe 9s steps(18) infinite;
 }
 
 /* Opacity only: with a scale in here too, every frame of the card's
@@ -3285,6 +3323,10 @@ body.is-dice-mode .history-toggle span {
    main thread (roughly 1.5s of work per second of motion). */
 @keyframes mystic-halo-breathe {
   0%, 100% { opacity: 0.75; }
+  10%, 90% { opacity: 0.7704; }
+  20%, 80% { opacity: 0.833; }
+  30%, 70% { opacity: 0.917; }
+  40%, 60% { opacity: 0.9796; }
   50% { opacity: 1; }
 }
 
@@ -3341,11 +3383,15 @@ body.is-dice-mode .history-toggle span {
   display: block;
   box-shadow: 0 0 22px rgba(216, 183, 106, 0.5);
   opacity: 0.7;
-  animation: mystic-card-glow 7s ease-in-out infinite;
+  animation: mystic-card-glow 7s steps(14) infinite;
 }
 
 @keyframes mystic-card-glow {
   0%, 100% { opacity: 0.7; }
+  10%, 90% { opacity: 0.7245; }
+  20%, 80% { opacity: 0.7996; }
+  30%, 70% { opacity: 0.9004; }
+  40%, 60% { opacity: 0.9755; }
   50% { opacity: 1; }
 }
 

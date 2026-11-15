@@ -2878,6 +2878,41 @@ function surgeSigil(isMajor = false) {
   document.dispatchEvent(new CustomEvent("tarot:reveal", { detail: { major: isMajor, card } }));
 }
 
+// The idle clock (see style.css): Mystic Violet's resting animations all
+// tick every 50ms, on the same frames, so the frames in between need no
+// drawing. That only holds while they share a beat. The ones that start
+// with the page do, but the pool of light and the card's glow start
+// again whenever the card slot comes back from the dice, a few
+// milliseconds off, and every off-beat animation costs a second set of
+// redraws. So each one is moved onto the beat as it starts - earlier,
+// by under 50ms, never later: a start moved into the future would blank
+// the animation for a frame.
+const IDLE_TICK_MS = 50;
+const IDLE_CLOCK_ANIMATIONS = new Set([
+  "sigil-turn",
+  "mystic-sigil-breathe",
+  "mystic-veil-drift",
+  "mystic-twinkle",
+  "mystic-halo-breathe",
+  "mystic-card-glow"
+]);
+
+function alignIdleClock() {
+  if (typeof document.getAnimations !== "function") return;
+  for (const animation of document.getAnimations()) {
+    if (!IDLE_CLOCK_ANIMATIONS.has(animation.animationName)) continue;
+    const start = animation.startTime;
+    if (typeof start !== "number") continue;
+    const onBeat = Math.floor(start / IDLE_TICK_MS) * IDLE_TICK_MS;
+    if (onBeat !== start) animation.startTime = onBeat;
+  }
+}
+
+document.addEventListener("animationstart", event => {
+  if (document.documentElement.hasAttribute("data-theme")) return;
+  if (IDLE_CLOCK_ANIMATIONS.has(event.animationName)) alignIdleClock();
+});
+
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
     stopTerminalRain();
